@@ -224,6 +224,30 @@ DP with no extra space with bottom up.
 
 
 
+### 278. First Bad Version
+
+**Solution:**
+
+Binary Search 之境界二，OOOOOXXXXX find the first bad version. While 循环去逼近first bad version, 正常情况下应该left和right应该定位到中间的OX上，一般情况下应该返回right，但是若第一版就是bad，就需要返回left，因为left，right达到了左边的极限left=1，right=2。
+
+```java
+public int firstBadVersion(int n) {
+    int left = 1, right = n;
+    while (left + 1 < right) {
+        int mid = left + (right - left) / 2;
+        if (isBadVersion(mid)) {
+            right = mid;
+        } else {
+            left = mid;
+        }
+    }
+    if(isBadVersion(left)) return left;
+    return right;
+}
+```
+
+
+
 ###283. Move Zeroes
 
 Given an array `nums`, write a function to move all `0`'s to the end of it while maintaining the relative order of the non-zero elements.
