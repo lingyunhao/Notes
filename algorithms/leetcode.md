@@ -1,6 +1,6 @@
 ## LeetCode Problems
 
-#### 70. Climbing Stairs
+### 70. Climbing Stairs
 
 You are climbing a stair case. It takes *n* steps to reach to the top.
 
@@ -36,7 +36,9 @@ public int climbStairs(int n) {
 }
 ```
 
-#### 120. Triangle
+
+
+###120. Triangle
 
 Given a triangle, find the minimum path sum from top to bottom. Each step you may move to adjacent numbers on the row below.
 
@@ -153,7 +155,9 @@ DP with no extra space with bottom up.
 
 不开新的矩阵，直接在输入上进行操作，bottom up，不需要初始化最底层。
 
-#### 283. Move Zeroes
+
+
+###283. Move Zeroes
 
 Given an array `nums`, write a function to move all `0`'s to the end of it while maintaining the relative order of the non-zero elements.
 
@@ -184,7 +188,9 @@ public void moveZeroes(int[] nums) {
 }
 ```
 
-#### 300. Longest Increasing Subsequence
+
+
+### 300. Longest Increasing Subsequence
 
 Given an unsorted array of integers, find the length of longest increasing subsequence.
 
