@@ -184,5 +184,52 @@ public void moveZeroes(int[] nums) {
 }
 ```
 
+#### 300. Longest Increasing Subsequence
+
+Given an unsorted array of integers, find the length of longest increasing subsequence.
+
+**Example:**
+
+```
+Input: [10,9,2,5,3,7,101,18]
+Output: 4 
+Explanation: The longest increasing subsequence is [2,3,7,101], therefore the length is 4. 
+```
+
+**Note:**
+
+- There may be more than one LIS combination, it is only necessary for you to return the length.
+- Your algorithm should run in O(*n2*) complexity.
+
+**Solution 1:**
+
+DP with time compelexity O($n^2$).
+
+dp[i] stores the longest increasing subsequence ending with nums[i]. dp[i] = max(dp[j]) +1 | j<i and nums[j] < nums[i]. 本题的初始化需要将dp数组全置为1，在循环中初始化，如果i前面没有比自己小的，则dp[i]为1。最后的结果可能是以任意一个位置结尾的，需要对dp打擂台求最大值。
+
+```java
+public int lengthOfLIS(int[] nums) {
+    int n = nums.length;
+    int[] dp = new int[n];
+
+    for(int i=0; i<n; ++i) {
+        //Initialize
+        int max = 1;
+        for(int j=0; j<i; ++j) {
+            if(nums[i] > nums[j]) {
+                max = Math.max(dp[j] + 1, max);
+            }
+        }
+        dp[i] = max;
+    }
+
+    int result = 0;
+    for(int i = 0; i < n; ++i) {
+        result = Math.max(dp[i], result);
+    }
+    return result;
+}
+```
+
 
 
