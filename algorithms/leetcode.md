@@ -1,5 +1,72 @@
 ## LeetCode Problems
 
+### 34. Find First and Last Position of Element in Sorted Array
+
+Given an array of integers `nums` sorted in ascending order, find the starting and ending position of a given `target` value.
+
+Your algorithm's runtime complexity must be in the order of *O*(log *n*).
+
+If the target is not found in the array, return `[-1, -1]`.
+
+**Example 1:**
+
+```
+Input: nums = [5,7,7,8,8,10], target = 8
+Output: [3,4]
+```
+
+**Example 2:**
+
+```
+Input: nums = [5,7,7,8,8,10], target = 6
+Output: [-1,-1]
+```
+
+**Solution:**
+
+分别找first，last position，找不到返回-1。
+
+```java
+public int[] searchRange(int[] nums, int target) {
+    if (nums == null || nums.length == 0) return new int[]{-1, -1};
+    int first = first_position(nums, target);
+    int last = last_position(nums, target);
+    return new int[]{first, last};
+}
+
+private int first_position(int[] nums, int target) {
+    int left = 0, right = nums.length - 1;
+    while (left + 1 < right) {
+        int mid = left + (right - left) / 2;
+        if (nums[mid] >= target) {
+            right = mid;
+        } else {
+            left = mid;
+        }
+    }
+    if (nums[left]  == target) return left;
+    if (nums[right] == target) return right;
+    return -1;
+}
+
+private int last_position(int[] nums, int target) {
+    int left = 0, right = nums.length - 1;
+    while (left + 1 < right) {
+        int mid = left + (right - left) / 2;
+        if (nums[mid] > target) {
+            right = mid;
+        } else {
+            left = mid;
+        }
+    }
+    if (nums[right] == target) return right;
+    if (nums[left]  == target) return left;
+    return -1;
+}
+```
+
+
+
 ### 70. Climbing Stairs
 
 You are climbing a stair case. It takes *n* steps to reach to the top.
@@ -234,6 +301,33 @@ public int lengthOfLIS(int[] nums) {
         result = Math.max(dp[i], result);
     }
     return result;
+}
+```
+
+
+
+### 704. Binary Search
+
+Given a **sorted** (in ascending order) integer array `nums` of `n`elements and a `target` value, write a function to search `target` in `nums`. If `target` exists, then return its index, otherwise return `-1`.
+
+**Solution**:
+
+（二分模版）使用while循环去逼近target，循环中没有return，将target范围缩小在left，right两个范围内。出了循环之后再进行判断，本题没有重复所以先判断left，right都可以。注意在循环中nums[mid] == target的情况必须把left或者right置为mid，不能mid+1/mid-1，否则就会miss掉这个答案。而实际上对于left+1<right的判断条件，把left，right置为mid-1，mid+1和mid是完全没有区别的。
+
+```java
+public int search(int[] nums, int target) {
+    int left = 0, right = nums.length - 1;
+    while(left + 1 < right) {
+        int mid = left + (right - left)/2;
+        if(nums[mid] > target) {
+            right = mid;
+        } else {
+            left = mid;
+        }
+    }
+    if(nums[left] == target) return left;
+    if(nums[right] == target) return right;
+    return -1;
 }
 ```
 
