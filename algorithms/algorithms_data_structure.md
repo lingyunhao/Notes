@@ -1,8 +1,6 @@
-## Algorithms
+# Algorithms
 
-#### Two Pointers
-
-
+### Binary Search
 
 
 
@@ -10,5 +8,11 @@
 
 
 
-## Data Structure
+
+
+
+
+
+
+
 
