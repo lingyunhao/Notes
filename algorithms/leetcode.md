@@ -224,6 +224,42 @@ DP with no extra space with bottom up.
 
 
 
+### 153. Find Minimum in Rotated Sorted Array
+
+Suppose an array sorted in ascending order is rotated at some pivot unknown to you beforehand.Find the minimum element. You may assume no duplicate exists in the array.
+
+**Example :**
+
+```
+Input: [3,4,5,1,2] 
+Output: 1
+```
+
+**Solution:**
+
+Find the first element which is less than or equal to the last number. 不会出现nums[mid] = nums[nums.length -1] 的情况，因为left,right最大的可能是length-2，length-1。 正常情况下，应该返回的是right,但是会出现 nums = [1,2,3,4], left 和right会停在1,2(index 0,1) 的位置，此时应该返回left, 而[5,4,3,2,1]的话，left,right会停在length-2,length-1的地方，此时返回right是正确的。
+
+```java
+public int findMin(int[] nums) {
+    if (nums == null || nums.length == 0) return -1;
+    int left = 0, right = nums.length-1;
+    while (left + 1 < right) {
+        int mid = left + (right - left) / 2;
+        if(nums[mid] <= nums[nums.length - 1]) {
+            right = mid;
+        } else {
+            left = mid;
+        }
+    }
+    return Math.min(nums[left],nums[right]);
+    // or
+    // if (left == 0 && nums[left] < nums[right]) return nums[left];
+    // return nums[right];
+}
+```
+
+
+
 ### 278. First Bad Version
 
 **Solution:**
@@ -352,6 +388,27 @@ public int search(int[] nums, int target) {
     if(nums[left] == target) return left;
     if(nums[right] == target) return right;
     return -1;
+}
+```
+
+
+
+### 852. Peak Index in a Mountain Array
+
+Binary Search 之境界二，find the last element which is bigger the previous one. 考虑两个边界条件,[0210],最后停在[2,1]，返回left正确。[3,4,5,1] 最后停在[5,1] 返回left正确。
+
+```java
+public int peakIndexInMountainArray(int[] A) {
+    int left = 1, right = A.length - 1, mid;
+    while(left + 1 < right) {
+        mid = left + (right - left) / 2;
+        if (A[mid] > A[mid-1]) {
+            left = mid;
+        } else {
+            right = mid;
+        }
+    }
+    return left;
 }
 ```
 
