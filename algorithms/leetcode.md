@@ -393,6 +393,16 @@ public int search(int[] nums, int target) {
 
 
 
+### 796. Rotate String
+
+```java
+public boolean rotateString(String A, String B) {
+    return A.length() == B.length() && (A+A).contains(B);
+}
+```
+
+
+
 ### 852. Peak Index in a Mountain Array
 
 Binary Search 之境界二，find the last element which is bigger the previous one. 考虑两个边界条件,[0210],最后停在[2,1]，返回left正确。[3,4,5,1] 最后停在[5,1] 返回left正确。
@@ -413,4 +423,53 @@ public int peakIndexInMountainArray(int[] A) {
 ```
 
 
+
+### 102. Binary Tree Order Level Traversal
+
+**Example:**
+
+Given binary tree `[3,9,20,null,null,15,7]`
+
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+return its level order traversal as:
+
+```
+[
+  [3],
+  [9,20],
+  [15,7]
+]
+```
+
+**Solution:**
+
+```java
+public List<List<Integer>> levelOrder(TreeNode root) {
+    List<List<Integer>> results = new ArrayList<>();
+    if(root == null) return results;
+
+    Queue<TreeNode> queue = new LinkedList<>();
+    queue.offer(root);
+
+    while(!queue.isEmpty()) {
+        int size = queue.size();
+        List<Integer> level = new ArrayList<>();
+        for(int i=0; i<size; i++) {
+            TreeNode node = queue.poll();
+            level.add(node.val);
+            if(node.left != null) queue.offer(node.left);
+            if(node.right != null) queue.offer(node.right);
+        }
+        results.add(level);
+    }
+    return results;
+}
+```
 

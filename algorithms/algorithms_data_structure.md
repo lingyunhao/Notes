@@ -294,3 +294,97 @@ public int peakIndexInMountainArray(int[] A) {
 
 **Find Peak Element**
 
+### Breadth First Search
+
+BFS in Binary Tree
+
+BFS in Graph -> Topological sorting
+
+BFS in board
+
+**使用BFS的cases**
+
+Traverse in graph(Tree is one kind of graph)
+
+* Level order traversal(层级遍历)
+* Connected component
+* Topological sorting
+
+Shortest path in simple graph(仅限每条边长度都为1，且没有方向)
+
+最短路径：BFS, dp
+
+最长路径：DFS, dp
+
+BFS: Queue (stack 也可以，但顺序是反的，没人用的)
+
+DFS: Stack
+
+**模板：**
+
+BFS写法几乎都一样(参考102)：
+
+1. 创建一个队列，把起始节点都放到里面去
+2. while队列不空，处理队列中的节点并扩展出新的节点
+
+如果不需要分层，则只需要一个循环
+
+**Examples:**
+
+**102. Binary Tree Level Order Traversal**
+
+**Example:**
+
+Given binary tree `[3,9,20,null,null,15,7]`
+
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+return its level order traversal as:
+
+```
+[
+  [3],
+  [9,20],
+  [15,7]
+]
+```
+
+**Solution:**
+
+```java
+public List<List<Integer>> levelOrder(TreeNode root) {
+    List<List<Integer>> results = new ArrayList<>();
+    if(root == null) return results;
+
+    Queue<TreeNode> queue = new LinkedList<>();
+    queue.offer(root);
+
+    while(!queue.isEmpty()) {
+        int size = queue.size();
+        List<Integer> level = new ArrayList<>();
+        for(int i=0; i<size; i++) {
+            TreeNode node = queue.poll();
+            level.add(node.val);
+            if(node.left != null) queue.offer(node.left);
+            if(node.right != null) queue.offer(node.right);
+        }
+        results.add(level);
+    }
+    return results;
+}
+```
+
+
+
+
+
+
+
+
+
