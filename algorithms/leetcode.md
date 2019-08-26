@@ -1,4 +1,4 @@
-## LeetCode Problems
+LeetCode Problems
 
 ### 34. Find First and Last Position of Element in Sorted Array
 
@@ -100,6 +100,107 @@ public int climbStairs(int n) {
         pre2 = cur;
     }
     return pre2;
+}
+```
+
+
+
+### 102. Binary Tree Order Level Traversal
+
+**Example:**
+
+Given binary tree `[3,9,20,null,null,15,7]`
+
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+return its level order traversal as:
+
+```
+[
+  [3],
+  [9,20],
+  [15,7]
+]
+```
+
+**Solution:**
+
+```java
+public List<List<Integer>> levelOrder(TreeNode root) {
+    List<List<Integer>> results = new ArrayList<>();
+    if(root == null) return results;
+
+    Queue<TreeNode> queue = new LinkedList<>();
+    queue.offer(root);
+
+    while(!queue.isEmpty()) {
+        int size = queue.size();
+        List<Integer> level = new ArrayList<>();
+        for(int i=0; i<size; i++) {
+            TreeNode node = queue.poll();
+            level.add(node.val);
+            if(node.left != null) queue.offer(node.left);
+            if(node.right != null) queue.offer(node.right);
+        }
+        results.add(level);
+    }
+    return results;
+}
+```
+
+
+
+### 107. Binary Tree Level Order Traversal II
+
+**Example:**
+
+Given binary tree `[3,9,20,null,null,15,7]`,
+
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+return its bottom-up level order traversal as:
+
+```
+[
+  [15,7],
+  [9,20],
+  [3]
+]
+```
+
+**Solution:**
+
+```java
+public List<List<Integer>> levelOrderBottom(TreeNode root) {
+    List<List<Integer>> results = new ArrayList<>();
+    if(root == null) return results;
+    Queue<TreeNode> queue = new LinkedList<>();
+    queue.offer(root);
+    while(!queue.isEmpty()) {
+        int size = queue.size();
+        List<Integer> level = new ArrayList<>();
+        for(int i=0; i<size; i++) {
+            TreeNode node = queue.poll();
+            if(node.left != null) queue.add(node.left);
+            if(node.right != null) queue.add(node.right);
+            level.add(node.val);
+        }
+        results.add(level);
+    }
+    Collections.reverse(results);
+    return results;
 }
 ```
 
@@ -317,6 +418,106 @@ public void moveZeroes(int[] nums) {
 
 
 
+### 297. Serialize and Deserialize Binary Tree:
+
+**Example:** 
+
+```
+You may serialize the following tree:
+
+    1
+   / \
+  2   3
+     / \
+    4   5
+
+as "[1,2,3,null,null,4,5]"
+```
+
+**Solution:**
+
+serialize:
+
+1. 开一个arraylist，把root丢进去，BFS用一层循环把每层节点都丢进去，判断条件是i<queue.size(), queue的size每层是变化的。依次把所有节点的左右节点丢进去，遇到null跳出，直到不再丢进去，同时也运行到最后一个节点。
+
+2. 使用while循环把最后一层尾部的null全部去掉
+
+3. 把TreeNode的queue(arraylist) 中的节点的val code成一串字符串
+
+Deserialize：
+
+把String按照","split成String array，建立 一个Arraylist去存所有TreeNode，index为当前进行到哪个node，用isLeftNode去判断左右子节点。
+
+```java
+// Encodes a tree to a single string.
+public String serialize(TreeNode root) {
+    if (root == null) return "[]";
+
+    List<TreeNode> queue = new ArrayList<TreeNode>();
+    queue.add(root);
+
+    for (int i = 0; i < queue.size(); i++) {
+        TreeNode node = queue.get(i);
+        if (node == null) continue;
+        queue.add(node.left);
+        queue.add(node.right);
+    }
+
+    while (queue.get(queue.size() - 1) == null) {
+        queue.remove(queue.size() - 1);
+    }
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("[");
+    sb.append(queue.get(0).val);
+    for (int i = 1; i < queue.size(); i++) {
+        if (queue.get(i) == null) {
+            sb.append(",null");
+        } else {
+            sb.append(",");
+            sb.append(queue.get(i).val);
+        }
+    }
+    sb.append("]");
+
+    return sb.toString();
+}
+
+// Decodes your encoded data to tree.
+public TreeNode deserialize(String data) {
+    if (data.equals("[]")) return null;
+
+    String[] vals = data.substring(1, data.length()-1).split(",");
+
+    List<TreeNode> queue = new ArrayList<TreeNode>();
+    TreeNode root = new TreeNode(Integer.parseInt(vals[0]));
+    queue.add(root);
+
+    int index = 0;
+    boolean isLeftNode = true;
+    for (int i = 1; i < vals.length; i++) {
+        if (!vals[i].equals("null")) {
+            TreeNode node = new TreeNode(Integer.parseInt(vals[i]));
+            if (isLeftNode) {
+                queue.get(index).left = node;
+            } else {
+                queue.get(index).right = node;
+            }
+            queue.add(node);
+        }
+
+        if (!isLeftNode) {
+            index++;
+        }
+
+        isLeftNode = !isLeftNode;
+    }
+    return root;
+}
+```
+
+
+
 ### 300. Longest Increasing Subsequence
 
 Given an unsorted array of integers, find the length of longest increasing subsequence.
@@ -419,57 +620,6 @@ public int peakIndexInMountainArray(int[] A) {
         }
     }
     return left;
-}
-```
-
-
-
-### 102. Binary Tree Order Level Traversal
-
-**Example:**
-
-Given binary tree `[3,9,20,null,null,15,7]`
-
-```
-    3
-   / \
-  9  20
-    /  \
-   15   7
-```
-
-return its level order traversal as:
-
-```
-[
-  [3],
-  [9,20],
-  [15,7]
-]
-```
-
-**Solution:**
-
-```java
-public List<List<Integer>> levelOrder(TreeNode root) {
-    List<List<Integer>> results = new ArrayList<>();
-    if(root == null) return results;
-
-    Queue<TreeNode> queue = new LinkedList<>();
-    queue.offer(root);
-
-    while(!queue.isEmpty()) {
-        int size = queue.size();
-        List<Integer> level = new ArrayList<>();
-        for(int i=0; i<size; i++) {
-            TreeNode node = queue.poll();
-            level.add(node.val);
-            if(node.left != null) queue.offer(node.left);
-            if(node.right != null) queue.offer(node.right);
-        }
-        results.add(level);
-    }
-    return results;
 }
 ```
 
