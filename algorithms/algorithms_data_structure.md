@@ -426,7 +426,7 @@ public List<List<Integer>> levelOrder(TreeNode root) {
 }
 ```
 
-**297. Serialize and Deserialize Binary Tree：**
+**297. Serialize and Deserialize Binary Tree**
 
 **Example:** 
 
@@ -524,7 +524,7 @@ public TreeNode deserialize(String data) {
 }
 ```
 
-**261. Graph Valid Tree:**
+**261. Graph Valid Tree**
 
 Given `n` nodes labeled from `0` to `n - 1` and a list of `undirected` edges (each edge is a pair of nodes), write a function to check whether these edges make up a valid tree.
 
@@ -602,6 +602,8 @@ Graph is a tree if and only if 1. There are n-1 edges. 2. n nodes are connected
 ```
 
 
+
+### Dynamic Programming
 
 
 
