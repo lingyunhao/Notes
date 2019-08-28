@@ -545,6 +545,8 @@ public List<List<Integer>> levelOrder(TreeNode root) {
 }
 ```
 
+
+
 **297. Serialize and Deserialize Binary Tree**
 
 **Example:** 
@@ -643,13 +645,13 @@ public TreeNode deserialize(String data) {
 }
 ```
 
+
+
 **261. Graph Valid Tree**
 
 Given `n` nodes labeled from `0` to `n - 1` and a list of `undirected` edges (each edge is a pair of nodes), write a function to check whether these edges make up a valid tree.
 
 You can assume that no duplicate edges will appear in edges. Since all edges are `undirected`, `[0, 1]` is the same as `[1, 0]` and thus will not appear together in edges.
-
-**Example:**
 
 **Example 1:**
 
@@ -960,3 +962,45 @@ public int lengthOfLIS(int[] nums) {
 }
 ```
 
+**413. Arithmetic Slices**
+
+A sequence of number is called arithmetic if it consists of at least three elements and if the difference between any two consecutive elements is the same.
+
+**Example:**
+
+```
+A = [1, 2, 3, 4]
+
+return: 3, for 3 arithmetic slices in A: [1, 2, 3], [2, 3, 4] and [1, 2, 3, 4] itself.
+```
+
+**Solution:**
+
+求方案总数，dp[i] 表示的是以A[i]结尾的number of arithmetic slices，如果dp[i] - dp[i-1] = dp[i-1] - dp[i-2], 那么以A[i-1]结尾的所有等差递增序列在A[i]也成立，不过是长度+1，除此之外，会多一个子序列dp[i-2],dp[i-1],dp[i]。而如果上面等式不成立的话，将没有以A[i]结尾的arithmetic slices，所以dp[i]为0。在初始化dp时已经定义为0。所以dp[i] = dp[i-1] + 1。
+
+Note: 本题求的是所有arithmatic slices，也就是说以任何一个A[i]结尾的arithmetic slices的个数之和，所以最后要遍历dp求和,因此本题也不能压缩dp数组到几个变量。
+
+```java
+public int numberOfArithmeticSlices(int[] A) {
+    if (A == null || A.length <= 2) return 0;
+    int n = A.length;
+    int[] dp = new int[n];
+
+    for(int i = 2; i < n; i++) {
+        if (A[i] - A[i-1] == A[i-1] - A[i-2]) {
+            dp[i] = dp[i-1] + 1;
+        }
+    }
+    int total = 0;
+    for(int each : dp) {
+        total += each;
+    }
+    return total;
+}
+```
+
+
+
+### Two Pointers
+
+主要

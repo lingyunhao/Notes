@@ -807,6 +807,45 @@ public int lengthOfLIS(int[] nums) {
 
 
 
+### 413. Arithmetic Slices
+
+A sequence of number is called arithmetic if it consists of at least three elements and if the difference between any two consecutive elements is the same.
+
+**Example:**
+
+```
+A = [1, 2, 3, 4]
+
+return: 3, for 3 arithmetic slices in A: [1, 2, 3], [2, 3, 4] and [1, 2, 3, 4] itself.
+```
+
+**Solution:**
+
+求方案总数，dp[i] 表示的是以A[i]结尾的number of arithmetic slices，如果dp[i] - dp[i-1] = dp[i-1] - dp[i-2], 那么以A[i-1]结尾的所有等差递增序列在A[i]也成立，不过是长度+1，除此之外，会多一个子序列dp[i-2],dp[i-1],dp[i]。而如果上面等式不成立的话，将没有以A[i]结尾的arithmetic slices，所以dp[i]为0。在初始化dp时已经定义为0。所以dp[i] = dp[i-1] + 1。
+
+Note: 本题求的是所有arithmatic slices，也就是说以任何一个A[i]结尾的arithmetic slices的个数之和，所以最后要遍历dp求和,因此本题也不能压缩dp数组到几个变量。
+
+```java
+public int numberOfArithmeticSlices(int[] A) {
+    if (A == null || A.length <= 2) return 0;
+    int n = A.length;
+    int[] dp = new int[n];
+
+    for(int i = 2; i < n; i++) {
+        if (A[i] - A[i-1] == A[i-1] - A[i-2]) {
+            dp[i] = dp[i-1] + 1;
+        }
+    }
+    int total = 0;
+    for(int each : dp) {
+        total += each;
+    }
+    return total;
+}
+```
+
+
+
 ### 704. Binary Search
 
 Given a **sorted** (in ascending order) integer array `nums` of `n`elements and a `target` value, write a function to search `target` in `nums`. If `target` exists, then return its index, otherwise return `-1`.
