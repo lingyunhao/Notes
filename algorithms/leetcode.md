@@ -105,6 +105,73 @@ public int uniquePaths(int m, int n) {
 
 
 
+### 63. Unique Paths II
+
+```
+Input:
+[
+  [0,0,0],
+  [0,1,0],
+  [0,0,0]
+]
+Output: 2
+Explanation:
+There is one obstacle in the middle of the 3x3 grid above.
+There are two ways to reach the bottom-right corner:
+1. Right -> Right -> Down -> Down
+2. Down -> Down -> Right -> Right
+```
+
+**Solution：** 
+
+先初始化，顶点以及第一行第一列。for循环中加if判断是否有障碍物。
+
+```java
+public int uniquePathsWithObstacles(int[][] obstacleGrid) {
+    int m = obstacleGrid.length;
+    int n = obstacleGrid[0].length;
+    if (m == 0 || n == 0) return 1;
+    if (obstacleGrid[0][0] == 1) return 0;
+   
+    int[][] dp = new int[m][n];
+
+    dp[0][0] = 1;
+
+    int column = 1;
+    while (column < n && obstacleGrid[0][column] != 1) {
+        dp[0][column] = 1;
+        column++;
+    }
+    while (column < n) {
+        dp[0][column] = 0;
+        column++;
+    }
+
+    int row = 1;
+    while (row < m && obstacleGrid[row][0] != 1) {
+        dp[row][0] = 1;
+        row++;
+    }
+    while (row < m) {
+        dp[row][0] = 0;
+        row++;
+    }
+
+    for (int i = 1; i < m; i++) {
+        for (int j = 1; j < n; j++) {
+            if (obstacleGrid[i][j] == 0) {
+                dp[i][j] = dp[i-1][j] + dp[i][j-1];
+            } else {
+                dp[i][j] = 0;
+            }
+        }
+    }
+    return dp[m-1][n-1];
+}
+```
+
+
+
 ### 64. Minimum Path Sum
 
 **Example:**
