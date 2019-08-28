@@ -67,6 +67,155 @@ private int last_position(int[] nums, int target) {
 
 
 
+###62. Unique Paths
+
+A robot is located at the top-left corner of a *m* x *n* grid (marked 'Start' in the diagram below).
+
+The robot can only move either down or right at any point in time. The robot is trying to reach the bottom-right corner of the grid (marked 'Finish' in the diagram below).
+
+How many possible unique paths are there?
+
+![img](https://assets.leetcode.com/uploads/2018/10/22/robot_maze.png)
+Above is a 7 x 3 grid. How many possible unique paths are there?
+
+**Note:** *m* and *n* will be at most 100.
+
+**Solution:**
+
+求方案总数。初始化第一行第一列全为1，dp[i] [j] = dp[i] [j-1] + dp[i-1] [j], return dp[m-1] [n-1]
+
+求方案总数的问题要把上一步可能在的位置相加，求最短路径是取上一步可能在的位置的最小值。
+
+```java
+public int uniquePaths(int m, int n) {
+    if (m == 0 || n == 0) return 1;
+    int[][] dp = new int[1][n];
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            if (i == 0 || j == 0) {
+                dp[0][j] = 1;
+                continue;
+            }
+            dp[0][j] = dp[0][j-1] + dp[0][j];
+        }
+    }
+    return dp[0][n-1];
+}
+```
+
+
+
+### 64. Minimum Path Sum
+
+**Example:**
+
+```
+Input:
+[
+  [1,3,1],
+  [1,5,1],
+  [4,2,1]
+]
+Output: 7
+Explanation: Because the path 1→3→1→1→1 minimizes the sum.
+```
+
+**Solution 1:**
+
+O($m*n$) extra space. 
+
+state: dp[i] [j] 表示从起点到当前位置的最短路径
+
+function: dp[i] [j] = min(dp[i-1] [j], dp[i] [j-1]) + grid[i] [j]
+
+initialize: 第0行，第0列为前一个数加上其本身，实际上就是从0到给该位置的和
+
+answer: dp[m-1] [n-1]
+
+能用dp做的题一定不存在循环依赖，即怎么走都走不出一个环，例如本题只能向下或者向右走，如果四个方向都能走的话，用BFS。规定了只能向右向下走的话，BFS只能解决耗费相同，而dp可以解决耗费不同。
+
+初始化一个二维数组的话先初始化它的第零行第零列。本题的初始化包含在for循环中用if判断了，也可以写在外面先初始化然后再两层for循环。
+
+```java
+public int minPathSum(int[][] grid) {
+    int m = grid.length;
+    int n = grid[0].length;
+    int[][] dp = new int [m][n];
+
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            if(i == 0 && j == 0) {
+                dp[i][j] = grid[0][0];
+            } else if (i == 0) {
+                dp[i][j] = dp[i][j-1] + grid[i][j];
+            } else if (j == 0) {
+                dp[i][j] = dp[i-1][j] + grid[i][j];
+            } else {
+                dp[i][j] = Math.min(dp[i-1][j], dp[i][j-1]) + grid[i][j];
+            }
+        }
+    }
+    return dp[m-1][n-1];
+}
+```
+
+**Solution 2:**
+
+O(n) extra space. dp[2] [n] 滚动数组，设置pre, cur 两个index变量，处理cur，把pre当作上一层，下次循环时把cur赋给pre。
+
+```java
+public int minPathSum(int[][] grid) {
+    int m = grid.length;
+    int n = grid[0].length;
+    int[][] dp = new int [2][n];
+    int pre = 0, cur = 0;
+    for (int i = 0; i < m; i++) {
+        pre = cur;
+        cur = 1 - cur;
+        for (int j = 0; j < n; j++) {
+            if(i == 0 && j == 0) {
+                dp[cur][j] = grid[0][0];
+            } else if (i == 0) {
+                dp[cur][j] = dp[cur][j-1] + grid[i][j];
+            } else if (j == 0) {
+                dp[cur][j] = dp[pre][j] + grid[i][j];
+            } else {
+                dp[cur][j] = Math.min(dp[pre][j], dp[cur][j-1]) + grid[i][j];
+            }
+        }
+    }
+    return dp[cur][n-1];
+}
+```
+
+**Solution 3:**
+
+O(n) extra space. dp[1] [n] 因为本题向下向右所以当前状态依赖左边和上一层，那么可以不断更新当前层即可。 
+
+```java
+public int minPathSum(int[][] grid) {
+    int m = grid.length;
+    int n = grid[0].length;
+    int[][] dp = new int [1][n];
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            if(i == 0 && j == 0) {
+                dp[0][j] = grid[0][0];
+            } else if (i == 0) {
+                dp[0][j] = dp[0][j-1] + grid[i][j];
+            } else if (j == 0) {
+                dp[0][j] = dp[0][j] + grid[i][j];
+            } else {
+                dp[0][j] = Math.min(dp[0][j], dp[0][j-1]) + grid[i][j];
+            }
+        }
+    }
+    return dp[0][n-1];
+}
+```
+
+
+
 ### 70. Climbing Stairs
 
 You are climbing a stair case. It takes *n* steps to reach to the top.
