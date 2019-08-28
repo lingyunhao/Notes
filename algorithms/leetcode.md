@@ -510,6 +510,30 @@ public int findMin(int[] nums) {
 
 
 
+### 198. House Robber
+
+抢劫一排住户，但不能抢劫相邻的住户，求最大抢劫量。
+
+dp[i] 表示抢劫到第i个时，最大的抢劫量。dp[i] = max(dp[i-1], nums[i] + dp[i-2])。 一维的数组时，可以压缩成相邻的几个变量。注意不能给pre2赋值为nums[1]。
+
+```java
+public int rob(int[] nums) {
+    if (nums == null || nums.length == 0) return 0;
+    if (nums.length == 1) return nums[0];
+    int pre1 = 0, pre2 = 0, cur = 0;
+
+    for (int i = 0; i < nums.length; ++i) {
+        cur = Math.max(pre2, nums[i] + pre1);
+        pre1 = pre2;
+        pre2 = cur;
+    }
+
+    return pre2;
+}
+```
+
+
+
 ### 278. First Bad Version
 
 **Solution:**

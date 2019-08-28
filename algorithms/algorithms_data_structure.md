@@ -377,6 +377,125 @@ The topological order can be:
 
 **Examples:**
 
+**120. Triangle**
+
+Given a triangle, find the minimum path sum from top to bottom. Each step you may move to adjacent numbers on the row below.
+
+**Example:**
+
+```
+[
+     [2],
+    [3,4],
+   [6,5,7],
+  [4,1,8,3]
+]
+```
+
+The minimum path sum from top to bottom is `11` (i.e., **2** + **3** + **5**+ **1** = 11).
+
+**Solution 1:**
+
+DP bottom up with O($n^2$) time complexity and exrta O($n^2$) space.
+
+自底向上的DP, 开一个NN的二维数组, 存的是从(i,j)出发走到最底层的最小路径，先初始化最后一层为其本身，两层for循环遍历前n-1层，每个节点的值depend on (i+1,j) 和 (i+1,j+1) 两个节点，取其最小值再加上本身即为从(i,j)出发到bottom的最短路径，直到求到(0,0)为止， return(0,0) (从(0,0)出发到bottom 的最小值)。
+
+```java
+public int minimumTotal(List<List<Integer>> triangle) {
+    int n = triangle.size();
+
+    // Record the minimum path from (i,j) to the bottom
+    int dp[][] = new int[n][n];
+
+    // Initialize the bottom
+    for(int i = 0; i < n; ++i) {
+        dp[n-1][i] = triangle.get(n-1).get(i); 
+    }
+
+    // DP function
+    for(int i = n - 2; i >= 0; --i) {
+        for(int j = 0; j <= i; ++j) {
+            dp[i][j] = Math.min(dp[i+1][j], dp[i+1][j+1]) + triangle.get(i).get(j);
+        }
+    }
+
+    return dp[0][0];
+}
+```
+
+初始化也可以放在两层赋值for循环中，加个if语句即可。
+
+```java
+public int minimumTotal(List<List<Integer>> triangle) {
+    int n = triangle.size();
+
+    // Record the minimum path from (i,j) to the bottom
+    int dp[][] = new int[n][n];
+
+    // DP function
+    for(int i = n - 1; i >= 0; --i) {
+        for(int j = 0; j <= i; ++j) {
+            // Initialize
+            if(i == n - 1) {
+                dp[i][j] = triangle.get(i).get(j);
+                continue;
+            }
+            dp[i][j] = Math.min(dp[i+1][j], dp[i+1][j+1]) + triangle.get(i).get(j);
+        }
+    }
+
+    return dp[0][0];
+}
+```
+
+**Solution 2:**
+
+DP bottom up with O($n^2$) time complexity and exrta O($n^2$) space.
+
+与Solution 1不同的是，dp(i,j) represents the minimum path from (0,0) to (i,j). 赋值时需要取两个前继节点的最小值取其本身，三角形左边右边只有一个前继节点，需要对三角形左边(i,0)右边(i,i)初始化为其唯一的前继节点+其本身。先初始化顶点，然后左边后边，初始化可以在外边也可以在两层for循环内加if语句完成。最后在最底层打擂台得到状态矩阵最底层的最小值。
+
+```java
+public int minimumTotal(List<List<Integer>> triangle) {
+    int n = triangle.size();
+
+    // Record the minimum path from (i,j) to the bottom
+    int dp[][] = new int[n][n];
+
+    // Initialize
+    dp[0][0] = triangle.get(0).get(0);
+    for(int i = 1; i < n; ++i) {
+        dp[i][0] = dp[i-1][0] + triangle.get(i).get(0);
+        dp[i][i] = dp[i-1][i-1] + triangle.get(i).get(i);
+    }
+
+    // DP function
+    for(int i = 1; i < n; ++i) {
+        for(int j = 1; j < i; ++j) {
+            dp[i][j] = Math.min(dp[i-1][j-1], dp[i-1][j]) + triangle.get(i).get(j);
+        }
+    }
+
+    int result = Integer.MAX_VALUE;
+    for(int i = 0; i < n; ++i) {
+        result = Math.min(dp[n-1][i], result);
+    }
+
+    return result;
+}
+```
+
+**Solution 3:**
+
+将上面的算法优化到O(n)extra space. 实际上可以只开一个2 * n的矩阵，只保留计算当前这一层需要的前一层和此层，和n * n算法上并没有什么需别，而开1 * n的矩阵就需要考虑到谁先更新的问题。
+
+**Solution 4：**
+
+DP with no extra space with bottom up.
+
+不开新的矩阵，直接在输入上进行操作，bottom up，不需要初始化最底层
+
+
+
 **102. Binary Tree Level Order Traversal**
 
 **Example:**
@@ -604,6 +723,8 @@ Graph is a tree if and only if 1. There are n-1 edges. 2. n nodes are connected
 
 
 ### Dynamic Programming
+
+动态规划和递归(divide conquer)都是将原问题拆成多个字问题然后进行求解，他们之间最本质的区别是dp保留了子问题的解避免了重复计算。实际上，dp就相当于dfs + memorization。
 
 **Examples:**
 
