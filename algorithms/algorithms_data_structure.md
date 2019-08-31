@@ -1003,5 +1003,33 @@ public int numberOfArithmeticSlices(int[] A) {
 
 
 
-### Two Pointers
+### DFS
+
+找出所有方案的题，一般是DFS，DFS经常是排列、组合的题。一般DFS可以用recursion实现，（如果面试官不要求用non-recursion的办法写DFS的话）
+
+**Recursion三要素**
+
+递归的定义（递归函数求的是什么，完成了什么功能，类似dp[i]表示什么）
+
+递归的拆解 （这次递归和之前的递归有什么关系，在本次递归调用递归传参，return等等，类似dp fucntion）
+
+递归的出口 （什么时候可以return）
+
+**Combination(组合搜索）**
+
+问题模型：求出所有满足条件的组合
+
+判断条件：组合中的元素是顺序无关的（有关的事排列）
+
+时间复杂度：与O($2^n$)有关
+
+**Permutation(排列搜索）**
+
+问题模型：求出所有满足条件的排列
+
+判断条件：组合中的元素是顺序相关的
+
+时间复杂度： 与n!相关
+
+**必背：**
 

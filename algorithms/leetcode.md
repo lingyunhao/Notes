@@ -807,6 +807,48 @@ public int lengthOfLIS(int[] nums) {
 
 
 
+### 376. Wiggle Subsequence
+
+**Example 1:**
+
+```
+Input: [1,7,4,9,2,5]
+Output: 6
+Explanation: The entire sequence is a wiggle sequence.
+```
+
+**Example 2:**
+
+```
+Input: [1,17,5,10,13,15,10,5,16,8]
+Output: 7
+Explanation: There are several subsequences that achieve this length. One is [1,17,10,13,10,16,8].
+```
+
+**Solution:**
+
+利用两个变量去记录上一个down,up 的位置。
+
+```java
+public int wiggleMaxLength(int[] nums) {
+    if (nums == null || nums.length == 0) {
+        return 0;
+    }
+
+    int up = 1, down = 1;
+    for (int i = 1; i < nums.length; ++i) {
+        if (nums[i] > nums[i-1]) {
+            up = down + 1;
+        } else if (nums[i] < nums[i-1]) {
+            down = up + 1;
+        }
+    }
+    return Math.max(down, up);
+}
+```
+
+
+
 ### 413. Arithmetic Slices
 
 A sequence of number is called arithmetic if it consists of at least three elements and if the difference between any two consecutive elements is the same.
@@ -841,6 +883,49 @@ public int numberOfArithmeticSlices(int[] A) {
         total += each;
     }
     return total;
+}
+```
+
+
+
+### 646. Maximum Length of Pair Chain
+
+You are given `n` pairs of numbers. In every pair, the first number is always smaller than the second number.
+
+Now, we define a pair `(c, d)` can follow another pair `(a, b)`if and only if `b < c`. Chain of pairs can be formed in this fashion.
+
+**Example:**
+
+```
+Input: [[1,2], [2,3], [3,4]]
+Output: 2
+Explanation: The longest chain is [1,2] -> [3,4]
+```
+
+**Solution:**
+
+根据pair第一个元素进行排序，找由第二个元素组成的最长递增子序列。同problem 300。dp数组要初始化为1。
+
+```java
+public int findLongestChain(int[][] pairs) {
+    if (pairs == null || pairs.length == 0) return 0;
+    Arrays.sort(pairs, (a,b) -> (a[0] - b[0]));
+    int[] dp = new int[pairs.length];
+    Arrays.fill(dp, 1);
+
+    for (int i = 1; i < pairs.length; ++i) {
+        for (int j = 0; j < i; ++j) {
+            if (pairs[j][1] < pairs[i][0]) {
+                dp[i] = Math.max(dp[j]+1, dp[i]);
+            }
+        }
+    }
+
+    int result = 0;
+    for (int i = 0; i < dp.length; ++i) {
+        result = Math.max(dp[i], result);
+    }
+    return result;
 }
 ```
 
