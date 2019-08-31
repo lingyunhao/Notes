@@ -321,6 +321,54 @@ public int climbStairs(int n) {
 
 
 
+###74. Search in a 2D Array
+
+Write an efficient algorithm that searches for a value in an *m* x *n*matrix. This matrix has the following properties:
+
+- Integers in each row are sorted from left to right.
+- The first integer of each row is greater than the last integer of the previous row.
+
+**Example:**
+
+```
+Input:
+matrix = [
+  [1,   3,  5,  7],
+  [10, 11, 16, 20],
+  [23, 30, 34, 50]
+]
+target = 3
+Output: true
+```
+
+**Solution:**
+
+整个数组按行展开是sorted,在有序数组中search->binary search，left = 0， wight = 元素个数 -1， 将mid进行division和mod操作后转化成二维数组的坐标。本题没有重复也不求first，last，所以就使用了 left <= right 为判断条件（注意等于号不可丢保证每个元素都进行过判断，并且出循环后，left = right + 1），直接在while循环中遇到等于就返回。（其他非简单情况用left + 1 < right) 的模版。
+
+```java
+public boolean searchMatrix(int[][] matrix, int target) {
+    if (matrix ==  null || matrix.length == 0) return false;
+    int m = matrix.length, n = matrix[0].length;
+    int left = 0, right = m * n - 1;
+    int mid,r,c;
+    while (left <= right) {
+        mid = left + (right - left) / 2;
+        r = mid / n;
+        c = mid % n;
+        if (matrix[r][c] == target) {
+            return true;
+        } else if (matrix[r][c] > target) {
+            right = mid - 1;
+        } else {
+            left = mid + 1;
+        }
+    }
+    return false;
+}
+```
+
+
+
 ### 102. Binary Tree Order Level Traversal
 
 **Example:**
