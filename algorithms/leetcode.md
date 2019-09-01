@@ -1017,6 +1017,46 @@ public int findLongestChain(int[][] pairs) {
 
 
 
+###695. Max Area of Island
+
+Given a non-empty 2D array `grid` of 0's and 1's, an **island** is a group of `1`'s (representing land) connected 4-directionally (horizontal or vertical.) You may assume all four edges of the grid are surrounded by water.求最大的联通面积。
+
+**Solution:**
+
+dfs recursion函数求的是，与当前元素向四个方向所联通的面积和，每个area在四个方向都加了一次。实际上是先调用dfs，然后判断满不满足条件需要return(函数的出口，当前函数return，把调用当前函数的函数pop出栈), 写的时候，是在dfs函数第一行进行判断。注意每次调用dfs把当前元素置为1，下一个方向上的元素又回头把自己加上，每个元素最终只进行了一次dfs。不需要改回来，改回来的话，相当于一个联通面积中每个元素都进行了一次dfs，求出了一个相等的area返回到主函数中进行打擂台。dfs是一种search，原则上每个元素遍历一次，有些题目必须要改回来，这种叫backtracking, 例如排列组合的题目。
+
+```java
+private int[][] direction = {{0,1}, {0,-1}, {1,0}, {-1,0}}; 
+public int maxAreaOfIsland(int[][] grid) {
+    if (grid == null || grid.length == 0) {
+        return 0;
+    }
+    int m = grid.length;
+    int n = grid[0].length;
+    int maxArea = 0;
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            maxArea = Math.max(maxArea, dfs(grid, i, j, m, n));
+        }
+    }
+    return maxArea;   
+}
+
+private int dfs(int[][] grid, int r, int c, int m, int n) {
+    if (r < 0 || r >= m || c < 0 || c >= n || grid[r][c] == 0) {
+        return 0;
+    }
+    grid[r][c] = 0;
+    int area = 1;
+    for (int[] d : direction) {
+        area += dfs(grid, r+d[0], c+d[1], m, n);
+    }
+    return area;
+}
+```
+
+
+
 ### 704. Binary Search
 
 Given a **sorted** (in ascending order) integer array `nums` of `n`elements and a `target` value, write a function to search `target` in `nums`. If `target` exists, then return its index, otherwise return `-1`.

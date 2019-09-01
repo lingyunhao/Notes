@@ -813,6 +813,91 @@ Graph is a tree if and only if 1. There are n-1 edges. 2. n nodes are connected
 
 
 
+### Depth First Search
+
+BFS是一层一层遍历，每一层得到所有的新节点，用队列存当前层的节点，处理本层节点的同时加入下一层新节点。而DFS是得到新节点立马对新节点进行遍历，直到没有新节点了再返回上一层，然后继续对该层进行遍历，如此重复，知道所有节点遍历完毕。
+
+从一个节点出发，使用DFS进行遍历时，能够到达的节点都是初始节点可达的，DFS常用来求这种可达性问题。
+
+DFS在inplement时，要注意以下问题：
+
+- stack : 用stack来保存当前节点信息，当遍历新节点结束时返回能够继续遍历当前节点，有non-recursion版本喝recursion版本。
+- 标记：和bfs一样需要对已经遍历过的节点进行标记。
+
+找出所有方案的题，一般是DFS，DFS经常是排列、组合的题。一般DFS可以用recursion实现，（如果面试官不要求用non-recursion的办法写DFS的话）
+
+**Recursion三要素**
+
+* 递归的定义（递归函数求的是什么，完成了什么功能，类似dp[i]表示什么）
+
+* 递归的拆解 （这次递归和之前的递归有什么关系，在本次递归调用递归传参，return等等，类似dp fucntion）
+
+* 递归的出口 （什么时候可以return）
+
+**Combination(组合搜索）**
+
+问题模型：求出所有满足条件的组合
+
+判断条件：组合中的元素是顺序无关的（有关的事排列）
+
+时间复杂度：与O($2^n$)有关
+
+**Permutation(排列搜索）**
+
+问题模型：求出所有满足条件的排列
+
+判断条件：组合中的元素是顺序相关的
+
+时间复杂度： 与n!相关
+
+**BackTracking**
+
+BackTracking 属于DFS ：
+
+**普通DFS examples(不需要backtracking):**
+
+DFS可以用来求最大面积，求方案总数等等（同dp）。
+
+**695. Max Area of Island**
+
+Given a non-empty 2D array `grid` of 0's and 1's, an **island** is a group of `1`'s (representing land) connected 4-directionally (horizontal or vertical.) You may assume all four edges of the grid are surrounded by water.求最大的联通面积。
+
+**Solution:**
+
+dfs recursion函数求的是，与当前元素向四个方向所联通的面积和，每个area在四个方向都加了一次。实际上是先调用dfs，然后判断满不满足条件需要return(函数的出口，当前函数return，把调用当前函数的函数pop出栈), 写的时候，是在dfs函数第一行进行判断。注意每次调用dfs把当前元素置为1，下一个方向上的元素又回头把自己加上，每个元素最终只进行了一次dfs。不需要改回来，改回来的话，相当于一个联通面积中每个元素都进行了一次dfs，求出了一个相等的area返回到主函数中进行打擂台。dfs是一种search，原则上每个元素遍历一次，有些题目必须要改回来，这种叫backtracking, 例如排列组合的题目。
+
+```java
+private int[][] direction = {{0,1}, {0,-1}, {1,0}, {-1,0}}; 
+public int maxAreaOfIsland(int[][] grid) {
+    if (grid == null || grid.length == 0) {
+        return 0;
+    }
+    int m = grid.length;
+    int n = grid[0].length;
+    int maxArea = 0;
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            maxArea = Math.max(maxArea, dfs(grid, i, j, m, n));
+        }
+    }
+    return maxArea;   
+}
+
+private int dfs(int[][] grid, int r, int c, int m, int n) {
+    if (r < 0 || r >= m || c < 0 || c >= n || grid[r][c] == 0) {
+        return 0;
+    }
+    grid[r][c] = 0;
+    int area = 1;
+    for (int[] d : direction) {
+        area += dfs(grid, r+d[0], c+d[1], m, n);
+    }
+    return area;
+}
+```
+
+
+
 ### Dynamic Programming
 
 动态规划和递归(divide conquer)都是将原问题拆成多个字问题然后进行求解，他们之间最本质的区别是dp保留了子问题的解避免了重复计算。实际上，dp就相当于dfs + memorization。
@@ -1092,37 +1177,22 @@ public int numberOfArithmeticSlices(int[] A) {
 
 
 
-### DFS
+### 一些常用的辅助function：
 
-找出所有方案的题，一般是DFS，DFS经常是排列、组合的题。一般DFS可以用recursion实现，（如果面试官不要求用non-recursion的办法写DFS的话）
+#### Reverse Linked List
 
-**Recursion三要素**
-
-递归的定义（递归函数求的是什么，完成了什么功能，类似dp[i]表示什么）
-
-递归的拆解 （这次递归和之前的递归有什么关系，在本次递归调用递归传参，return等等，类似dp fucntion）
-
-递归的出口 （什么时候可以return）
-
-**Combination(组合搜索）**
-
-问题模型：求出所有满足条件的组合
-
-判断条件：组合中的元素是顺序无关的（有关的事排列）
-
-时间复杂度：与O($2^n$)有关
-
-**Permutation(排列搜索）**
-
-问题模型：求出所有满足条件的排列
-
-判断条件：组合中的元素是顺序相关的
-
-时间复杂度： 与n!相关
-
-**必背：**
+```java
+public ListNode reverseList(ListNode head) {
+    ListNode prev = null;
+    while(head != null) {
+        ListNode tmp = head.next;
+        head.next = prev;
+        prev = head;
+        head = tmp;
+    }
+    return prev;
+}
+```
 
 
-
-**图中的搜索**
 
