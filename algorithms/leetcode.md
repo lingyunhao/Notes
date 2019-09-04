@@ -665,6 +665,68 @@ public int rob(int[] nums) {
 
 
 
+###200. Number Of Islands
+
+**Example 1:**
+
+```
+Input:
+11110
+11010
+11000
+00000
+Output: 1
+```
+
+**Example 2:**
+
+```
+Input:
+11000
+11000
+00100
+00011
+Output: 3
+```
+
+**Solution:**
+
+本题同max area of island类似，矩阵可以看为一个有向图，在主函数中调用dfs时先要判断是否为0，在dfs function中去搜索四个方向，把当前元素以及四个方向的land改为water，以后不会再遍历到这个元素。所以两层for循环，对每个land，及其联通的land标记为0，整个记为一个island。
+
+```java
+private int m,n;
+private int[][] directions = {{0,1},{0,-1},{1,0},{-1,0}};
+public int numIslands(char[][] grid) {
+    if(grid == null || grid.length == 0) {
+        return 0;
+    }
+    m = grid.length;
+    n = grid[0].length;
+    int numberOfIsland = 0;
+    for(int i=0; i<m; i++) {
+        for(int j=0; j<n; j++) {
+            if(grid[i][j] != '0') {
+                dfs(grid, i, j);
+                numberOfIsland++;
+            }
+        }
+    }
+    return numberOfIsland;
+}
+
+private void dfs(char[][] grid, int i, int j) {
+    if(i<0 || i>=m || j<0 || j>=n || grid[i][j] == '0') {
+        return;
+    }
+    grid[i][j] = '0';
+    for(int[] d : directions) {
+        dfs(grid, i+d[0], j+d[1]);
+    }
+}
+```
+
+
+
 ### 206. Reverse Linked List
 
 ```
@@ -969,6 +1031,77 @@ public int numberOfArithmeticSlices(int[] A) {
         total += each;
     }
     return total;
+}
+```
+
+
+
+###547. Friend Circles
+
+There are **N** students in a class. Some of them are friends, while some are not. Their friendship is transitive in nature. For example, if A is a **direct** friend of B, and B is a **direct** friend of C, then A is an **indirect** friend of C. And we defined a friend circle is a group of students who are direct or indirect friends.
+
+Given a **N\*N** matrix **M** representing the friend relationship between students in the class. If M[i][j] = 1, then the ith and jthstudents are **direct** friends with each other, otherwise not. And you have to output the total number of friend circles among all the students.
+
+**Example 1:**
+
+```
+Input: 
+[[1,1,0],
+ [1,1,0],
+ [0,0,1]]
+Output: 2
+Explanation:The 0th and 1st students are direct friends, so they are in a friend circle. 
+The 2nd student himself is in a friend circle. So return 2.
+```
+
+**Example 2:**
+
+```
+Input: 
+[[1,1,0],
+ [1,1,1],
+ [0,1,1]]
+Output: 1
+Explanation:The 0th and 1st students are direct friends, the 1st and 2nd students are direct friends, 
+so the 0th and 2nd students are indirect friends. All of them are in the same friend circle, so return 1.
+```
+
+**Solution:**
+
+好友关系可以看成一个无向图，本题要搞明白和island题之间的不同，
+
+- 本题中所有的可能的情况（元素）是n个人，而不是input M中的每个元素，而对于每个元素，他可能和其他任意每个元素相连，而对于island中，每个元素只可能与上下所有四个方向的元素相连。
+- 在主函数中要遍历所有元素，在dfs函数中要通过所有可能出现的边去处理下一层元素。
+- 本题因为可能出现的边为剩下n个人，要先通过判断是不是好友再去调用dfs（入栈）不然先调用，再在dfs第一行写return条件的话，容易stackoverflow
+- 这种类型的题目要搞清楚node和edge，主函数对每个node调用dfs，dfs对当前node可能有edge相连的所有node再做dfs，本题相当于一维的元素，每个人可能与剩下的人相连，而这种相连关系用一个矩阵表示出来了而已。
+- 本题的dfs表示去标记与当前的人是好友的其他所有人。
+
+```java
+public int findCircleNum(int[][] M) {
+    if (M == null || M.length == 0) {
+        return 0;
+    }
+
+    int n = M.length;
+    boolean[] visited = new boolean[n];
+
+    int circle = 0;
+    for(int i = 0; i < n; i++) {
+        if (!visited[i]) {
+            dfs(M, i, n, visited);
+            circle++;
+        }
+    }
+    return circle;
+}
+
+private void dfs(int[][] M, int i, int n, boolean[] visited) {
+    visited[i] = true;
+    for(int k = 0; k < n; k++) {
+        if(M[i][k] == 1 && !visited[k]) {
+            dfs(M, k, n, visited);
+        }
+    }
 }
 ```
 
