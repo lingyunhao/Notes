@@ -1312,6 +1312,16 @@ public int numberOfArithmeticSlices(int[] A) {
 
 
 
+### Linked List
+
+基本就三个考点：
+
+1. Merge two linked lists
+2. Reverse linked list
+3. Slow fast pointers to find the middle
+
+
+
 ### 一些常用的辅助function：
 
 #### Reverse Linked List
@@ -1328,8 +1338,4 @@ public ListNode reverseList(ListNode head) {
     return prev;
 }
 ```
-
-
-
-
 
