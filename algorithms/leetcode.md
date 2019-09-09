@@ -1107,6 +1107,48 @@ private void dfs(int[][] M, int i, int n, boolean[] visited) {
 
 
 
+### 605. Can Place Flowers
+
+Suppose you have a long flowerbed in which some of the plots are planted and some are not. However, flowers cannot be planted in adjacent plots - they would compete for water and both would die.
+
+Given a flowerbed (represented as an array containing 0 and 1, where 0 means empty and 1 means not empty), and a number **n**, return if **n** new flowers can be planted in it without violating the no-adjacent-flowers rule.
+
+**Example 1:**
+
+```
+Input: flowerbed = [1,0,0,0,1], n = 1
+Output: True
+```
+
+**Example 2:**
+
+```
+Input: flowerbed = [1,0,0,0,1], n = 2
+Output: False
+```
+
+**Solution: **
+
+判断已给的flowerbed最多能种多少花，判断是否大于等于parameter2。或者可以每次判断cnt是否大于n, 满足则直接return。本题主要是要考虑第一个item和最后一个item，因为他们一个没有prev，一个没有next，可以把这两个单独拿出来讨论，但讨论的时候一定要考虑flowerbed的长度是否等于1的情况，或者我们可以把第一个和最后一个同化到中间那些。即，把flowerbed[0]的prev设为0，flowbed[length-1]的next设为0。
+
+```java
+public boolean canPlaceFlowers(int[] flowerbed, int n) {
+    int cnt = 0, len = flowerbed.length;
+
+    for (int i = 0; i < len; i++) {
+        int pre = i == 0 ? 0 : flowerbed[i-1];
+        int next = i == len - 1 ? 0 : flowerbed[i+1];
+        if (pre == 0 && next == 0 && flowerbed[i] == 0) {
+            cnt++;
+            flowerbed[i] = 1;
+        }
+    }
+    return cnt >= n;
+}
+```
+
+
+
 ### 646. Maximum Length of Pair Chain
 
 You are given `n` pairs of numbers. In every pair, the first number is always smaller than the second number.
