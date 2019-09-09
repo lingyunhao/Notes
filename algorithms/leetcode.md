@@ -1,5 +1,74 @@
 # LeetCode Problems
 
+### 2. Add Two Numbers
+
+You are given two **non-empty** linked lists representing two non-negative integers. The digits are stored in **reverse order** and each of their nodes contain a single digit. Add the two numbers and return it as a linked list.
+
+You may assume the two numbers do not contain any leading zero, except the number 0 itself.
+
+**Example:**
+
+```
+Input: (2 -> 4 -> 3) + (5 -> 6 -> 4)
+Output: 7 -> 0 -> 8
+Explanation: 342 + 465 = 807.
+```
+
+**Solution:**
+
+The reverseness of linked list avoid the problem of alignment. 并不需要把数字reverse回来加起来后再reverse回去。倒着加就好了，相当于直接从各位开始加起。记录carry，最后需要处理一下carry。
+
+用一个dummy node，和cur node，最后返回dummy.next。
+
+```java
+public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+    int carry = 0;
+    ListNode dummy_head = new ListNode(0);
+    ListNode cur = dummy_head;
+    while (l1 != null || l2 != null) {
+        if (l1 != null) {
+            carry += l1.val;
+            l1 = l1.next;
+        }
+        if (l2 != null) {
+            carry += l2.val;
+            l2 = l2.next;
+        }
+        cur.next = new ListNode(carry % 10);
+        carry /= 10;
+        cur = cur.next;
+    }
+    if (carry != 0) {
+        cur.next = new ListNode(carry);
+        cur = cur.next;
+    }
+    cur.next = null;
+    return dummy_head.next;
+}
+```
+
+
+
+### 3. Longest Substring Without Repeating Characters
+
+Given a string, find the length of the **longest substring** without repeating characters.
+
+**Example :**
+
+```
+Input: "abcabcbb" Output: 3 Explanation: The answer is "abc", with the length of 3. 
+Input: "bbbbb" Output: 1 Explanation: The answer is "b", with the length of 1.
+Input: "pwwkew" Output: 3 Explanation: The answer is "wke", with the length of 3. 
+            
+Note that the answer must be a substring, "pwke" is a subsequence and not a substring.
+```
+
+**Solution:**
+
+
+
+
+
 ### 26. Remove Duplicates from Sorted Array
 
 **Example:**
@@ -1287,4 +1356,60 @@ public int peakIndexInMountainArray(int[] A) {
     return left;
 }
 ```
+
+
+
+### 1007. Minimum Domino Rotations For Equal Row
+
+In a row of dominoes, `A[i]` and `B[i]` represent the top and bottom halves of the `i`-th domino.  (A domino is a tile with two numbers from 1 to 6 - one on each half of the tile.)
+
+We may rotate the `i`-th domino, so that `A[i]` and `B[i]` swap values.
+
+Return the minimum number of rotations so that all the values in `A` are the same, or all the values in `B` are the same.
+
+If it cannot be done, return `-1`.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2019/03/08/domino.png)
+
+```
+Input: A = [2,1,2,4,2,2], B = [5,2,6,2,3,2]
+Output: 2
+Explanation: 
+The first figure represents the dominoes as given by A and B: before we do any rotations.
+If we rotate the second and fourth dominoes, we can make every value in the top row equal to 2, as indicated by the second figure.
+```
+
+**Solution: **
+
+在第一列的两个元素可能成为最后相同的那个元素，先判断A[0], B[0]是否存在在每列中，如果都不存在，则一定不可以达成要求。如果都存在，随便取一个就行，都存在说明如果某一行换好了，另一行也就换好了。
+
+Note :  求最少交换次数的时候，不仅要记
+
+```java
+public int minDominoRotations(int[] A, int[] B) {
+    // determine candidates
+    int candidateA = A[0], candidateB = B[0], n = A.length;
+    for (int i = 1; i < n; i++) {
+        if (candidateA != 0 && candidateA != A[i] && candidateA != B[i]) candidateA = 0;
+        if (candidateB != 0 && candidateB != A[i] && candidateB != B[i]) candidateB = 0;
+    }
+
+    if (candidateA == 0 && candidateB == 0) return -1;
+
+    // calculate minimum swap times
+    int swapCountA = 0, swapCountB = 0, candidate = candidateA == 0? candidateB : candidateA;
+    for (int i = 0; i < n; i++) {
+        if (candidate != A[i]) swapCountA++;
+        if (candidate != B[i]) swapCountB++;
+    }
+
+    return Math.min(swapCountA, swapCountB);
+}
+```
+
+
 
