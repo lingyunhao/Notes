@@ -67,6 +67,68 @@ Note that the answer must be a substring, "pwke" is a subsequence and not a subs
 
 
 
+### 13. Roman to Integer
+
+Roman numerals are represented by seven different symbols: `I`, `V`, `X`, `L`, `C`, `D` and `M`.
+
+```
+Symbol       Value
+I             1
+V             5
+X             10
+L             50
+C             100
+D             500
+M             1000
+```
+
+For example, two is written as `II` in Roman numeral, just two one's added together. Twelve is written as, `XII`, which is simply `X` + `II`. The number twenty seven is written as `XXVII`, which is `XX` + `V` + `II`.
+
+Roman numerals are usually written largest to smallest from left to right. However, the numeral for four is not `IIII`. Instead, the number four is written as `IV`. Because the one is before the five we subtract it making four. The same principle applies to the number nine, which is written as `IX`. There are six instances where subtraction is used:
+
+**Example:**
+
+```
+Input: "III" Output: 3
+Input: "IX" Output: 9
+Input: "LVIII" Output: 58 Explanation: L = 50, V= 5, III = 3.
+Input: "MCMXCIV" Output: 1994 Explanation: M = 1000, CM = 900, XC = 90 and IV = 4.
+```
+
+**Solution:**
+
+Roman数字的规则：
+
+1. 把Stirng的所有Character代表的数值进行加或者减的操作
+
+2. 从左向右是从大到小的顺序
+
+3. 每一位要看和后一位的关系决定自己是加还是减
+
+4. 不会出现 “IIX”， 意味着，减的情况不会重复超过两位去判断，只需要判断其后一位就好了
+
+   从后往前遍历，如果比前一位小则减，如果大于等于则加。
+
+```java
+public int romanToInt(String s) {
+    Map<Character, Integer> map = new HashMap<Character, Integer>() {
+        {
+            put('I', 1); put('V', 5); put('X', 10); put('L', 50); put('C', 100); put('D', 500); put('M', 1000);
+        }
+    };
+    if (s == null || s.length() == 0) return 0;
+    int n = s.length();
+    int cur = map.get(s.charAt(n-1)), post = cur, res = cur;
+    for (int i = n - 2; i >= 0; i--) {
+        cur = map.get(s.charAt(i));
+        if (cur < post) res -= cur; 
+        else res += cur;
+        post = cur;
+    }
+    return res;
+}
+```
+
 
 
 ### 26. Remove Duplicates from Sorted Array
@@ -705,6 +767,47 @@ public int findMin(int[] nums) {
     // or
     // if (left == 0 && nums[left] < nums[right]) return nums[left];
     // return nums[right];
+}
+```
+
+
+
+### 189. Rotate Array
+
+Given an array, rotate the array to the right by *k* steps, where *k* is non-negative.
+
+**Example 1:**
+
+```
+Input: [1,2,3,4,5,6,7] and k = 3
+Output: [5,6,7,1,2,3,4]
+```
+
+**Solution: **
+
+三步翻转，分别翻转前 length - k 个，再翻转后边k个，最后翻转整个数组。
+
+NOTE: 1.  注意要对k取mode, 不然会out of index
+
+​	        2. 注意传参
+
+```java
+public void rotate(int[] nums, int k) {
+    if (nums == null || nums.length == 0) return;
+    k = k % nums.length;
+    reverse(nums, 0, nums.length - k - 1);
+    reverse(nums, nums.length - k, nums.length - 1);
+    reverse(nums, 0, nums.length - 1);
+}
+
+private void reverse(int[] nums, int start, int end) {
+    while (start < end) {
+        int tmp = nums[start];
+        nums[start] = nums[end];
+        nums[end] = tmp;
+        start++;
+        end--;
+    }
 }
 ```
 
