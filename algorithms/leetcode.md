@@ -851,6 +851,27 @@ private void reverse(int[] nums, int start, int end) {
 
 
 
+### 191. Number of 1 Bits
+
+Write a function that takes an unsigned integer and return the number of '1' bits it has (also known as the [Hamming weight](http://en.wikipedia.org/wiki/Hamming_weight)).
+
+**Solution:**
+
+按位& then 右移。java中没有unsigned datatype. To solve this, we could limit the time of shift <= 32, or use >>> .  >> : use the sign bit to fill the trailing positions after shift. >>> : unsigned right shift.
+
+```java
+public int hammingWeight(int n) {
+    int res = 0;
+    while (n != 0 ) {
+        res += n & 1;
+        n >>>= 1;
+    }
+    return res;
+}
+```
+
+
+
 ### 198. House Robber
 
 抢劫一排住户，但不能抢劫相邻的住户，求最大抢劫量。
