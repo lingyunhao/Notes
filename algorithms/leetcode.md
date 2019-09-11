@@ -736,6 +736,44 @@ DP with no extra space with bottom up.
 
 
 
+### 121. Best Time to Buy and Sell Stock
+
+Say you have an array for which the *i*th element is the price of a given stock on day *i*.
+
+**Example:**
+
+```
+Input: [7,1,5,3,6,4]
+Output: 5
+Explanation: Buy on day 2 (price = 1) and sell on day 5 (price = 6), profit = 6-1 = 5.
+             Not 7-1 = 6, as selling price needs to be larger than buying price.
+```
+
+**Solution:**
+
+保持一个maxDiff 和一个min，遍历数组，min records the minmum number up to the current position, and maxDiff records the max difference up to now.
+
+Note : 1. Should update maxDiff first then min.
+
+			2. initiate maxDiff as 0, not Integer.MAX_VALUE to avoid the corner case array is in descending order, [7,5,4,3,1]. In this case, we should return 0, not a negative number.
+
+```java
+public int maxProfit(int[] prices) {
+    if (prices == null || prices.length == 0 || prices.length == 1) return 0;
+    int min = prices[0];
+    int maxDiff = 0;
+
+    for (int i = 1; i < prices.length; i++) {
+        maxDiff = Math.max(maxDiff, prices[i] - min);
+        min = Math.min(min, prices[i]);
+    }
+
+    return maxDiff;
+}
+```
+
+
+
 ### 153. Find Minimum in Rotated Sorted Array
 
 Suppose an array sorted in ascending order is rotated at some pivot unknown to you beforehand.Find the minimum element. You may assume no duplicate exists in the array.
