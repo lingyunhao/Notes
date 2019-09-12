@@ -927,6 +927,53 @@ public int findMin(int[] nums) {
 
 
 
+### 155. Min Stack
+
+Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.
+
+- push(x) -- Push element x onto stack.
+- pop() -- Removes the element on top of the stack.
+- top() -- Get the top element.
+- getMin() -- Retrieve the minimum element in the stack.
+
+**Solution:**
+
+首先理解min stack 定义，首先这是个stack，其次他是个可以在O(1)时间内拿出最小值的stack。pop只是pop栈顶的值并不是pop出最小值。
+
+用两个stack来写，一个stack保存入栈、出栈的顺序，另一个来保存最小值。两个stack的大小是一样的。解决了万一把最小值pop出来，仍然可以在O(1)时间拿到最小值。
+
+```java
+class MinStack {
+    /** initialize your data structure here. */
+    Stack<Integer> minStack;
+    Stack<Integer> dataStack;
+    public MinStack() {
+        minStack = new Stack<>();
+        dataStack = new Stack<>();
+    }
+    public void push(int x) {
+        dataStack.push(x);
+        if (minStack.isEmpty() || x < minStack.peek()) {
+            minStack.push(x);
+        } else {
+            minStack.push(minStack.peek());
+        }
+    }
+    public void pop() {
+        dataStack.pop();
+        minStack.pop();
+    }
+    public int top() {
+         return dataStack.peek();
+    }
+    public int getMin() {
+        return minStack.peek();
+    }
+}
+```
+
+
+
 ### 189. Rotate Array
 
 Given an array, rotate the array to the right by *k* steps, where *k* is non-negative.
