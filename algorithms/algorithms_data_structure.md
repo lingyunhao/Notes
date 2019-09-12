@@ -1326,6 +1326,8 @@ public int numberOfArithmeticSlices(int[] A) {
 
 #### Reverse Linked List
 
+注意调用此函数会把传入的head.next 置为null，如果原来head有prev结点的话，就会使原来的linked list在head这里断掉，head变成了tail。然后返回的节点是原来的tail结点。
+
 ```java
 public ListNode reverseList(ListNode head) {
     ListNode prev = null;
@@ -1336,6 +1338,32 @@ public ListNode reverseList(ListNode head) {
         head = tmp;
     }
     return prev;
+}
+```
+
+#### 快慢指针
+
+slow和fast都从head开始，根据判断条件的不同，最后slow的位置不同，如果linked list长度为奇数，来年各种功能写法是一样的最后都停在中间的位置上，如果为偶数则不同。（记不住时，举个栗子）
+
+```java
+// version 1
+// [1,2,3,4] slow 停在 3
+// [1,2,3,4,5] slow 停在 3
+ListNode slow = head;
+ListNode fast = head;
+while (fast != null && fast.next != null) {
+  slow = slow.next;
+  fast = fast.next.next;
+}
+
+// version 2
+// [1,2,3,4] slow 停在 2
+// [1,2,3,4,5] slow 停在 3
+ListNode slow = head;
+ListNode fast = head;
+while (fast.next != null && fast.next.next != null) {
+  slow = slow.next;
+  fast = fast.next.next;
 }
 ```
 

@@ -687,6 +687,53 @@ public List<List<Integer>> levelOrderBottom(TreeNode root) {
 
 
 
+### 119. Pascal's Triangle II
+
+Given a non-negative index *k* where *k* ≤ 33, return the *k*th index row of the Pascal's triangle.
+
+Note that the row index starts from 0. Could you optimize your algorithm to use only *O*(*k*) extra space?
+
+![img](https://upload.wikimedia.org/wikipedia/commons/0/0d/PascalTriangleAnimated2.gif)
+In Pascal's triangle, each number is the sum of the two numbers directly above it.
+
+**Example:**
+
+```
+Input: 3
+Output: [1,3,3,1]
+```
+
+**Solution:**
+
+本题是二维的数组，需要两个for loop，需要压缩extra space的题，一般需要在当前的答案上进行修改，为此一般需要两个额外变量：
+
+1. 存当前的状态 (get(i))
+2. 改变当前的状态 (set(i))
+3. prev = cur
+
+```java
+public List<Integer> getRow(int rowIndex) {
+    List<Integer> list = new ArrayList<>();
+    list.add(1);
+    if (rowIndex == 0) return list;
+    int prev = 1;
+    for (int i = 1; i <= rowIndex; i++) {
+        for (int j = 1; j <= i; j++) {
+            if (j == i) {
+                list.add(1);
+            } else {
+                int cur = list.get(j);
+                list.set(j, prev + cur);
+                prev = cur;
+            }
+        }
+    }
+    return list;
+}
+```
+
+
+
 ###120. Triangle
 
 Given a triangle, find the minimum path sum from top to bottom. Each step you may move to adjacent numbers on the row below.
@@ -1045,6 +1092,103 @@ public ListNode reverseList(ListNode head) {
         head = tmp;
     }
     return prev;
+}
+```
+
+
+
+### 234. Palindrome Linked List
+
+Could you do it in O(n) time and O(1) space?
+
+**Solution:**
+
+快慢指针 + reverse。本题用的判断条件是 fast != null && fast.next != null, 所以slow会停在偏右的地方，因为没有断开两条链，所以还是连着的，尔reverse函数返回的是新的prev。我们把slow的next置为null，head还是连到了原来的slow那里，对于偶数个数的链表，只比较slow后边的个数
+
+[1,2,3,4]  —> head : 1 -> 2 -> 3
+
+​                       slow : 4 -> 3
+
+[1,2,2,1]  —> head : 1-> 2 -> 2
+
+​                       slow :  1 -> 2           比较到前两个就停下了
+
+[1,2,3,2,1] —> head: 1 -> 2 -> 3
+
+​                         slow: 1 -> 2 -> 3  这里的val为3的node实际上同一个，就是快慢指针之后的slow，然后在reverse的时候把slow.next 置为null了
+
+```java
+public boolean isPalindrome(ListNode head) {
+    if (head == null) return true;
+    ListNode slow = head;
+    ListNode fast = head;
+    while (fast != null && fast.next != null) {
+        slow = slow.next;
+        fast = fast.next.next;
+    }
+    slow = reverse(slow);
+
+    ListNode test = head;
+     while (test != null) {
+         System.out.println(test.val);
+         test = test.next;
+     }
+
+    while (slow != null) {
+        if (head.val != slow.val) {
+            return false;
+        }
+        head = head.next;
+        slow = slow.next;
+    }
+    return true;
+}
+
+private ListNode reverse(ListNode head) {
+    ListNode prev = null, tmp = null;
+    while (head != null) {
+        tmp = head.next;
+        head.next = prev;
+        prev = head;
+        head = tmp;
+    }
+    return prev;
+}
+```
+
+
+
+### 237. Delete Node in a Linked List
+
+Write a function to delete a node (except the tail) in a singly linked list, given only access to that node.
+
+Given linked list -- head = [4,5,1,9], which looks like following:
+
+![img](https://assets.leetcode.com/uploads/2018/12/28/237_example.png)
+
+ 
+
+**Example 1:**
+
+```
+Input: head = [4,5,1,9], node = 5
+Output: [4,1,9]
+Explanation: You are given the second node with value 5, the linked list should become 4 -> 1 -> 9 after calling your function.
+```
+
+**Solution:**
+
+We don;'t have access to the head, 存一个当前node(prev), 把当前的node的值改为next node的值，知道node到了倒数第二个也就是node.next == null， 然后把最后一个砍掉。
+
+```java
+public void deleteNode(ListNode node) {
+    ListNode pre = node;
+    while (node.next != null) {
+        pre = node;
+        node = node.next;
+        pre.val = node.val;
+    }
+    pre.next = null;
 }
 ```
 
