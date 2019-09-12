@@ -1447,6 +1447,31 @@ public int lengthOfLIS(int[] nums) {
 
 
 
+### 371. Sum of Two Integers
+
+Calculate the sum of two integers *a* and *b*, but you are **not allowed** to use the operator `+` and `-`. 
+
+**Solution:**
+
+对数字做运算，除了四则运算之外只能用位运算。
+
+1. 不考虑进位，对每一位相加，相当于异或。
+2. 考虑进位，只有1与1时会产生进位，相当于与。
+3. 把上面两个结果想加，直到再也没有进位位置。本题也可以用while loop 判断条件是 b!=0
+
+```java
+public int getSum(int a, int b) {
+    if (b == 0) return a;
+
+    int sum = a ^ b;
+    int carry = (a & b) << 1;
+
+    return getSum(sum, carry);
+}
+```
+
+
+
 ### 376. Wiggle Subsequence
 
 **Example 1:**
