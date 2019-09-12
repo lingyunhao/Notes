@@ -214,6 +214,58 @@ private int last_position(int[] nums, int target) {
 
 
 
+### 53. Maximum Subarray
+
+Given an integer array `nums`, find the contiguous subarray (containing at least one number) which has the largest sum and return its sum.
+
+**Example:**
+
+```
+Input: [-2,1,-3,4,-1,2,1,-5,4],
+Output: 6
+Explanation: [4,-1,2,1] has the largest sum = 6.
+```
+
+**Follow up:**
+
+If you have figured out the O(*n*) solution, try coding another solution using the divide and conquer approach, which is more subtle.
+
+**Solution:**
+
+dp[i] 表示以nums[i]结尾的最大subarray，要么就是与dp[i-1]连起来，要么就是自己。可以用sum代替dp[i-1], 压缩空间到一维。 核心：1. dp[i] = Math.max(nums[i], nums[i] + dp[i-1]) 等同于 sum = Math.max(nums[i], nums[i] + sum).
+
+2.遍历完dp需要打擂台获取最大值，同时这一步也可以在遍历时候进行。
+
+```java
+// extra O(n) space
+public int maxSubArray(int[] nums) {
+    if (nums == null || nums.length == 0) return 0;
+    int[] dp = new int[nums.length];
+    dp[0] = nums[0];
+    int maxSum = dp[0];
+    for (int i = 1; i < nums.length; i++) {
+        dp[i] = Math.max(nums[i], nums[i] + dp[i-1]);
+        maxSum = Math.max(dp[i], maxSum);
+    }
+    return maxSum;
+}
+
+// extra O(1) space
+public int maxSubArray(int[] nums) {
+    if (nums == null || nums.length == 0) return 0;
+    int sum = nums[0];
+    int maxSum = sum;
+    for (int i = 1; i < nums.length; i++) {
+        sum = Math.max(nums[i], nums[i] + sum);
+        maxSum = Math.max(maxSum, sum);
+    }
+
+    return maxSum;
+}
+```
+
+
+
 ###62. Unique Paths
 
 A robot is located at the top-left corner of a *m* x *n* grid (marked 'Start' in the diagram below).
@@ -511,6 +563,24 @@ public boolean searchMatrix(int[][] matrix, int target) {
         }
     }
     return false;
+}
+```
+
+
+
+### 100. Same Tree
+
+Given two binary trees, write a function to check if they are the same or not.
+
+**Solution:**
+
+Recursion : 当前节点，当前节点的left，当前节点的right 全部相同。
+
+```java
+public boolean isSameTree(TreeNode p, TreeNode q) {
+    if (p == null && q == null) return true;
+    if (p == null || q == null) return false;
+    return (p.val == q.val) && isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
 }
 ```
 
