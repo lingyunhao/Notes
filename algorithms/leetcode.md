@@ -1861,3 +1861,61 @@ public int minDominoRotations(int[] A, int[] B) {
 
 
 
+## Google tag
+
+### 56. Merge Intervals
+
+Given a collection of intervals, merge all overlapping intervals.
+
+**Example:**
+
+```
+Input: [[1,3],[2,6],[8,10],[15,18]]
+Output: [[1,6],[8,10],[15,18]]
+Explanation: Since intervals [1,3] and [2,6] overlaps, merge them into [1,6].
+```
+
+**Solution:**
+
+对intervals按照第一个元素排序，然后遍历整个数组add到list中。
+
+Note: 1. 背二维数组按照每行第一元素排序的写法，comparator
+
+2. 返回值是int$[ ][ ]$但是返回值的长度不一定，先创建一个int[]的ArrayList，最后再加到int$[ ][ ]$中
+3. 注意要用一个index存res走到了哪里，注意只有else的时候index才++，表明res的前一个已经成为过去式，下次考虑的就是else这次刚加进去的interval了。
+4. 排序的时间复杂度是O(nlog(n)), 此solution复杂度也是O (nlg(n)).
+
+```java
+public int[][] merge(int[][] intervals) {
+    if (intervals.length <= 1) return intervals;
+    Arrays.sort(intervals, new Comparator<int[]>(){
+        public int compare(int[] a, int[] b) {
+            return a[0] - b[0];
+        }
+    });
+
+    List<int[]> res = new ArrayList<>();
+    res.add(intervals[0]);
+    int index = 1;
+
+    for (int i = 1; i < intervals.length; i++) {
+        if (res.get(index-1)[1] >= intervals[i][1]) {
+            continue;
+        } else if (res.get(index-1)[1] >= intervals[i][0]) {
+            res.set(index-1, new int[]{res.get(index-1)[0], intervals[i][1]});
+        } else {
+            index++;
+            res.add(new int[]{intervals[i][0], intervals[i][1]});
+        }
+    }
+
+    int[][] ret = new int[index][2];
+
+    for (int i = 0; i < index; i++) {
+        ret[i][0] = res.get(i)[0];
+        ret[i][1] = res.get(i)[1];
+    }
+    return ret;
+}
+```
+
