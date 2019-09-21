@@ -1919,3 +1919,66 @@ public int[][] merge(int[][] intervals) {
 }
 ```
 
+###205.Isomorphic Strings
+
+Given two strings **s** and **t**, determine if they are isomorphic.
+
+Two strings are isomorphic if the characters in **s** can be replaced to get **t**.
+
+All occurrences of a character must be replaced with another character while preserving the order of characters. **No two characters may map to the same character but a character may map to itself.**
+
+**Example 1:**
+
+```
+Input: s = "egg", t = "add"
+Output: true
+```
+
+**Example 2:**
+
+```
+Input: s = "foo", t = "bar"
+Output: false
+```
+
+**Solution:**
+
+注意本题S中的两个character不能map到同一个character，用两个map分别存character和上一次出现的位置。所以讨论false的情况，1. map中一个存在另一个不存在 2. 两个都存在但是位置不相同。Integer的比较应该用equals而不是==，他是个object。
+
+```java
+public boolean isIsomorphic(String s, String t) {
+    if (s.length() != t.length()) {
+        return false;
+    }
+    int n = s.length();
+    Map<Character, Integer> map1 = new HashMap<Character, Integer>();
+    Map<Character, Integer> map2 = new HashMap<Character, Integer>();
+    for (int i = 0; i < n; i++) {
+        char cs = s.charAt(i);
+        char ct = t.charAt(i);
+        if ((map1.containsKey(cs) && !map2.containsKey(ct)) || (!map1.containsKey(cs) && map2.containsKey(ct))) {
+            return false;
+        } else if (map1.containsKey(cs) && map2.containsKey(ct) && !map1.get(cs).equals(map2.get(ct))) {
+            return false;
+        }
+        map1.put(cs,i);
+        map2.put(ct,i);
+    }
+    return true;
+}
+```
+
+或者用数组来代替map，index是char的值，value是string中的index。
+
+```c++
+bool isIsomorphic(string s, string t) {
+    vector<int> s_first_index (256, 0), t_first_index (256, 0);
+    for (int i = 0; i < s.length(); ++i) {
+        if (s_first_index[s[i]] != t_first_index[t[i]]) return false;
+        s_first_index[s[i]] = i + 1;
+        t_first_index[t[i]] = i + 1;
+    }
+    return true;
+}
+```
+

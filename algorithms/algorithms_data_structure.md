@@ -1310,6 +1310,10 @@ public int numberOfArithmeticSlices(int[] A) {
 }
 ```
 
+### Trie
+
+Trie又称字典树或者前缀树，用来判断字符串是否有某种前缀，或者字符串是否存在。
+
 
 
 ### Linked List
