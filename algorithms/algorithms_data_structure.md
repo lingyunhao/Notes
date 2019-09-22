@@ -1312,7 +1312,74 @@ public int numberOfArithmeticSlices(int[] A) {
 
 ### Trie
 
-Trie又称字典树或者前缀树，用来判断字符串是否有某种前缀，或者字符串是否存在。
+Trie又称字典树或者前缀树，用来判断字符串是否有某种前缀，或者字符串是否存在。背吧就。
+
+**208. Implement Trie (Prefix Tree)**
+
+```java
+class Trie {
+    /** Initialize your data structure here. */
+    private class Node {
+        Node[] children = new Node[26];
+        boolean isLeaf;
+    }
+    private Node root;
+    // Constructor
+    public Trie() {
+        root = new Node();
+    }
+    /** Inserts a word into the trie. */
+    public void insert(String word) {
+        insert(word, root);
+    }
+    private void insert(String word, Node node) {
+        Node tmp = node;
+        for (int i = 0; i < word.length(); ++i) {
+            int index = charToIndex(word.charAt(i));
+            if (tmp.children[index] == null) {
+                tmp.children[index] = new Node();
+            }
+            tmp = tmp.children[index];
+        }
+        tmp.isLeaf = true;
+    }
+    /** Returns if the word is in the trie. */
+    public boolean search(String word) {
+        return search(word, root);
+    }
+    private boolean search(String word, Node node) {
+        Node tmp = node;
+        for (int i = 0; i < word.length(); ++i) {
+            int index = charToIndex(word.charAt(i));
+            if (tmp.children[index] == null) {
+                return false;
+            } else { 
+                tmp = tmp.children[index];
+            }
+        }
+        return tmp.isLeaf;
+    }
+    /** Returns if there is any word in the trie that starts with the given prefix. */
+    public boolean startsWith(String prefix) {
+        return startsWith(prefix, root);
+    }
+    private boolean startsWith(String prefix, Node node) {
+        Node tmp = node;
+        for (int i = 0; i < prefix.length(); ++i) {
+            int index = charToIndex(prefix.charAt(i));
+            if (tmp.children[index] == null) {
+                return false;
+            } else {
+                tmp = tmp.children[index];
+            }
+        }
+        return true;
+    }
+    private int charToIndex(char c) {
+        return c - 'a';
+    }
+}
+```
 
 
 
