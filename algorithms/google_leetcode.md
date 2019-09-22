@@ -1,5 +1,3 @@
-
-
 ## Google tag
 
 ### 56. Merge Intervals
@@ -503,5 +501,36 @@ You need to return whether the student could be rewarded according to his attend
 ```
 Input: "PPALLP"
 Output: True
+```
+
+**Solution:**
+
+首先注意读题，连续的三个L。对于这种tripel的问题，像334一样，可以设置两个变量来存是否起前一个是L和是否前两个是L，然后用两个if else注意顺序来update这两个变量，如果第一个不是true，则更新第一个，否则去看第二个是不是true，两个都是true的话，则满足不reward条件。
+
+另外要注意本题是连续三个L，所以在遇到非L时，需要重置那两个变量。
+
+```java
+public boolean checkRecord(String s) {
+    int cntA = 0;
+    boolean isL = false;
+    boolean isSecL = false;
+    for (int i = 0; i < s.length(); ++i) {
+        char c = s.charAt(i);
+        if (c == 'A') {
+            isL = false;
+            isSecL = false;
+            cntA += 1;
+        } else if (c == 'L'){
+            if (!isL)  isL = true;
+            else if (!isSecL) isSecL = true;
+            else return false;
+        } else {
+            isL = false;
+            isSecL = false;
+        }
+        if(cntA > 1) return false;
+    }
+    return true;
+}
 ```
 
