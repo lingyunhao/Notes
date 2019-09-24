@@ -403,13 +403,13 @@ Shortest path in simple graph(仅限每条边长度都为1，且没有方向)
 
 最短路径：BFS, dp
 
-最长路径：DFS, dp
+所有方案：DFS或BFS, dp
 
 BFS: Queue (stack 也可以，但顺序是反的，没人用的)
 
 DFS: Stack
 
-能用BFS写的尽量不要用DFS，non-recursion的DFS不好写，recursion会造成stack overflow。
+non-recursion的DFS不好写，recursion会造成stack overflow。
 
 **模板：**
 
@@ -638,6 +638,8 @@ public List<List<Integer>> levelOrder(TreeNode root) {
 
 **297. Serialize and Deserialize Binary Tree**
 
+(queue写法不太好，暂时不看)
+
 **Example:** 
 
 ```
@@ -656,7 +658,7 @@ as "[1,2,3,null,null,4,5]"
 
 serialize:
 
-1. 开一个arraylist，把root丢进去，BFS用一层循环把每层节点都丢进去，判断条件是i<queue.size(), queue的size每层是变化的。依次把所有节点的左右节点丢进去，遇到null跳出，直到不再丢进去，同时也运行到最后一个节点。
+1. 开一个queue，把root丢进去，BFS用一层循环把每层节点都丢进去，判断条件是i<queue.size(), queue的size每层是变化的。依次把所有节点的左右节点丢进去，遇到null跳出，直到不再丢进去，同时也运行到最后一个节点。
 
 2. 使用while循环把最后一层尾部的null全部去掉
 
@@ -665,6 +667,10 @@ serialize:
 Deserialize：
 
 把String按照","split成String array，建立 一个Arraylist去存所有TreeNode，index为当前进行到哪个node，用isLeftNode去判断左右子节点。
+
+**本题是用List->arrylist去写的一个queue，arraylist其实更像一个stack，之所以可以用是本题巧妙在其实第一个for loop，每次i<queue.size(), 相当于一直在往queue里加东西，并没有remove，所以还是先进来的点，现add他的子节点。其实本质就是个arraylist，命名不好**
+
+queue是个abstract class，应当用实现类。Queue<> queue = new LinkedList<>();
 
 ```java
 // Encodes a tree to a single string.

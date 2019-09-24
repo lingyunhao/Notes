@@ -269,6 +269,50 @@ public int countNodes(TreeNode root) {
 }
 ```
 
+### 247. Strobogrammatic Number II
+
+A strobogrammatic number is a number that looks the same when rotated 180 degrees (looked at upside down).
+
+Find all strobogrammatic numbers that are of length = n.
+
+**Example:**
+
+```
+Input:  n = 2
+Output: ["11","69","88","96"]
+```
+
+**Solution:**
+
+有点像dp的解法，也不典型。分奇偶base case，然后一层一层往外边加。注意初始化和define。背吧。
+
+```java
+public List<String> findStrobogrammatic(int n) {
+    List<String>[] dp = new List[n + 1];
+    for (int i = 0; i <= n; i++) {
+        dp[i] = new ArrayList<>();
+    }
+    dp[0].add("");
+    dp[1].add("0");
+    dp[1].add("1");
+    dp[1].add("8");
+    int i = n % 2 == 0 ? 0 : 1;
+    while (i != n) {
+        for (String s : dp[i]) {
+            if (i + 2 != n) {
+                dp[i + 2].add("0" + s + "0");
+            }
+            dp[i + 2].add("1" + s + "1");
+            dp[i + 2].add("8" + s + "8");
+            dp[i + 2].add("6" + s + "9");
+            dp[i + 2].add("9" + s + "6");
+        }
+        i += 2;
+    }
+    return dp[n];
+}
+```
+
 ### 299. Bulls and Cows
 
 You are playing the following [Bulls and Cows](https://en.wikipedia.org/wiki/Bulls_and_Cows) game with your friend: You write down a number and ask your friend to guess what the number is. Each time your friend makes a guess, you provide a hint that indicates how many digits in said guess match your secret number exactly in both digit and position (called "bulls") and how many digits match the secret number but locate in the wrong position (called "cows"). Your friend will use successive guesses and hints to eventually derive the secret number.
@@ -531,6 +575,279 @@ public boolean checkRecord(String s) {
         if(cntA > 1) return false;
     }
     return true;
+}
+```
+
+### 734. Sentence Similarity
+
+Given two sentences `words1, words2` (each represented as an array of strings), and a list of similar word pairs `pairs`, determine if two sentences are similar.
+
+For example, "great acting skills" and "fine drama talent" are similar, if the similar word pairs are `pairs = [["great", "fine"], ["acting","drama"], ["skills","talent"]]`.
+
+Note that the similarity relation is not transitive. For example, if "great" and "fine" are similar, and "fine" and "good" are similar, "great" and "good" are **not** necessarily similar.
+
+However, similarity is symmetric. For example, "great" and "fine" being similar is the same as "fine" and "great" being similar.
+
+Also, a word is always similar with itself. For example, the sentences `words1 = ["great"], words2 = ["great"], pairs = []` are similar, even though there are no specified similar word pairs.
+
+Finally, sentences can only be similar if they have the same number of words. So a sentence like `words1 = ["great"]` can never be similar to `words2 = ["doubleplus","good"]`.
+
+**Solution:**
+
+放到一个map中。复杂的逻辑关系可以用boolean变量来存。
+
+```java
+public boolean areSentencesSimilar(String[] words1, String[] words2, List<List<String>> pairs) {
+    if (words1 == null || words2 == null) return false;
+    int m = words1.length, n = words2.length;
+    if (m != n) return false;
+    Map<String, Set<String>> map = new HashMap<>();
+    for (int i = 0; i < pairs.size(); ++i) {
+        if (!map.containsKey(pairs.get(i).get(0))) {
+            Set<String> set = new HashSet<>();
+            set.add(pairs.get(i).get(1));
+            map.put(pairs.get(i).get(0), set);
+        } else {
+            map.get(pairs.get(i).get(0)).add(pairs.get(i).get(1));
+        }
+    }
+    for (int i = 0; i < m; ++i) {
+        if (words1[i].equals(words2[i])) continue;
+        boolean checkFirst = map.containsKey(words1[i]) && map.get(words1[i]).contains(words2[i]);
+        boolean checkSecond = map.containsKey(words2[i]) && map.get(words2[i]).contains(words1[i]);
+        if (!checkFirst && !checkSecond) return false;
+    }
+    return true;
+}
+```
+
+
+
+### 844. Backspace String Compare
+
+Given two strings `S` and `T`, return if they are equal when both are typed into empty text editors. `#` means a backspace character.
+
+**Example 1:**
+
+```
+Input: S = "ab#c", T = "ad#c"
+Output: true
+Explanation: Both S and T become "ac".
+```
+
+**Solution:**
+
+这种走走还要倒退的问题可以考虑stack。
+
+```java
+public boolean backspaceCompare(String S, String T) {
+    String finalS = afterBackspace(S);
+    String finalT = afterBackspace(T);
+    System.out.println(finalS);
+    System.out.println(finalT);
+    return finalS.equals(finalT);
+}
+private String afterBackspace(String s) {
+    Stack<Character> stack = new Stack<>();
+    for (int i = 0; i < s.length(); ++i) {
+        char c = s.charAt(i);
+        if (c == '#') {
+            if(!stack.isEmpty()) {
+                stack.pop();
+            }
+        } else {
+            stack.push(c);
+        }
+    }
+    StringBuilder sb = new StringBuilder();
+    while (!stack.isEmpty()) {
+        sb.append(stack.pop());
+    }
+    return sb.toString();
+}
+```
+
+### 951. Flip Equivalent Binary Trees
+
+For a binary tree T, we can define a flip operation as follows: choose any node, and swap the left and right child subtrees.
+
+A binary tree X is *flip equivalent* to a binary tree Y if and only if we can make X equal to Y after some number of flip operations.
+
+Write a function that determines whether two binary trees are *flip equivalent*.  The trees are given by root nodes `root1` and `root2`.
+
+**Example 1:**
+
+```
+Input: root1 = [1,2,3,4,5,6,null,null,null,7,8], root2 = [1,3,2,null,6,4,5,null,null,null,null,8,7]
+Output: true
+Explanation: We flipped at nodes with values 1, 3, and 5.
+```
+
+ **Solution:**
+
+递推：recursion。（也可以理解为是个dfs，dfs(recursion写法）本质上就是在用recursion去搜索）。
+
+主要要把recursion单独当作一种方法，不要和dfs混淆，只是dfs经常用recursion来写，因为快且方便。
+
+**Recursion 的要素**
+
+- 递归的定义（递归函数求的是什么，完成了什么功能，类似dp[i]表示什么）
+
+- 递归的拆解 （这次递归和之前的递归有什么关系，在本次递归调用递归传参，return等等，类似dp fucntion）
+
+- 递归的出口 （什么时候可以return）
+
+**写recursion的时候，assume对于当前的node是正确的，那么对于所有的node一定正确。**
+
+**tree等需要recursion结构 判断identical类问题四步：**
+
+1. 两个root皆为null return true （出口）
+
+2. 两个root其中一个为null return false （出口）
+
+3. 两个root的值不相等 return false （出口）
+
+4. 根据题意，判断左右子树调用问题传参（递归的拆解）
+
+   本题的recursion就是判断当前节点正确，且左右子树正确
+
+```java
+public boolean flipEquiv(TreeNode root1, TreeNode root2) {
+    if (root1 == null && root2 == null) return true;
+    if (root1 == null || root2 == null) return false;
+    if (root1.val != root2.val) return false;
+    return (flipEquiv(root1.left, root2.left) && flipEquiv(root1.right, root2.right)) || (flipEquiv(root1.left, root2.right) && flipEquiv(root1.right, root2.left));
+}
+```
+
+### 1170. Compare Strings by Frequency of the Smallest Character
+
+Let's define a function `f(s)` over a non-empty string `s`, which calculates the frequency of the smallest character in `s`. For example, if `s = "dcce"` then `f(s) = 2` because the smallest character is `"c"` and its frequency is 2.
+
+Now, given string arrays `queries` and `words`, return an integer array `answer`, where each `answer[i]` is the number of words such that `f(queries[i])` < `f(W)`, where `W` is a word in `words`.
+
+**Example:**
+
+```
+Input: queries = ["bbb","cc"], words = ["a","aa","aaa","aaaa"]
+Output: [1,2]
+Explanation: On the first query only f("bbb") < f("aaaa"). On the second query both f("aaa") and f("aaaa") are both > f("cc").
+```
+
+**Solution:**
+
+本道题的二分是去找nums中比target大的个数，也就是求nums中第一个大于target的元素，也就是分为，小于等于target和大于target，所以二分的条件是 (小于等于) 和 (大于), 逼近之后逐一判断left，right（不想细想最后倒是逼近到哪了）。
+
+极端情况是全部都比target大，最后left，right是在length-2，length-1，都不满足>的话，返回right+1。
+
+二分的话具体情况具体分析。举例思考。
+
+```java
+public int[] numSmallerByFrequency(String[] queries, String[] words) {
+    int m = queries.length, n = words.length;
+    int[] fqueries = new int[m];
+    int[] fwords = new int[n];
+    int[] ans = new int[m];
+    for (int i = 0; i < m; ++i) {
+        fqueries[i] = f(queries[i]);
+    }
+    for (int i = 0; i < n; ++i) {
+        fwords[i] = f(words[i]);
+    }
+    Arrays.sort(fwords);
+    for (int i = 0; i < m; ++i) {
+        ans[i] = n - binarySearch(fqueries[i], fwords);
+    }
+    return ans;
+}
+private int f(String s) {
+    Map<Character, Integer> map = new HashMap<Character, Integer>();
+    char min = 'z';
+    for (int i = 0; i < s.length(); ++i) {
+        char c = s.charAt(i);
+        if (map.containsKey(c)) {
+            map.put(c, map.get(c)+1);
+        } else {
+            map.put(c, 1);
+        }
+        if (c < min) min = c;
+    }
+    return map.get(min);
+}
+private int binarySearch(int target, int[] nums) {
+    int left = 0, right = nums.length - 1;
+    while (left + 1 < right) {
+        int mid = left + (right - left)/2;
+        if (nums[mid] > target) {
+            right = mid;
+        } else if (nums[mid] <= target) {
+            left = mid;
+        } 
+    }
+    if (nums[left] > target) return left;
+    if (nums[right] > target) return right;
+    return right+1;
+}
+```
+
+###1197. Minimum Knight Moves
+
+In an **infinite** chess board with coordinates from `-infinity` to `+infinity`, you have a **knight** at square `[0, 0]`.
+
+A knight has 8 possible moves it can make, as illustrated below. Each move is two squares in a cardinal direction, then one square in an orthogonal direction.
+
+![img](https://assets.leetcode.com/uploads/2018/10/12/knight.png)
+
+Return the minimum number of steps needed to move the knight to the square `[x, y]`.  It is guaranteed the answer exists.
+
+**Example 1:**
+
+```
+Input: x = 2, y = 1
+Output: 1
+Explanation: [0, 0] → [2, 1]
+```
+
+**Solution:**
+
+1. 记住directions 的写法是花括号
+2. 记住queue怎么define，用的是Queue 和 linkedlist
+3. 因为本题一定有答案，而且chess没有边界，不会越界，所以不用在for loop中判断
+4. 本题层数按照$8^n$增长，遍历过的position不要再遍历了，节省时间
+5. 考虑到用set去存一个pair，但是pair 是 reference，不能contains去看，要重写equals 和hashcode函数，但是String等包装类，已经重写好了equals函数，treemap等重写好了compare所以可以直接用contians。一个tricky的办法：可以建一个x-y的string存到map里
+6. 本题因为pair跑不过，所以加了很多减支，正负其实是一样的，另外用一个Integer去存了两个x,y在里面。
+
+```java
+class Solution {
+    final int[][] directions = {{2,1},{1,2},{2,-1},{1,-2},{-1,-2},{-2,-1},{-2,1},{-1,2}};
+    public int minKnightMoves(int x, int y) {
+        x = Math.abs(x);
+        y = Math.abs(y);
+        Queue<Integer> queue = new LinkedList<>();
+        Set<Integer> set = new HashSet<>();
+        queue.add(0);
+        set.add(0);
+        int step = 0;
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                Integer cur = queue.poll();
+                int cr = cur >> 10, cc = cur - (cr << 10);
+                if (cr == x && cc == y) return step;
+                for (int[] d : directions) {
+                    int m = cr + d[0];
+                    int n = cc + d[1];
+                    if (m < -2 || n < -2) continue;
+                    int next = (m << 10) + n;
+                    if (set.contains(next)) continue;
+                    set.add(next);
+                    queue.add(next);
+                }
+            }
+            step++;
+        }
+        return -1;
+    }
 }
 ```
 
