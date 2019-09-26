@@ -578,6 +578,33 @@ public boolean checkRecord(String s) {
 }
 ```
 
+### 686. Repeated String Match
+
+Given two strings A and B, find the minimum number of times A has to be repeated such that B is a substring of it. If no such solution, return -1.
+
+For example, with A = "abcd" and B = "cdabcdab".
+
+Return 3, because by repeating A three times (“abcdabcdabcd”), B is a substring of it; and B is not a substring of A repeated two times ("abcdabcd").
+
+**Solution:**
+
+indexOf 函数， time complexity：O(M*(M+N))
+
+```java
+public int repeatedStringMatch(String A, String B) {
+    int m = A.length(), n = B.length();
+    int cnt = 1;
+    StringBuilder sb = new StringBuilder(A);
+    while (sb.length() < n) {
+        sb.append(A);
+        ++cnt;
+    }
+    if (sb.indexOf(B) >= 0) return cnt;
+    if (sb.append(A).indexOf(B) >= 0) return cnt+1;
+    return -1;
+}
+```
+
 ### 734. Sentence Similarity
 
 Given two sentences `words1, words2` (each represented as an array of strings), and a list of similar word pairs `pairs`, determine if two sentences are similar.
@@ -750,6 +777,72 @@ public boolean flipEquiv(TreeNode root1, TreeNode root2) {
 }
 ```
 
+###1047. Remove All Adjacent Duplicates In String
+
+Given a string `S` of lowercase letters, a *duplicate removal* consists of choosing two adjacent and equal letters, and removing them.
+
+We repeatedly make duplicate removals on S until we no longer can.
+
+Return the final string after all such duplicate removals have been made.  It is guaranteed the answer is unique.
+
+**Example 1:**
+
+```
+Input: "abbaca"
+Output: "ca"
+Explanation: 
+For example, in "abbaca" we could remove "bb" since the letters are adjacent and equal, and this is the only possible move.  The result of this move is that the string is "aaca", of which only "aa" is possible, so the final string is "ca".
+```
+
+**Solution:**
+
+Stack, 别忘了最后要reverse。
+
+```java
+public String removeDuplicates(String S) {
+    if (S == null || S.length() == 0) return S;
+    Stack<Character> stack = new Stack<Character>();
+    for (int i = 0; i < S.length(); ++i) {
+        char c = S.charAt(i);
+        if (!stack.isEmpty()) {
+            if (stack.peek() == c) {
+                stack.pop();
+            } else {
+                stack.push(c);
+            }
+        } else {
+            stack.push(c);
+        }
+    }
+    StringBuilder sb = new StringBuilder();
+    while (!stack.isEmpty()) {
+        sb.append(stack.pop());
+    }
+    return sb.reverse().toString();
+}
+```
+
+### 1057. Campus Bikes
+
+On a campus represented as a 2D grid, there are `N` workers and `M` bikes, with `N <= M`. Each worker and bike is a 2D coordinate on this grid.
+
+Our goal is to assign a bike to each worker. Among the available bikes and workers, we choose the (worker, bike) pair with the shortest Manhattan distance between each other, and assign the bike to that worker. (If there are multiple (worker, bike) pairs with the same shortest Manhattan distance, we choose the pair with the smallest worker index; if there are multiple ways to do that, we choose the pair with the smallest bike index). We repeat this process until there are no available workers.
+
+The Manhattan distance between two points `p1` and `p2` is `Manhattan(p1, p2) = |p1.x - p2.x| + |p1.y - p2.y|`.
+
+Return a vector `ans` of length `N`, where `ans[i]` is the index (0-indexed) of the bike that the `i`-th worker is assigned to.
+
+**Example:**
+
+![img](https://assets.leetcode.com/uploads/2019/03/06/1261_example_1_v2.png)
+
+```
+Input: workers = [[0,0],[2,1]], bikes = [[1,2],[3,3]]
+Output: [1,0]
+Explanation: 
+Worker 1 grabs Bike 0 as they are closest (without ties), and Worker 0 is assigned Bike 1. So the output is [1, 0].
+```
+
 ### 1170. Compare Strings by Frequency of the Smallest Character
 
 Let's define a function `f(s)` over a non-empty string `s`, which calculates the frequency of the smallest character in `s`. For example, if `s = "dcce"` then `f(s) = 2` because the smallest character is `"c"` and its frequency is 2.
@@ -819,29 +912,6 @@ private int binarySearch(int target, int[] nums) {
     return right+1;
 }
 ```
-
-### 1057. Campus Bikes
-
-On a campus represented as a 2D grid, there are `N` workers and `M` bikes, with `N <= M`. Each worker and bike is a 2D coordinate on this grid.
-
-Our goal is to assign a bike to each worker. Among the available bikes and workers, we choose the (worker, bike) pair with the shortest Manhattan distance between each other, and assign the bike to that worker. (If there are multiple (worker, bike) pairs with the same shortest Manhattan distance, we choose the pair with the smallest worker index; if there are multiple ways to do that, we choose the pair with the smallest bike index). We repeat this process until there are no available workers.
-
-The Manhattan distance between two points `p1` and `p2` is `Manhattan(p1, p2) = |p1.x - p2.x| + |p1.y - p2.y|`.
-
-Return a vector `ans` of length `N`, where `ans[i]` is the index (0-indexed) of the bike that the `i`-th worker is assigned to.
-
-**Example:**
-
-![img](https://assets.leetcode.com/uploads/2019/03/06/1261_example_1_v2.png)
-
-```
-Input: workers = [[0,0],[2,1]], bikes = [[1,2],[3,3]]
-Output: [1,0]
-Explanation: 
-Worker 1 grabs Bike 0 as they are closest (without ties), and Worker 0 is assigned Bike 1. So the output is [1, 0].
-```
-
-
 
 ###1197. Minimum Knight Moves
 
