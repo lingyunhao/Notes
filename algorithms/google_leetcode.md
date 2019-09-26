@@ -269,6 +269,41 @@ public int countNodes(TreeNode root) {
 }
 ```
 
+### 243. Shortest Word Distance
+
+Given a list of words and two words *word1* and *word2*, return the shortest distance between these two words in the list.
+
+**Example:**
+Assume that words = `["practice", "makes", "perfect", "coding", "makes"]`.
+
+```
+Input: word1 = “coding”, word2 = “practice”
+Output: 3
+Input: word1 = "makes", word2 = "coding"
+Output: 1
+```
+
+**Solution:**
+
+注意res那里不能直接return还是要打擂台。
+
+```java
+public int shortestDistance(String[] words, String word1, String word2) {
+    if (word1.equals(word2)) return 0;
+    int index1 = -1, index2 = -1;
+    int res = Integer.MAX_VALUE;
+    for (int i = 0; i < words.length; ++i) {
+        if (words[i].equals(word1)) {
+            index1 = i;
+        } else if (words[i].equals(word2)) {
+            index2 = i;
+        }
+        if (index1 != -1 && index2 != -1) res = Math.min(res, Math.abs(index1 - index2));
+    }
+    return res;
+}
+```
+
 ### 247. Strobogrammatic Number II
 
 A strobogrammatic number is a number that looks the same when rotated 180 degrees (looked at upside down).
@@ -843,7 +878,70 @@ Explanation:
 Worker 1 grabs Bike 0 as they are closest (without ties), and Worker 0 is assigned Bike 1. So the output is [1, 0].
 ```
 
+**Solution:**
+
+用一个tuple去存distance，workerId，bikeId。根据dis，workId,bikeId  sort。然后依次把bikeid存袋相应的workid为index的答案中。注意 index该用什么。
+
+两个加速的trick:
+
+1. 用array代替set，不需要worker的set，把ans视为set，-1代表还没分配bike。
+2. **用一个counter去记录已经分配了几个woker，到达worker的数量，提前break，常见的一种提前跳出循环的方法，而且加速作用很大**
+
 ### 1170. Compare Strings by Frequency of the Smallest Character
+
+```java
+public class Tuple {
+    public int dis;
+    public int workerId;
+    public int bikeId;
+    public Tuple(int dis, int workerId, int bikeId) {
+        this.dis = dis;
+        this.workerId = workerId;
+        this.bikeId = bikeId;
+    }
+}
+public int[] assignBikes(int[][] workers, int[][] bikes) {
+    if (workers == null || workers.length == 0) return null;
+    int m = workers.length, n = bikes.length;
+    Tuple[] tuples = new Tuple[m*n];
+    int index = 0;
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            tuples[index++] = new Tuple(distance(workers[i],bikes[j]), i, j);;
+        }
+    }
+    Arrays.sort(tuples, new Comparator<Tuple>(){
+        public int compare(Tuple a, Tuple b) {
+            int res = a.dis - b.dis;
+            if (res == 0) {
+                res = a.workerId - b.workerId;
+                if (res == 0) {
+                    res = a.bikeId - b.bikeId;
+                }
+            }
+            return res;
+        }
+    });
+    int cnt = 0;
+    int[] ans = new int[m];
+    Arrays.fill(ans, -1);
+    int[] bikeValid = new int[n];
+    for (int i = 0; i < tuples.length; ++i) {
+        if (ans[tuples[i].workerId] == -1 && bikeValid[tuples[i].bikeId] == 0) {
+            ans[tuples[i].workerId] = tuples[i].bikeId;
+            bikeValid[tuples[i].bikeId] = 1;
+            cnt++;
+        } 
+        if (cnt == m) break;
+    }
+    return ans;
+}
+private int distance(int[] a, int[] b) {
+    return Math.abs(a[0]-b[0]) + Math.abs(a[1] - b[1]);
+}
+```
+
+###1170. Compare Strings by Frequency of the Smallest Character
 
 Let's define a function `f(s)` over a non-empty string `s`, which calculates the frequency of the smallest character in `s`. For example, if `s = "dcce"` then `f(s) = 2` because the smallest character is `"c"` and its frequency is 2.
 
