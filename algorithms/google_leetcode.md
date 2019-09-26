@@ -56,6 +56,43 @@ public int[][] merge(int[][] intervals) {
 }
 ```
 
+### 171. Excel Sheet Column Number
+
+Given a column title as appear in an Excel sheet, return its corresponding column number.
+
+For example:
+
+```
+    A -> 1
+    B -> 2
+    C -> 3
+    ...
+    Z -> 26
+    AA -> 27
+    AB -> 28 
+    ...
+```
+
+**Solution:**
+
+把用A-Z表示的26进制转换成十进制。注意进制转换公式：
+
+26 -> 10: 1. 从头开始遍历
+
+2. res = res * (现在的进制) + 当前这位对应的目标进制的值
+
+```java
+public int titleToNumber(String s) {
+    if (s == null || s.length() == 0) return -1;
+    int res = 0;
+    for (int i = 0; i < s.length(); ++i) {
+        char c = s.charAt(i);
+        res = res * 26 + (c - 'A' + 1);
+    }
+    return res;
+}
+```
+
 ### 205.Isomorphic Strings
 
 Given two strings **s** and **t**, determine if they are isomorphic.
