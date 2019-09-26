@@ -621,7 +621,39 @@ public boolean areSentencesSimilar(String[] words1, String[] words2, List<List<S
 }
 ```
 
+### 788. Rotated Digits
 
+X is a good number if after rotating each digit individually by 180 degrees, we get a valid number that is different from X.  Each digit must be rotated - we cannot choose to leave it alone.
+
+A number is valid if each digit remains a digit after rotation. 0, 1, and 8 rotate to themselves; 2 and 5 rotate to each other; 6 and 9 rotate to each other, and the rest of the numbers do not rotate to any other number and become invalid.
+
+Now given a positive number `N`, how many numbers X from `1` to `N` are good?
+
+**Solution:**
+
+validTable 的思想。
+
+```java
+public int rotatedDigits(int N) {
+    int cnt = 0;
+    // 0,1,8 -> 0, 2,5,6,9 ->1, 3,4,7 -> -1
+    int[] validTable = {0,0,1,-1,-1,1,1,-1,0,1};
+    for (int i = 1; i <= N; ++i) {
+        if (validNumber(validTable, i)) ++cnt;
+    }
+    return cnt;
+}
+private boolean validNumber(int[] validTable, int n) {
+    boolean isDifferent = false;
+    while (n > 0) {
+        int mode = n % 10;
+        if (validTable[mode] == -1) return false;
+        if (validTable[mode] == 1) isDifferent = true;
+        n /= 10;
+    }
+    return isDifferent;
+}
+```
 
 ### 844. Backspace String Compare
 
@@ -643,8 +675,6 @@ Explanation: Both S and T become "ac".
 public boolean backspaceCompare(String S, String T) {
     String finalS = afterBackspace(S);
     String finalT = afterBackspace(T);
-    System.out.println(finalS);
-    System.out.println(finalT);
     return finalS.equals(finalT);
 }
 private String afterBackspace(String s) {
@@ -789,6 +819,29 @@ private int binarySearch(int target, int[] nums) {
     return right+1;
 }
 ```
+
+### 1057. Campus Bikes
+
+On a campus represented as a 2D grid, there are `N` workers and `M` bikes, with `N <= M`. Each worker and bike is a 2D coordinate on this grid.
+
+Our goal is to assign a bike to each worker. Among the available bikes and workers, we choose the (worker, bike) pair with the shortest Manhattan distance between each other, and assign the bike to that worker. (If there are multiple (worker, bike) pairs with the same shortest Manhattan distance, we choose the pair with the smallest worker index; if there are multiple ways to do that, we choose the pair with the smallest bike index). We repeat this process until there are no available workers.
+
+The Manhattan distance between two points `p1` and `p2` is `Manhattan(p1, p2) = |p1.x - p2.x| + |p1.y - p2.y|`.
+
+Return a vector `ans` of length `N`, where `ans[i]` is the index (0-indexed) of the bike that the `i`-th worker is assigned to.
+
+**Example:**
+
+![img](https://assets.leetcode.com/uploads/2019/03/06/1261_example_1_v2.png)
+
+```
+Input: workers = [[0,0],[2,1]], bikes = [[1,2],[3,3]]
+Output: [1,0]
+Explanation: 
+Worker 1 grabs Bike 0 as they are closest (without ties), and Worker 0 is assigned Bike 1. So the output is [1, 0].
+```
+
+
 
 ###1197. Minimum Knight Moves
 
