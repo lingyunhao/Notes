@@ -924,8 +924,6 @@ Worker 1 grabs Bike 0 as they are closest (without ties), and Worker 0 is assign
 1. 用array代替set，不需要worker的set，把ans视为set，-1代表还没分配bike。
 2. **用一个counter去记录已经分配了几个woker，到达worker的数量，提前break，常见的一种提前跳出循环的方法，而且加速作用很大**
 
-### 1170. Compare Strings by Frequency of the Smallest Character
-
 ```java
 public class Tuple {
     public int dis;
@@ -975,6 +973,57 @@ public int[] assignBikes(int[][] workers, int[][] bikes) {
 }
 private int distance(int[] a, int[] b) {
     return Math.abs(a[0]-b[0]) + Math.abs(a[1] - b[1]);
+}
+```
+
+### 1110. Delete Nodes And Return Forest
+
+
+Given the `root` of a binary tree, each node in the tree has a distinct value.
+
+After deleting all nodes with a value in `to_delete`, we are left with a forest (a disjoint union of trees).
+
+Return the roots of the trees in the remaining forest.  You may return the result in any order.
+
+ 
+
+**Example 1:**
+
+**![img](https://assets.leetcode.com/uploads/2019/07/01/screen-shot-2019-07-01-at-53836-pm.png)**
+
+```
+Input: root = [1,2,3,4,5,6,7], to_delete = [3,5]
+Output: [[1,2,null,4],[6],[7]]
+```
+
+ **Solution:**
+
+Recursion, (dfs)， recursion完成的功能是，处理root左右结点，相当于左右结点之下的都已经处理好了，该删的删掉了，该加的加到forest中了，然后处理本结点。（有点像post order tarversal）是一种思路处理好左右结点再处理自己。
+
+如果先处理自己再左右结点的话，会出现，如果2，4都被删除，那么处理2的时候就先把4加到结果中，后边把4置为null，只是把当时root不再reference到4结点，但是4这个object还在,并且list这个容器的相应位置还是reference到了4这个object。
+
+```java
+public List<TreeNode> delNodes(TreeNode root, int[] to_delete) {        
+    Set<Integer> set = new HashSet<>();
+    List<TreeNode> list = new ArrayList<>();
+    for (int i : to_delete) {
+        set.add(i);
+    }
+    root = helper(root, set, list);
+    if (root != null) list.add(root);
+    return list;
+}
+
+private TreeNode helper(TreeNode root, Set set, List list) {
+    if (root == null) return null;
+    root.left = helper(root.left, set, list);
+    root.right = helper(root.right, set, list);
+    if (set.contains(root.val)) {
+        if (root.left != null) list.add(root.left);
+        if (root.right != null) list.add(root.right);
+        root = null;
+    }
+    return root;
 }
 ```
 
