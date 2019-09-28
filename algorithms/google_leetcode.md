@@ -894,6 +894,50 @@ public String removeDuplicates(String S) {
 }
 ```
 
+### 1055. Shortest Way to Form String
+
+From any string, we can form a *subsequence* of that string by deleting some number of characters (possibly no deletions).
+
+Given two strings `source` and `target`, return the minimum number of subsequences of `source` such that their concatenation equals `target`. If the task is impossible, return `-1`.
+
+**Example 1:**
+
+```
+Input: source = "abc", target = "abcbc"
+Output: 2
+Explanation: The target "abcbc" can be formed by "abc" and "bc", which are subsequences of source "abc".
+```
+
+**Solution:**
+
+先用一个map去判断是不是target中出现的character在source中出现过，如果没有返回-1，如果全都出现过说明一定可以form 成功。
+
+Greedy，遍历target，再遍历source去cancate target中的subarray。把target从头开始覆盖，遍历source去尽可能的从头顺次覆盖，这样得到的是最短的way。
+
+```java
+public int shortestWay(String source, String target) {
+    int m = source.length(), n = target.length();
+    int[] chars = new int[256];
+    for (char c : source.toCharArray()) {
+        chars[c] = 1;
+    }
+    for (char c : target.toCharArray()) {
+        if (chars[c] != 1) return -1;
+    }
+    int i = 0, j = 0;
+    int res = 0;
+    while (i < n) {
+        while (j < m && i < n) {
+            if (target.charAt(i) == source.charAt(j)) i++;
+            j++;
+        }
+        res++;
+        j = 0;
+    }
+    return res;
+}
+```
+
 ### 1057. Campus Bikes
 
 On a campus represented as a 2D grid, there are `N` workers and `M` bikes, with `N <= M`. Each worker and bike is a 2D coordinate on this grid.
