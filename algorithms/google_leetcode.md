@@ -849,6 +849,74 @@ public boolean flipEquiv(TreeNode root1, TreeNode root2) {
 }
 ```
 
+### 1011. Capacity To Ship Packages Within D Days
+
+A conveyor belt has packages that must be shipped from one port to another within `D` days.
+
+The `i`-th package on the conveyor belt has a weight of `weights[i]`.  Each day, we load the ship with packages on the conveyor belt (in the order given by `weights`). We may not load more weight than the maximum weight capacity of the ship.
+
+Return the least weight capacity of the ship that will result in all the packages on the conveyor belt being shipped within `D` days.
+
+**Example:**
+
+```
+Input: weights = [1,2,3,4,5,6,7,8,9,10], D = 5
+Output: 15
+Explanation: 
+A ship capacity of 15 is the minimum to ship all the packages in 5 days like this:
+1st day: 1, 2, 3, 4, 5
+2nd day: 6, 7
+3rd day: 8
+4th day: 9
+5th day: 10
+
+Note that the cargo must be shipped in the order given, so using a ship of capacity 14 and splitting the packages into parts like (2, 3, 4, 5), (1, 6, 7), (8), (9), (10) is not allowed. 
+```
+
+**Solution:**
+
+这种题一上来要想到二分，首先得有个思想就是知道会有一个helper function去算给定一个capacity和weights，找到相应的天数或者判断在D天内能不能完成该任务。二分的话就是去找个lower bound, upper bound, 然后利用helper function去判断属于哪一边。
+
+关于lower bound可以是1，也可以是max(average, maxWeight),实际上用1差不多，upperbound 是 totalwieght(最快就是一天完成嘛，不可能0天)。
+
+然后在[lowerbound,upperBound]二分去找满足shipValid的最小的数，也就是第一个满足shipValid的数。
+
+```java
+public int shipWithinDays(int[] weights, int D) {
+    int maxWeight = Integer.MIN_VALUE;
+    int totalWeight = 0;
+    for (int w : weights) {
+        maxWeight = Math.max(w, maxWeight);
+        totalWeight += w;
+    }
+    int average = totalWeight % D == 0 ? totalWeight/D : totalWeight/D + 1;
+    int left = Math.max(average, maxWeight), right = totalWeight;
+    while (left + 1 < right) {
+        int mid = left + (right-left)/2;
+        if (shipValid(weights, D, mid)) {
+            right = mid;
+        } else {
+            left = mid;
+        }
+    }
+    if (shipValid(weights, D, left)) return left;
+    return right; 
+}
+private boolean shipValid(int[] weights, int D, int capacity) {
+    int cnt = 1, tmp = capacity;
+    for (int i = 0; i < weights.length;) {
+        tmp -= weights[i];
+        if (tmp < 0) {
+            tmp = capacity;
+            cnt += 1;
+        } else {
+            ++i;
+        }
+    }
+    return cnt <= D;
+}
+```
+
 ###1047. Remove All Adjacent Duplicates In String
 
 Given a string `S` of lowercase letters, a *duplicate removal* consists of choosing two adjacent and equal letters, and removing them.
