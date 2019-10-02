@@ -477,6 +477,57 @@ public boolean increasingTriplet(int[] nums) {
 }
 ```
 
+### 346. Moving Average from Data Stream
+
+Given a stream of integers and a window size, calculate the moving average of all integers in the sliding window.
+
+**Example:**
+
+```
+MovingAverage m = new MovingAverage(3);
+m.next(1) = 1
+m.next(10) = (1 + 10) / 2
+m.next(3) = (1 + 10 + 3) / 3
+m.next(5) = (10 + 3 + 5) / 3
+```
+
+**Solution:**
+
+是一个sliding window，尾进头出，(FIFO) 用queue。（头部删除尾部增加都是O（1））
+
+单独存一个sum使得next O(1)时间。
+
+**这种考OOD的需要注意：**
+
+1. 别忘了数据结构在外面Initialize
+
+2. 别忘了可以structor去初始化数据结构
+3. 非常注重Time Complexity, 不可以用arraylist不支持头部O(1)删除。
+
+```java
+class MovingAverage {
+    /** Initialize your data structure here. */
+    private Queue<Integer> queue = new LinkedList<>();
+    private int sum = 0;
+    private int capacity;
+    public MovingAverage(int size) {
+        this.capacity = size;
+    }
+    
+    public double next(int val) {
+        if (queue.size() < capacity) {
+            queue.offer(val);
+            sum += val;
+        } else {
+            sum -= queue.poll();
+            queue.add(val);
+            sum += val;
+        }
+        return ((double)sum)/queue.size();
+    }
+}
+```
+
 ### 359. Logger Rate Limiter
 
 Design a logger system that receive stream of messages along with its timestamps, each message should be printed if and only if it is **not printed in the last 10 seconds**.
