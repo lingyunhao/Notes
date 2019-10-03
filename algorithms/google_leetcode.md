@@ -847,6 +847,69 @@ private String afterBackspace(String s) {
 }
 ```
 
+### 939. Minimum Area Rectangle
+
+Given a set of points in the xy-plane, determine the minimum area of a rectangle formed from these points, with sides parallel to the x and y axes.If there isn't any rectangle, return 0.
+
+**Solution:**
+
+把所有点按照x group到一起，HashMap,key->x, value->list of y。把list of y全部sort一遍。遍历两个column，去找相同的y值，有两对的话就可以组成一个长方形。
+
+Note：
+
+1. Integer的相等要用equals
+2. 用一个x list去存x，当作遍历HashMap时的index。防止重复两次遍历一对x。有了index就可以用j+1，防止重复之前遍历过的。
+3. 一些加速的小技巧
+
+```java
+public int minAreaRect(int[][] points) {
+    Map<Integer, List<Integer>> map = new HashMap<>();
+    List<Integer> x = new ArrayList<>();
+    for (int[] p : points) {
+        if (map.containsKey(p[0])) {
+            map.get(p[0]).add(p[1]);
+        } else {
+            x.add(p[0]);
+            map.put(p[0], new ArrayList<>());
+            map.get(p[0]).add(p[1]);
+        }
+    }
+    for (Map.Entry<Integer, List<Integer>> entry : map.entrySet()) {
+        Collections.sort(entry.getValue());
+    }
+    int lasty = 0;
+    int minArea = Integer.MAX_VALUE;
+    boolean last = false;
+    for (int i = 0; i < x.size(); ++i) {
+        if (map.get(x.get(i)).size() <= 1) continue;
+        for (int j = i + 1; j < x.size(); ++j) {
+            if (map.get(x.get(j)).size() <= 1) continue;
+            int m = 0, n = 0;
+            List<Integer> col1 = map.get(x.get(i));
+            List<Integer> col2 = map.get(x.get(j));
+            while (m < col1.size() && n < col2.size()) {
+                if (col1.get(m) < col2.get(n)) {
+                    ++m;
+                } else if (col1.get(m) > col2.get(n)) {
+                    ++n;
+                } else {
+                     if (!last) {
+                        last = true;
+                    } else {
+                        minArea = Math.min(minArea, Math.abs((x.get(i)-x.get(j)) * (col1.get(m) - lasty)));
+                    }
+                    lasty = col1.get(m);
+                    ++m;
+                    ++n;
+                }
+            }
+            last = false;
+        }
+    }
+    return minArea < Integer.MAX_VALUE ? minArea : 0;
+}
+```
+
 ### 951. Flip Equivalent Binary Trees
 
 For a binary tree T, we can define a flip operation as follows: choose any node, and swap the left and right child subtrees.
