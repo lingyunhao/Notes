@@ -771,6 +771,118 @@ public boolean areSentencesSimilar(String[] words1, String[] words2, List<List<S
 }
 ```
 
+### 809. Expressive Words
+
+Sometimes people repeat letters to represent extra feeling, such as "hello" -> "heeellooo", "hi" -> "hiiii".  In these strings like "heeellooo", we have *groups* of adjacent letters that are all the same:  "h", "eee", "ll", "ooo".
+
+For some given string `S`, a query word is *stretchy* if it can be made to be equal to `S` by any number of applications of the following *extension* operation: choose a group consisting of characters `c`, and add some number of characters `c` to the group so that the size of the group is 3 or more.
+
+For example, starting with "hello", we could do an extension on the group "o" to get "hellooo", but we cannot get "helloo" since the group "oo" has size less than 3.  Also, we could do another extension like "ll" -> "lllll" to get "helllllooo".  If `S = "helllllooo"`, then the query word "hello" would be stretchy because of these two extension operations: `query = "hello" -> "hellooo" -> "helllllooo" = S`.
+
+Given a list of query words, return the number of words that are stretchy. 
+
+```
+Example:
+Input: 
+S = "heeellooo"
+words = ["hello", "hi", "helo"]
+Output: 1
+Explanation: 
+We can extend "e" and "o" in the word "hello" to get "heeellooo".
+We can't extend "helo" to get "heeellooo" because the group "ll" is not size 3 or more.
+```
+
+ **Solution1:**
+
+把S按照character依次group存key和count。注意valid的判断条件，一些variables需要重置等等，空间比solution2少，但是solution2更容易理解。
+
+```java
+public int expressiveWords(String S, String[] words) {
+    List<Integer> counts = new ArrayList<>();
+    List<Character> chars = new ArrayList<>();
+    int prev = -1;
+    for (int i = 0; i < S.length(); i++) {
+        if (i == S.length() - 1 || S.charAt(i) != S.charAt(i+1)) {
+            chars.add(S.charAt(i));
+            counts.add(i - prev);
+            prev = i;
+        }
+    }
+    int index = 0;
+    int cnt = 0;
+    int previous = -1;
+    boolean valid = false;
+    for (String word : words) {
+        for (int i = 0; i < word.length(); i++) {
+            if (i == word.length() - 1 || word.charAt(i) != word.charAt(i+1)) {
+                if (index >= chars.size()) break;
+                if (word.charAt(i) != chars.get(index)) break;
+                int count = i - previous;
+                if (count > counts.get(index)) break;
+                if (count != counts.get(index) && counts.get(index) < 3) break;
+                if (i == word.length() - 1 && index == chars.size() - 1) valid = true;
+                index++;
+                previous = i;
+            }
+        }       
+        if (valid) {
+            cnt++;
+        }
+        valid = false;
+        previous = -1;
+        index = 0;
+    }
+    return cnt;
+}
+```
+
+**Solution2:**
+
+```java
+class Solution {
+    public int expressiveWords(String S, String[] words) {
+        RLE R = new RLE(S);
+        int ans = 0;
+
+        search: for (String word: words) {
+            RLE R2 = new RLE(word);
+            if (!R.key.equals(R2.key)) continue;
+            for (int i = 0; i < R.counts.size(); ++i) {
+                int c1 = R.counts.get(i);
+                int c2 = R2.counts.get(i);
+                if (c1 < 3 && c1 != c2 || c1 < c2)
+                    continue search;
+            }
+            ans++;
+        }
+        return ans;
+    }
+}
+
+class RLE {
+    String key;
+    List<Integer> counts;
+
+    public RLE(String S) {
+        StringBuilder sb = new StringBuilder();
+        counts = new ArrayList();
+
+        char[] ca = S.toCharArray();
+        int N = ca.length;
+        int prev = -1;
+        for (int i = 0; i < N; ++i) {
+            if (i == N-1 || ca[i] != ca[i+1]) {
+                sb.append(ca[i]);
+                counts.add(i - prev);
+                prev = i;
+            }
+        }
+
+        key = sb.toString();
+    }
+}
+```
+
 ### 788. Rotated Digits
 
 X is a good number if after rotating each digit individually by 180 degrees, we get a valid number that is different from X.  Each digit must be rotated - we cannot choose to leave it alone.
