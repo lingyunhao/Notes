@@ -385,6 +385,95 @@ public List<String> findStrobogrammatic(int n) {
 }
 ```
 
+### 271. Encode and Decode Strings
+
+Design an algorithm to encode **a list of strings** to **a string**. The encoded string is then sent over the network and is decoded back to the original list of strings.
+
+**Solution1:**
+
+Naive solution here is to join strings using delimiters.
+
+> What to use as a delimiter? Each string may contain any possible characters out of 256 valid ascii characters.
+
+Seems like one has to use non-ASCII unichar character, for example `unichr(257)` in Python and `Character.toString((char)257)` in Java (it's character `ā`).
+
+![fig](https://leetcode.com/problems/encode-and-decode-strings/Figures/271/delimiter.png)
+
+Here it's convenient to use two different non-ASCII characters, to distinguish between situations of "empty array" and of "array of empty strings".
+
+```java
+public class Codec {
+  // Encodes a list of strings to a single string.
+  public String encode(List<String> strs) {
+    if (strs.size() == 0) return Character.toString((char)258);
+
+    String d = Character.toString((char)257);
+    StringBuilder sb = new StringBuilder();
+    for(String s: strs) {
+      sb.append(s);
+      sb.append(d);
+    }
+    sb.deleteCharAt(sb.length() - 1);
+    return sb.toString();
+  }
+
+  // Decodes a single string to a list of strings.
+  public List<String> decode(String s) {
+    String d = Character.toString((char)258);
+    if (s.equals(d)) return new ArrayList();
+
+    d = Character.toString((char)257);
+    return Arrays.asList(s.split(d, -1));
+  }
+}
+```
+
+**Solution2:**
+
+注意intToString 把String的长度转换成一个4个char的string来表示。StringToInt把4位的char decode成对应的int，理解背住着两种转换方式。
+
+This approach is based on the [encoding used in HTTP v1.1](https://en.wikipedia.org/wiki/Chunked_transfer_encoding). **It doesn't depend on the set of input characters, and hence is more versatile and effective than Approach 1.**
+
+> Data stream is divided into chunks. Each chunk is preceded by its size in bytes.
+
+**Encoding Algorithm**
+
+![fig](https://leetcode.com/problems/encode-and-decode-strings/Figures/271/encodin.png)
+
+- Iterate over the array of chunks, i.e. strings.
+  - For each chunk compute its length, and convert that length into 4-bytes string.
+  - Append to encoded string :
+    - 4-bytes string with information about chunk size in bytes.
+    - Chunk itself.
+- Return encoded string.
+
+```java
+public class Codec {
+  // Encodes a list of strings to a single string.
+  public String encode(List<String> strs) {
+    if (strs.size() == 0) return Character.toString((char)258);
+
+    String d = Character.toString((char)257);
+    StringBuilder sb = new StringBuilder();
+    for(String s: strs) {
+      sb.append(s);
+      sb.append(d);
+    }
+    sb.deleteCharAt(sb.length() - 1);
+    return sb.toString();
+  }
+
+  // Decodes a single string to a list of strings.
+  public List<String> decode(String s) {
+    String d = Character.toString((char)258);
+    if (s.equals(d)) return new ArrayList();
+
+    d = Character.toString((char)257);
+    return Arrays.asList(s.split(d, -1));
+  }
+}
+```
+
 ### 299. Bulls and Cows
 
 You are playing the following [Bulls and Cows](https://en.wikipedia.org/wiki/Bulls_and_Cows) game with your friend: You write down a number and ask your friend to guess what the number is. Each time your friend makes a guess, you provide a hint that indicates how many digits in said guess match your secret number exactly in both digit and position (called "bulls") and how many digits match the secret number but locate in the wrong position (called "cows"). Your friend will use successive guesses and hints to eventually derive the secret number.
@@ -650,6 +739,8 @@ public String licenseKeyFormatting(String S, int K) {
     return res.toString();
 }
 ```
+
+###449. Serialize and Deserialize BST
 
 ### 551. Student Attendance Record I
 
@@ -917,6 +1008,70 @@ private boolean validNumber(int[] validTable, int n) {
 }
 ```
 
+### 833. Find And Replace in String
+
+To some string `S`, we will perform some replacement operations that replace groups of letters with new ones (not necessarily the same size).
+
+Each replacement operation has `3` parameters: a starting index `i`, a source word `x` and a target word `y`.  The rule is that if `x` starts at position `i` in the **original** **string** **S**, then we will replace that occurrence of `x` with `y`.  If not, we do nothing.
+
+For example, if we have `S = "abcd"` and we have some replacement operation `i = 2, x = "cd", y = "ffff"`, then because `"cd"` starts at position `2` in the original string `S`, we will replace it with `"ffff"`.
+
+Using another example on `S = "abcd"`, if we have both the replacement operation `i = 0, x = "ab", y = "eee"`, as well as another replacement operation `i = 2, x = "ec", y = "ffff"`, this second operation does nothing because in the original string `S[2] = 'c'`, which doesn't match `x[0] = 'e'`.
+
+All these operations occur simultaneously.  It's guaranteed that there won't be any overlap in replacement: for example, `S = "abc", indexes = [0, 1], sources = ["ab","bc"]` is not a valid test case.
+
+**Example 1:**
+
+```
+Input: S = "abcd", indexes = [0,2], sources = ["a","cd"], targets = ["eee","ffff"]
+Output: "eeebffff"
+Explanation: "a" starts at index 0 in S, so it's replaced by "eee".
+"cd" starts at index 2 in S, so it's replaced by "ffff".
+```
+
+**Solution:**
+
+这道题难点在于要同时把sources在相应的位置改变，那么长度就不一定了。所以要先记录下哪些位置可以改变，同时，也要知道这个需要在String S上改变的位置对应的是indexes,sources,targets中的哪一个，可以用一个map来记录对应关系。这时候map经常会用一个array来代替。array的index作为key，代表的是要在String S的哪个位置开始改变，array[index]记录的是这是indexes中的哪一位。
+
+```java
+public String findReplaceString(String S, int[] indexes, String[] sources, String[] targets) {
+    // List<Integer> valid = new ArrayList<>();
+    int[] match = new int[S.length()];
+    Arrays.fill(match, -1);
+    // Map<Integer, Integer> map = new HashMap<>();
+    for (int i = 0; i < indexes.length; ++i) {
+        int index = indexes[i];
+        if (index + sources[i].length()-1 < S.length()) {
+            if (S.substring(index, index + sources[i].length()).equals(sources[i])) {
+                match[index] = i;
+                // valid.add(indexes[i]);
+                // map.put(indexes[i], i);
+            }
+        }
+    }
+    // Collections.sort(valid);
+    int index = 0;
+    char[] arr = S.toCharArray();
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < arr.length;) {
+        // if (index < valid.size() && i == valid.get(index)) {
+        //     sb.append(targets[map.get(valid.get(index))]);
+        //     i += sources[map.get(valid.get(index))].length();
+        //     index++;
+        // } else {
+        //     sb.append(S.charAt(i++));
+        // }
+        if (match[i] >= 0) {
+            sb.append(targets[match[i]]);
+            i += sources[match[i]].length();
+        } else {
+            sb.append(S.charAt(i++));
+        }
+    }
+    return sb.toString();
+}
+```
+
 ### 844. Backspace String Compare
 
 Given two strings `S` and `T`, return if they are equal when both are typed into empty text editors. `#` means a backspace character.
@@ -956,6 +1111,80 @@ private String afterBackspace(String s) {
         sb.append(stack.pop());
     }
     return sb.toString();
+}
+```
+
+### 889. Construct Binary Tree from Preorder and Postorder Traversal
+
+Return any binary tree that matches the given preorder and postorder traversals.
+
+Values in the traversals `pre` and `post` are distinct positive integers.
+
+**Example 1:**
+
+```
+Input: pre = [1,2,4,5,3,6,7], post = [4,5,2,6,7,3,1]
+Output: [1,2,3,4,5,6,7]
+```
+
+ **Solution:**
+
+A preorder traversal is:
+
+- `(root node) (preorder of left branch) (preorder of right branch)`
+
+While a postorder traversal is:
+
+- `(postorder of left branch) (postorder of right branch) (root node)`
+
+Inorder:
+
+`(postorder of left branch)(root node)(postorder of right branch)`
+
+这三个order都不同于tree的表示方法，tree是从root开始，一层一层从左到右遍历，null即为null。
+
+树的问题一般会用recursion写，对某一个子树成立对任意一个树都成立。找到相应的规律即可。
+
+For example, if the final binary tree is `[1, 2, 3, 4, 5, 6, 7]` (serialized), then the preorder traversal is `[1] + [2, 4, 5] + [3, 6, 7]`, while the postorder traversal is `[4, 5, 2] + [6, 7, 3] + [1]`.
+
+If we knew how many nodes the left branch had, we could partition these arrays as such, and use recursion to generate each branch of the tree.
+
+**Algorithm**
+
+Let's say the left branch has L*L* nodes. We know the head node of that left branch is `pre[1]`, but it also occurs last in the postorder representation of the left branch. So `pre[1] = post[L-1]` (because of uniqueness of the node values.) Hence, `L = post.indexOf(pre[1]) + 1`.
+
+Now in our recursion step, the left branch is represnted by `pre[1 : L+1]` and `post[0 : L]`, while the right branch is represented by `pre[L+1 : N]` and `post[L : N-1]`.
+
+**用Recursion,创建根节点，不断的去找左右子树的根节点，根据pre[1] = post[L]，去找左子树的长度，N-L为右子树的长度**
+
+```java
+class Solution {
+    public TreeNode constructFromPrePost(int[] pre, int[] post) {
+        return make(0, 0, pre.length, pre, post);
+    }
+    
+    // recursion定义: 把pre[iPre]当作根结点 分别把左右子树链接到本根节点上。
+    //  pre[iPre:iPre+N] 和 post[iPost:iPost+N] 对应的是左子树混着右子树
+    // recursion出口: 1. leaf的左右子树，长度为0，判断条件N==0
+    // recursion出口: 2. leaf，长度为1，判断条件N==1
+    // recursion递推关系，本树的长度为N，找到本树(root)的左右子root
+    // 一直都是先走到N==0，即leaf的左右子树，然后N==1
+    private TreeNode make (int iPre, int iPost, int N, int[] pre, int[] post) {
+        if (N == 0) return null;
+        TreeNode root = new TreeNode(pre[iPre]);
+        // if N==1, pre[iPre] = post[iPost] 为本子树的根节点，左右无子树。
+        if (N == 1) return root;
+        
+        //L = 以root为根节点的左子树的长度，N-L即为右子树的长度
+        // pre[0]为根节点，pre[1]为左子树的根节点
+        int L = 1;
+        for (;L < N; ++L) {
+            if (pre[iPre + 1] == post[iPost+L-1]) break;
+        }
+        root.left = make(iPre+1, iPost, L, pre, post);
+        root.right = make(iPre+L+1, iPost+L, N-1-L, pre, post);
+        return root;
+    }
 }
 ```
 
@@ -1022,6 +1251,52 @@ public int minAreaRect(int[][] points) {
 }
 ```
 
+### 947. Most Stones Removed with Same Row or Column
+
+On a 2D plane, we place stones at some integer coordinate points.  Each coordinate point may have at most one stone.
+
+Now, a *move* consists of removing a stone that shares a column or row with another stone on the grid.
+
+What is the largest possible number of moves we can make?
+
+**Solution:**
+
+Number of islands 变种。求component个数，用结点个数减去conponent个数。dfs把与当前的点相连的所有点都标为visited。
+
+```java
+public int removeStones(int[][] stones) {
+    Map<Integer, Set<Integer>> map = new HashMap<>();
+    int n = stones.length;
+    for (int i = 0; i < n; ++i) {
+        Set<Integer> set = new HashSet<>();
+        for (int j = 0; j < n; ++j) {
+            if (j == i) continue;
+            if (stones[i][0] == stones[j][0] || stones[i][1] == stones[j][1]) {
+                set.add(j);
+            }
+        }
+        map.put(i, set);
+    }
+    boolean[] visited = new boolean[n];
+    int res = 0;
+    for (int i = 0; i < stones.length; ++i) {
+        if (!visited[i]) {
+            dfs(i, map, visited);
+            res++;
+        }
+    }
+    return n - res;
+}
+
+private void dfs(int index, Map<Integer, Set<Integer>> map, boolean[] visited) { 
+    if (visited[index]) return;
+    visited[index] = true;
+    for (int i : map.get(index)) {
+        dfs(i, map, visited);
+    }
+}
+```
+
 ### 951. Flip Equivalent Binary Trees
 
 For a binary tree T, we can define a flip operation as follows: choose any node, and swap the left and right child subtrees.
@@ -1072,6 +1347,51 @@ public boolean flipEquiv(TreeNode root1, TreeNode root2) {
     if (root1 == null || root2 == null) return false;
     if (root1.val != root2.val) return false;
     return (flipEquiv(root1.left, root2.left) && flipEquiv(root1.right, root2.right)) || (flipEquiv(root1.left, root2.right) && flipEquiv(root1.right, root2.left));
+}
+```
+
+### 981. Time Based Key-Value Store
+
+Create a timebased key-value store class `TimeMap`, that supports two operations.
+
+\1. `set(string key, string value, int timestamp)`
+
+- Stores the `key` and `value`, along with the given `timestamp`.
+
+\2. `get(string key, int timestamp)`
+
+- Returns a value such that `set(key, value, timestamp_prev)` was called previously, with `timestamp_prev <= timestamp`.
+- If there are multiple such values, it returns the one with the largest `timestamp_prev`.
+- If there are no values, it returns the empty string (`""`).
+
+ **Solution:**
+
+数据结构可以用一个HashMap<key, List<Pair<timestamp,String>>> 这样set是O(1), get正常情况是O(n)（暴力搜一遍）。或者set,get都是O(lgn)。用TreeMap，treemap的get和put都是O(lgn)，所以这里的set,get都是O(lgn)。
+
+```java
+class TimeMap {
+    /** Initialize your data structure here. */
+    private Map<String, TreeMap<Integer, String>> map;
+    public TimeMap() {
+        map = new HashMap();
+    }
+    
+    public void set(String key, String value, int timestamp) {
+        if (!map.containsKey(key)) {
+            map.put(key, new TreeMap<>());
+        } 
+        map.get(key).put(timestamp, value);
+        
+    }
+    
+    public String get(String key, int timestamp) {
+        if (map.containsKey(key)) {
+            Integer t = map.get(key).floorKey(timestamp);
+            return t == null ? "" : map.get(key).get(t);
+        } else {
+            return "";
+        }
+    }
 }
 ```
 
@@ -1314,16 +1634,129 @@ private int distance(int[] a, int[] b) {
 }
 ```
 
-### 1110. Delete Nodes And Return Forest
+### 1087. Brace Expansion
 
+A string `S` represents a list of words.
+
+Each letter in the word has 1 or more options.  If there is one option, the letter is represented as is.  If there is more than one option, then curly braces delimit the options.  For example, `"{a,b,c}"` represents options `["a", "b", "c"]`.
+
+For example, `"{a,b,c}d{e,f}"` represents the list `["ade", "adf", "bde", "bdf", "cde", "cdf"]`.
+
+Return all words that can be formed in this manner, in lexicographical order.
+
+**Example 1:**
+
+```
+Input: "{a,b}c{d,e}f"
+Output: ["acdf","acef","bcdf","bcef"]
+```
+
+**Example 2:**
+
+```
+Input: "abcd"
+Output: ["abcd"]
+```
+
+**Solution:**
+
+看作是个图，去搜索。是个排列组合问题，用DFS/backtracking。
+
+**dfs要素**
+
+dfs recursion 定义是，把当前这一层（也可能是与入口所有相连的结点，或者可能相连的结点，取决于进入dfs返回，还是判断后再进入dfs）所有结点进行处理(这里需要用一个for循环来遍历当前层的结点)。每遍历一个点，继续dfs遍历它所连接的点。
+
+本题的dfs定义是把当前这一层的character加到cur的string中。+操作每次返回一个新的String，不改变原来的Stirng，原来的String还是保留的。相当于开辟了很多个String的空间。而backtracking则是对一个referecnce进行append, remove操作。没有开辟新的空间。
+
+```java
+public String[] expand(String S) {
+    List<String> result = new ArrayList<>();
+    dfs(S, 0, result, "");
+    String[] ans = new String[result.size()];
+    Collections.sort(result);
+    int i = 0;
+    for (String s : result) {
+        ans[i++] = s;
+    }
+    return ans;
+}
+
+// dfs: 把index开始的当前的一层加到cur
+private void dfs(String S, int index, List<String> result, String cur) {
+    if (index == S.length()) {
+        result.add(cur.toString());
+        return;
+    }
+    List<Character> chars = new ArrayList<>();
+    if (S.charAt(index) != '{') {
+        chars.add(S.charAt(index++));
+    } else {
+        index++;
+        while (S.charAt(index) != '}') {
+            if (S.charAt(index) != ',') {
+                chars.add(S.charAt(index));
+            }
+            ++index;
+        }
+        ++index;
+    }
+    for (char c : chars) {
+        dfs(S, index, result, cur+c);
+    }
+}
+```
+
+**Solution2:**
+
+backtracking, 先append，传进去，结束后，delete最后一位。
+
+```java
+public String[] expand(String S) {
+    List<String> result = new ArrayList<>();
+    dfs(S, 0, result, new StringBuilder());
+    String[] ans = new String[result.size()];
+    Collections.sort(result);
+    int i = 0;
+    for (String s : result) {
+        ans[i++] = s;
+    }
+    return ans;
+}
+
+// dfs: 把index开始的当前的一层加到cur
+private void dfs(String S, int index, List<String> result, StringBuilder cur) {
+    if (index == S.length()) {
+        result.add(cur.toString());
+        return;
+    }
+    List<Character> chars = new ArrayList<>();
+    if (S.charAt(index) != '{') {
+        chars.add(S.charAt(index++));
+    } else {
+        index++;
+        while (S.charAt(index) != '}') {
+            if (S.charAt(index) != ',') {
+                chars.add(S.charAt(index));
+            }
+            ++index;
+        }
+        ++index;
+    }
+    for (char c : chars) {
+        cur.append(c);
+        dfs(S, index, result, cur);
+        cur.delete(cur.length()-1, cur.length());
+    }
+}
+```
+
+### 1110. Delete Nodes And Return Forest
 
 Given the `root` of a binary tree, each node in the tree has a distinct value.
 
 After deleting all nodes with a value in `to_delete`, we are left with a forest (a disjoint union of trees).
 
 Return the roots of the trees in the remaining forest.  You may return the result in any order.
-
- 
 
 **Example 1:**
 
