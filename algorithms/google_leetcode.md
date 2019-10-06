@@ -1350,6 +1350,70 @@ public boolean flipEquiv(TreeNode root1, TreeNode root2) {
 }
 ```
 
+### 963. Minimum Area Rectangle II
+
+Given a set of points in the xy-plane, determine the minimum area of **any** rectangle formed from these points, with sides **not necessarily parallel** to the x and y axes.
+
+If there isn't any rectangle, return 0.
+
+**Solution:**
+
+O($n^3$)遍历。先把所有的点加入set，取三个点，判断满足条件的第四个点在不在set种。
+
+判断四个点p1, p2, p3, p4是rectangle(假设p1,p2是对角)：
+
+1. p1.x + p2.x = p3.x + p4.x && p1.y + p2.y = p3.y + p4.y—> 保证了平行（对角线中点是同一个点）
+2. (p1.x-p3.x) * (p2.x-p3.x) + (p1.y-p3.y) * (p2.y-p3.y) == 0 保证了垂直
+
+```java
+import java.awt.Point;
+
+class Solution {
+    
+    public double minAreaFreeRect(int[][] points) {
+        if (points == null  || points.length <= 3) return 0;
+        int n = points.length;
+        Point[] A = new Point[n];
+        Set<Point> set = new HashSet<>();
+        for (int i = 0; i < n; ++i) {
+            A[i] = new Point(points[i][0], points[i][1]);
+            set.add(A[i]);
+        }
+        
+        double res = Double.MAX_VALUE;
+        for (int i = 0; i < n; ++i) {
+            for (int j = i+1; j < n; ++j) {
+                for (int m = j + 1; m < n; ++m) {
+                    Point candidate1 = new Point(A[i].x + A[j].x - A[m].x, A[i].y + A[j].y - A[m].y);   
+                    double area;
+                    if (checkRec(A[i], A[j], A[m], candidate1, set)) {
+                        area = A[i].distance(A[m]) * A[j].distance(A[m]);
+                        res = Math.min(res, area);
+                    }  
+                    Point candidate2 = new Point(A[i].x + A[m].x - A[j].x, A[i].y + A[m].y - A[j].y);
+                    if (checkRec(A[i], A[m], A[j], candidate2, set)) {
+                        area = A[i].distance(A[j]) * A[m].distance(A[j]);
+                        res = Math.min(res, area);
+                    }
+                    Point candidate3 = new Point(A[j].x + A[m].x - A[i].x, A[j].y + A[m].y - A[i].y);
+                    if (checkRec(A[j], A[m], A[i], candidate3, set)) {
+                        area = A[j].distance(A[i]) * A[m].distance(A[i]);
+                        res = Math.min(res, area);
+                    }
+                }
+            }
+        }
+        return res < Double.MAX_VALUE ? res : 0;
+    }
+    
+    private boolean checkRec(Point p1, Point p2, Point p3, Point p4, Set<Point> set) {
+        if (!set.contains(p4)) return false;
+        if ((p1.x - p3.x) * (p2.x - p3.x) + (p1.y - p3.y) * (p2.y - p3.y) == 0) return true;
+        return false;
+    } 
+}
+```
+
 ### 981. Time Based Key-Value Store
 
 Create a timebased key-value store class `TimeMap`, that supports two operations.
