@@ -385,6 +385,97 @@ public List<String> findStrobogrammatic(int n) {
 }
 ```
 
+### 253. Meeting Rooms II
+
+Given an array of meeting time intervals consisting of start and end times `[[s1,e1],[s2,e2],...]` (si < ei), find the minimum number of conference rooms required.
+
+**Example 1:**
+
+```
+Input: [[0, 30],[5, 10],[15, 20]]
+Output: 2
+```
+
+**Example 2:**
+
+```
+Input: [[7,10],[2,4]]
+Output: 1
+```
+
+**Solution1:**
+
+实际上是求在某一刻最多的overlape的meeting interval的个数。用一个priorityqueue去存interval的end，遍历intervals，每次pop出比当前start小的元素，说明该会议已经结束，然后把自己的end加进去，queue中的元素，代表有overlap的meeting。去存用一个global max去找哪个瞬间queue的size最大，这个size就是最终答案。
+
+```java
+public int minMeetingRooms(int[][] intervals) {
+    if (intervals == null || intervals.length == 0) return 0;
+    Arrays.sort(intervals, new Comparator<int[]>() {
+       public int compare(int[] a, int[] b) {
+           return a[0] - b[0];
+       } 
+    });
+
+    int min = 1;
+    PriorityQueue<Integer> queue = new PriorityQueue<>();
+    for (int i = 0; i < intervals.length; ++i) {
+        if (queue.isEmpty()) {
+            queue.add(intervals[i][1]);
+        } else {
+            while (!queue.isEmpty() && intervals[i][0] >= queue.peek()){
+                queue.poll();
+            }
+            queue.offer(intervals[i][1]);
+            min = Math.max(min, queue.size());
+        }
+    }
+    return min;
+}
+```
+
+**Solution2:**
+
+很tricky的写法。把intervals所有的start end存成，(start, 1) (end, -1) pair然后根据第一个元素sort一遍。用一个cnt去把value相加，哪个时刻cnt最大就是最少的room数。
+
+**进进出出问题。**
+
+```java
+class Pair {
+    int key;
+    int value;
+    public Pair(int key, int value) {
+        this.key = key;
+        this.value = value;
+    }
+}
+class Solution {
+    public int minMeetingRooms(int[][] intervals) {
+        Pair[] pairs = new Pair[2 * intervals.length];
+        int index = 0;
+        for (int i = 0; i < intervals.length; i++) {
+            pairs[index++] = new Pair(intervals[i][0], 1);
+            pairs[index++] = new Pair(intervals[i][1], -1);
+        }
+        Arrays.sort(pairs, new Comparator<Pair>() {
+            public int compare(Pair p1, Pair p2) {
+                int d =  p1.key - p2.key;
+                if (d == 0) {
+                    d = p1.value - p2.value;
+                }
+                return d;
+            }
+        });
+        int cnt = 0;
+        int min = 0;
+        for (Pair p : pairs) {
+            cnt += p.value;
+            min = Math.max(cnt, min);
+        }
+        return min;
+    }
+}
+```
+
 ### 271. Encode and Decode Strings
 
 Design an algorithm to encode **a list of strings** to **a string**. The encoded string is then sent over the network and is decoded back to the original list of strings.
@@ -819,6 +910,47 @@ public int repeatedStringMatch(String A, String B) {
 }
 ```
 
+### 708. Insert into a Cyclic Sorted List
+
+Given a node from a cyclic linked list which is sorted in ascending order, write a function to insert a value into the list such that it remains a cyclic sorted list. The given node can be a reference to *any* single node in the list, and may not be necessarily the smallest value in the cyclic list.
+
+If there are multiple suitable places for insertion, you may choose any place to insert the new value. After the insertion, the cyclic list should remain sorted.
+
+If the list is empty (i.e., given node is `null`), you should create a new single cyclic list and return the reference to that single node. Otherwise, you should return the original given node.
+
+**Soution：**
+
+分情况讨论所有可能的情况，用一个cur和next指针去逼近该插入的位置，然后break出循环，插到cur和next中间。
+
+```java
+public Node insert(Node head, int insertVal) {
+    if (head == null) {
+        Node cur = new Node();
+        cur.val = insertVal;
+        cur.next = cur;
+        return cur;
+    }
+    Node cur = head;
+    Node next = head.next;
+    while (next != head) {
+        // 2->2->2->3->3->3 insert2,3
+        // 1->3->3->4 insert 2,3
+        // 1->3->4->1(head) insert 1
+        if (cur.val <= next.val && insertVal >= cur.val && insertVal <= next.val) break;
+        // 3->4->1->3(head) insert 5
+        if (cur.val > next.val && insertVal >= cur.val) break;
+        // 3->4->1->3->(head) insert 0,1
+        if (cur.val > next.val && insertVal <= next.val) break;
+        // 1->3->4->1(head) insert 5(while)
+        cur = next;
+        next = cur.next;
+    }
+    Node node = new Node(insertVal, next);
+    cur.next = node;
+    return head;
+}
+```
+
 ### 734. Sentence Similarity
 
 Given two sentences `words1, words2` (each represented as an array of strings), and a list of similar word pairs `pairs`, determine if two sentences are similar.
@@ -859,6 +991,74 @@ public boolean areSentencesSimilar(String[] words1, String[] words2, List<List<S
         if (!checkFirst && !checkSecond) return false;
     }
     return true;
+}
+```
+
+### 743. Network Delay Time
+
+There are `N` network nodes, labelled `1` to `N`.
+
+Given `times`, a list of travel times as **directed** edges `times[i] = (u, v, w)`, where `u` is the source node, `v` is the target node, and `w` is the time it takes for a signal to travel from source to target.
+
+Now, we send a signal from a certain node `K`. How long will it take for all nodes to receive the signal? If it is impossible, return `-1`.
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2019/05/23/931_example_1.png)
+
+```
+Input: times = [[2,1,1],[2,3,1],[3,4,1]], N = 4, K = 2
+Output: 2
+```
+
+ **Solution:**
+
+给定有向图，找start 到其他所有节点最短路径中的max。
+
+用**Dijkstra Algorithm**, 这个算法是通过为每个顶点 *v* 保留当前为止所找到的从s到v的最短路径来工作的。实现：priorityqueue (+ 类似bfs）
+
+pq中存放的是下一层中可能会是出发节点的node，每次node被当作出发节点就把它放入map中，相当于设置了visited。
+
+```java
+public int networkDelayTime(int[][] times, int N, int K) {
+    Map<Integer, List<int[]>> graph = new HashMap<>();
+    //建立有向图
+    for (int[] edge : times) {
+        if (!graph.containsKey(edge[0])) {
+            graph.put(edge[0], new ArrayList<int[]>());
+        }
+        graph.get(edge[0]).add(new int[]{edge[1], edge[2]});
+    }
+
+    // 存weight 和 node pair
+    PriorityQueue<int[]> pq = new PriorityQueue<int[]>((info1,info2)->info1[0]-info2[0]);
+    pq.offer(new int[]{0, K});
+
+    //去重 同时记录从start到其他所有节点的距离
+    Map<Integer, Integer> dist = new HashMap<>();
+
+    while (!pq.isEmpty()) {
+        int[] info = pq.poll();
+        int d = info[0], node = info[1];
+
+        if (dist.containsKey(node)) continue;
+        dist.put(node, d);
+        if (graph.containsKey(node)) {
+            for (int[] edge : graph.get(node)) {
+                int nei = edge[0], d2 = edge[1];
+                if (!dist.containsKey(nei)) {
+                    pq.offer(new int[]{d+d2, nei});
+                }
+            }
+        }
+    }
+
+    if (dist.size() != N) return -1;
+    int ans = 0;
+    for (int cand : dist.values()) {
+        ans = Math.max(ans, cand);
+    }
+    return ans;
 }
 ```
 
@@ -1859,6 +2059,74 @@ private TreeNode helper(TreeNode root, Set set, List list) {
         root = null;
     }
     return root;
+}
+```
+
+### 1146. Snapshot Array
+
+Implement a SnapshotArray that supports the following interface:
+
+- `SnapshotArray(int length)` initializes an array-like data structure with the given length.  **Initially, each element equals 0**.
+- `void set(index, val)` sets the element at the given `index` to be equal to `val`.
+- `int snap()` takes a snapshot of the array and returns the `snap_id`: the total number of times we called `snap()` minus `1`.
+- `int get(index, snap_id)` returns the value at the given `index`, at the time we took the snapshot with the given `snap_id`
+
+**Example 1:**
+
+```
+Input: ["SnapshotArray","set","snap","set","get"]
+[[3],[0,5],[],[0,6],[0,0]]
+Output: [null,null,0,null,5]
+Explanation: 
+SnapshotArray snapshotArr = new SnapshotArray(3); // set the length to be 3
+snapshotArr.set(0,5);  // Set array[0] = 5
+snapshotArr.snap();  // Take a snapshot, return snap_id = 0
+snapshotArr.set(0,6);
+snapshotArr.get(0,0);  // Get the value of array[0] with snap_id = 0, return 5
+```
+
+ **Solution:**
+
+为了节省空间，不开长度为length的array，而是用一个arraylist，每次set的时候把index之前的设为0，get时候如果index比当前add到的index大，就直接返回0.
+
+用一个hashmap去存snap_id 和当时的array(copy)。
+
+```java
+class SnapshotArray {
+    ArrayList<Integer> arr = null;
+    int snap_id = 0;
+    HashMap<Integer,ArrayList<Integer>> map = new HashMap<>();
+    public SnapshotArray(int length) {
+        arr = new  ArrayList<Integer>();
+    }
+    
+    public void set(int index, int val) {
+        if(arr.size() <= index){
+            while(arr.size() != index){
+                arr.add(0);
+            }
+            arr.add(index,val);    
+        }else{
+            arr.set(index,val);
+        }
+        
+    }
+    
+    public int snap() {
+        ArrayList<Integer> temp = new ArrayList<Integer>();
+    		temp.addAll(arr);
+        map.put(snap_id,temp);
+        snap_id++;
+        return snap_id-1;
+    }
+    
+    public int get(int index, int snap_id) {
+       ArrayList<Integer> temp =  map.get(snap_id);
+        if(temp.size() > index)
+            return temp.get(index);
+        else 
+            return 0;
+    }
 }
 ```
 
