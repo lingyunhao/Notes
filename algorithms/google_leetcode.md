@@ -836,6 +836,47 @@ class Logger {
 }
 ```
 
+###363.Max Sum of Rectangle No Larger Than K
+
+Given a non-empty 2D matrix *matrix* and an integer *k*, find the max sum of a rectangle in the *matrix* such that its sum is no larger than *k*.
+
+**Solution:**
+
+DP + Naive brute force：store the sum of rec(0,0) - (i,j) in an array dp. Then traverse all of the possible rectangles maintain a maxArea which is less than k, if we find k just return k, if not, update the maxArea so far.
+
+Note: 1. 用dp[m+1] [n+1]这样不用初始化第一列和第一行，因为求和，所以第一列第一行是0即可。 不仅是在求dp时不用考虑，在求任意的矩形面积时都不用考虑。
+
+2. 四个点组成一个矩形，所以for循环应该有四层就可以遍历所有矩形。
+
+```java
+public int maxSumSubmatrix(int[][] matrix, int k) {
+    if (matrix == null || matrix.length == 0 || matrix[0].length == 0) return 0;
+    int m = matrix.length, n = matrix[0].length;
+    int[][] dp = new int[m+1][n+1];
+    for (int i = 1; i < m+1; ++i) {
+        for (int j = 1; j < n+1; ++j) {
+            dp[i][j] = dp[i-1][j] + dp[i][j-1] - dp[i-1][j-1] + matrix[i-1][j-1];
+        }
+    }
+
+    int maxAreaK = Integer.MIN_VALUE;
+    for (int i = 1; i < m+1; ++i) {
+        for (int j = 1; j < n+1; ++j) {
+            for (int p = 1; p <= i; ++p) {
+                for (int q = 1; q <=j; ++q) {
+                    int sum = dp[i][j] - dp[p-1][j] - dp[i][q-1] + dp[p-1][q-1];
+                    if (sum == k) return k;
+                    if (sum < k && sum > maxAreaK) {
+                        maxAreaK = sum;
+                    }
+                }
+            }
+        }
+    }
+    return maxAreaK;
+}
+```
+
 ### 482. License Key Formatting
 
 You are given a license key represented as a string S which consists only alphanumeric character and dashes. The string is separated into N+1 groups by N dashes.
