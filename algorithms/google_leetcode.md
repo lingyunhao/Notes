@@ -20,7 +20,7 @@ Note: 1. 背二维数组按照每行第一元素排序的写法，comparator
 
 2. 返回值是int$[ ][ ]$但是返回值的长度不一定，先创建一个int[]的ArrayList，最后再加到int$[ ][ ]$中
 3. 注意要用一个index存res走到了哪里，注意只有else的时候index才++，表明res的前一个已经成为过去式，下次考虑的就是else这次刚加进去的interval了。
-4. 排序的时间复杂度是O(nlog(n)), 此solution复杂度也是O (nlg(n)).
+4. 排序的时间复杂度是O(nlog(n)), 此solution复杂度也是O (nlog(n)).
 
 ```java
 public int[][] merge(int[][] intervals) {
@@ -1800,6 +1800,92 @@ class TimeMap {
             return "";
         }
     }
+}
+```
+
+### 987. Vertical Order Traversal of a Binary Tree
+
+Given a binary tree, return the *vertical order* traversal of its nodes values.
+
+For each node at position `(X, Y)`, its left and right children respectively will be at positions `(X-1, Y-1)` and `(X+1, Y-1)`.
+
+Running a vertical line from `X = -infinity` to `X = +infinity`, whenever the vertical line touches some nodes, we report the values of the nodes in order from top to bottom (decreasing `Y` coordinates).
+
+If two nodes have the same position, then the value of the node that is reported first is the value that is smaller.
+
+Return an list of non-empty reports in order of `X` coordinate.  Every report will have a list of values of nodes.
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2019/01/31/1236_example_1.PNG)
+
+```
+Input: [3,9,20,null,null,15,7]
+Output: [[9],[3,15],[20],[7]]
+Explanation: 
+Without loss of generality, we can assume the root node is at position (0, 0):
+Then, the node with value 9 occurs at position (-1, -1);
+The nodes with values 3 and 15 occur at positions (0, 0) and (0, -2);
+The node with value 20 occurs at position (1, -1);
+The node with value 7 occurs at position (2, -2).
+```
+
+**Soluiton:**
+
+用某种搜索或者traversal去遍历每个node，把其位置和val放进去。
+
+BFS + sort
+
+```java
+public List<List<Integer>> verticalTraversal(TreeNode root) {
+    if (root == null) return null;
+    Queue<TreeNode> queue = new LinkedList<>();
+    List<List<Integer>> result = new ArrayList<>();
+    //int[0]:x int[1]:y int[2]:val
+    List<int[]> infos = new ArrayList<>();
+    queue.offer(root);
+    infos.add(new int[]{0,0,root.val});
+    int index = -1;
+    while (!queue.isEmpty()) {
+        TreeNode node = queue.poll();
+        index++;
+        int cur_x = infos.get(index)[0];
+        int cur_y = infos.get(index)[1];
+        if (node.left != null) {
+            queue.offer(node.left);
+            infos.add(new int[]{cur_x - 1, cur_y - 1, node.left.val});
+        }
+        if (node.right != null) {
+            queue.offer(node.right);
+            infos.add(new int[]{cur_x + 1, cur_y - 1, node.right.val});
+        }
+    }
+    Collections.sort(infos, new Comparator<int[]>() {
+        public int compare(int[] a, int[] b) {
+            int d = a[0]-b[0];
+            if (d == 0) {
+                d = b[1] - a[1];
+                if (d == 0) {
+                    d = a[2] - b[2];
+                }
+            }
+            return d;
+        }
+    });
+    int x = Integer.MAX_VALUE;
+    List<Integer> col = null;
+    for (int[] each : infos) {
+        if (each[0] != x) {
+            if (col != null) {
+                result.add(col);
+            }
+            col = new ArrayList<>();
+        }
+        col.add(each[2]);
+        x = each[0];
+    }
+    result.add(col);
+    return result;
 }
 ```
 
