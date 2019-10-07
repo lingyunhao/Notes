@@ -630,6 +630,72 @@ private int charToIndex(char c) {
 }
 ```
 
+### 304. Range Sum Query 2D - Immutable
+
+Given a 2D matrix *matrix*, find the sum of the elements inside the rectangle defined by its upper left corner (*row*1, *col*1) and lower right corner (*row*2, *col*2).
+
+![Range Sum Query 2D](https://leetcode.com/static/images/courses/range_sum_query_2d.png)
+The above rectangle (with the red border) is defined by (row1, col1) = **(2, 1)** and (row2, col2) = **(4, 3)**, which contains sum = **8**.
+
+**Example:**
+
+```
+Given matrix = [
+  [3, 0, 1, 4, 2],
+  [5, 6, 3, 2, 1],
+  [1, 2, 0, 1, 5],
+  [4, 1, 0, 1, 7],
+  [1, 0, 3, 0, 5]
+]
+
+sumRegion(2, 1, 4, 3) -> 8
+sumRegion(1, 1, 2, 2) -> 11
+sumRegion(1, 2, 2, 4) -> 12
+```
+
+**Solution:**
+
+dp、积分图。初始化的时候用dp存从(0,0)到(i,j)的和，sumRegion的时候就用递推公式。如果要改变matrix的话，得重新求dp。
+
+```java
+class NumMatrix {
+    private int[][] dp;
+    public NumMatrix(int[][] matrix) {
+        if (matrix == null || matrix.length == 0 || matrix[0].length == 0) return;
+        int m = matrix.length, n = matrix[0].length;
+        dp = new int[m][n];
+        // initialize
+        dp[0][0] = matrix[0][0];
+        for (int i = 1; i < n; ++i) {
+            dp[0][i] = dp[0][i-1] + matrix[0][i];
+        }
+        for (int i = 1; i < m; ++i) {
+            dp[i][0] = dp[i-1][0] + matrix[i][0];
+        }
+        for (int i = 1; i < m; ++i) {
+            for (int j = 1; j < n; ++j) {
+                // 递推公式
+                dp[i][j] = dp[i-1][j] + dp[i][j-1] - dp[i-1][j-1] + matrix[i][j];
+            }
+        }
+    }
+    
+    public int sumRegion(int row1, int col1, int row2, int col2) {
+        int res;
+        if (col1 == 0 && row1 == 0) {
+            res = dp[row2][col2];
+        } else if (col1 == 0) {
+            res = dp[row2][col2] - dp[row1-1][col2];
+        } else if (row1 == 0) {
+            res = dp[row2][col2] - dp[row2][col1-1];
+        } else {
+            res = dp[row2][col2] - dp[row2][col1-1] - dp[row1-1][col2] + dp[row1-1][col1-1];
+        }
+        return res;
+    }
+}
+```
+
 ### 334. Increasing Triplet Subsequence
 
 Given an unsorted array return whether an increasing subsequence of length 3 exists or not in the array.
@@ -991,6 +1057,84 @@ public boolean areSentencesSimilar(String[] words1, String[] words2, List<List<S
         if (!checkFirst && !checkSecond) return false;
     }
     return true;
+}
+```
+
+### 742. Closest Leaf in a Binary Tree
+
+Given a binary tree **where every node has a unique value**, and a target key `k`, find the value of the nearest leaf node to target `k` in the tree.
+
+Here, *nearest* to a leaf means the least number of edges travelled on the binary tree to reach any leaf of the tree. Also, a node is called a *leaf* if it has no children.
+
+In the following examples, the input tree is represented in flattened form row by row. The actual `root` tree given will be a TreeNode object.
+
+**Example 1:**
+
+```
+Input:
+root = [1, 3, 2], k = 1
+Diagram of binary tree:
+          1
+         / \
+        3   2
+
+Output: 2 (or 3)
+
+Explanation: Either 2 or 3 is the nearest leaf node to the target of 1.
+```
+
+**Example 2:**
+
+```
+Input:
+root = [1], k = 1
+Output: 1
+
+Explanation: The nearest leaf node is the root node itself.
+```
+
+**Solution:**
+
+把树转化成一个无向图，用BFS从出发节点k去遍历无向图。找到leaf的最短路径。遇到第一个叶子节点返回其值即为最短。注意root如果一边为null，另一边不是的话不算是一个leaf。return前判断一下即可。
+
+用BFS遍历图的时候并不需要分层所以只需要一个loop就行。
+
+用任何order的travesal recursion都可以创建树。注意区分travesal和dfs，dfs是一种search方法，只要满足深度优先的搜索(注意是搜索而不是处理）就是dfs，这里的traverse任何一个位置都可以说是dfs。dfs经常用recursion来实现。
+
+```java
+public int findClosestLeaf(TreeNode root, int k) {
+    if (root.left == null && root.right == null) return 1;
+    Map<Integer, Set<Integer>> graph = new HashMap();
+    traverse(root, null, graph);
+    Queue<Integer> queue = new LinkedList<>();
+    Set<Integer> visited = new HashSet<>();
+    queue.add(k);
+    visited.add(k);
+    while (!queue.isEmpty()) {
+        int cur = queue.poll();
+        Set<Integer> set = graph.get(cur);
+        if (set.size() <= 1 && cur != root.val) return cur;
+        for (int m : set) {
+            if (!visited.contains(m)){
+                queue.offer(m);
+                visited.add(m);
+            }
+        }
+    }
+    return -1;
+}
+
+private void traverse(TreeNode root, TreeNode parent, Map<Integer, Set<Integer>> graph) {
+    if (root == null) return;
+    graph.put(root.val, new HashSet<>());
+    // 1. traverse(root.left, root, graph);
+    if (parent != null) graph.get(root.val).add(parent.val);
+    if (root.left != null) graph.get(root.val).add(root.left.val);
+    if (root.right != null) graph.get(root.val).add(root.right.val);
+    traverse(root.left, root, graph);
+    // 2.
+    traverse(root.right, root, graph);   
+    // 3. traverse(root.left, root, graph);
 }
 ```
 
