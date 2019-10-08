@@ -18,9 +18,22 @@ Explanation: Jump 1 step from index 0 to 1, then 3 steps to the last index.
 
 **Solution:**
 
-**Greedy** / DP(bottom up)/(top down) / dfs
+**Greedy O(n)/ DP(bottom up)/(top down) O($n^2$) / dfs O($2^n$)**
+
+DP 可以判断能不能跳到任意一个点。greedy只是判断了最后位置是不是good。
 
 从后向前贪心，如果能从i跳到lastPos 则跳，判断最终位置是不是0。
+
+Once we have our code in the bottom-up state, we can make one final, important observation. From a given position, when we try to see if we can jump to a *GOOD* position, we only ever use one - the first one (see the break statement). In other words, the left-most one. If we keep track of this left-most *GOOD* position as a separate variable, we can avoid searching for it in the array. Not only that, but we can stop using the array altogether.
+
+Iterating right-to-left, for each position we check if there is a potential jump that reaches a *GOOD* index (`currPosition + nums[currPosition] >= leftmostGoodIndex`). If we can reach a *GOOD* index, then our position is itself *GOOD*. Also, this new *GOOD* position will be the new leftmost *GOOD* index. Iteration continues until the beginning of the array. If first position is a *GOOD* index then we can reach the last index from the first position.
+
+To illustrate this scenario, we will use the diagram below, for input array `nums = [9, 4, 2, 1, 0, 2, 0]`. We write **G** for *GOOD*, **B** for *BAD* and **U** for *UNKNOWN*. Let's assume we have iterated all the way to position 0 and we need to decide if index 0 is *GOOD*. Since index 1 was determined to be *GOOD*, it is enough to jump there and then be sure we can eventually reach index 6. It does not matter that `nums[0]` is big enough to jump all the way to the last index. All we need is **one** way.
+
+| Index |  0   |  1   |  2   |  3   |  4   |  5   |  6   |
+| :---: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+| nums  |  9   |  4   |  2   |  1   |  0   |  2   |  0   |
+| memo  |  U   |  G   |  B   |  B   |  B   |  G   |  G   |
 
 ```java
 public boolean canJump(int[] nums) {
@@ -2315,6 +2328,76 @@ private void dfs(String S, int index, List<String> result, StringBuilder cur) {
         cur.append(c);
         dfs(S, index, result, cur);
         cur.delete(cur.length()-1, cur.length());
+    }
+}
+```
+
+### 1091. Shortest Path in Binary Matrix
+
+In an N by N square grid, each cell is either empty (0) or blocked (1).
+
+A *clear path from top-left to bottom-right* has length `k` if and only if it is composed of cells `C_1, C_2, ..., C_k` such that:
+
+- Adjacent cells `C_i` and `C_{i+1}` are connected 8-directionally (ie., they are different and share an edge or corner)
+- `C_1` is at location `(0, 0)` (ie. has value `grid[0][0]`)
+- `C_k` is at location `(N-1, N-1)` (ie. has value `grid[N-1][N-1]`)
+- If `C_i` is located at `(r, c)`, then `grid[r][c]` is empty (ie. `grid[r][c] == 0`).
+
+Return the length of the shortest such clear path from top-left to bottom-right.  If such a path does not exist, return -1.
+
+**Example 1:**
+
+```
+Input: [[0,1],[1,0]]
+Output: 2
+```
+
+**Solution:**
+
+8-way BFS
+
+1. 注意判断x,y exceeds the bound
+2. check if the positon is valid(grid[x] [y] == 0)
+3. 设置visited，不用再设置回去，因为一层一层保证进行到当前为止是最短距离。我们在加到queue之前判断visited，加到queue之后设置为visited。同一层的node具有相同的优先级。
+
+```java
+class Pair {
+    int x;
+    int y;
+    public Pair(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+class Solution {
+    int[][] directions = new int[][]{{-1,-1},{-1,0},{-1,1},{0,1},{0,-1},{1,1},{1,0},{1,-1}};
+    public int shortestPathBinaryMatrix(int[][] grid) {
+        if (grid == null || grid[0][0] == 1) return -1;
+        int n = grid.length;
+        if (grid[0][0] == 0 && n == 1) return 1;
+        boolean[][] visited = new boolean[n][n];
+        Queue<Pair> queue = new LinkedList<>();
+        queue.offer(new Pair(0,0));
+        visited[0][0] = true;
+        int level = 0;
+        while(!queue.isEmpty()) {
+            int size = queue.size();
+            ++level;
+            for (int i = 0; i < size; ++i) {
+                Pair cur = queue.poll();
+                for (int[] d : directions) {
+                    int newX = cur.x + d[0];
+                    int newY = cur.y + d[1];
+                    if (newX < 0 || newX >= n || newY < 0 || newY >= n || grid[newX][newY] == 1) continue;
+                    if (newX == n-1 && newY == n-1) return level+1;
+                    if (!visited[newX][newY]) {
+                        queue.offer(new Pair(newX, newY));
+                        visited[newX][newY] = true;
+                    }
+                }
+            }
+        }
+        return -1;
     }
 }
 ```
