@@ -1,5 +1,57 @@
 ## Google tag
 
+### 5. Longest Palindromic Substring
+
+Given a string **s**, find the longest palindromic substring in **s**. You may assume that the maximum length of **s** is 1000.
+
+**solution:**
+
+注意初始化（没看懂）、还有两个forloop怎么写。
+
+To improve over the brute force solution, we first observe how we can avoid unnecessary re-computation while validating palindromes. Consider the case "ababa". If we already knew that "bab" is a palindrome, it is obvious that "ababa" must be a palindrome since the two left and right end letters are the same.
+
+We define P(i,j)*P*(*i*,*j*) as following:
+
+P(i,j) = \begin{cases} \text{true,} &\quad\text{if the substring } S_i \dots S_j \text{ is a palindrome}\\ \text{false,} &\quad\text{otherwise.} \end{cases}*P*(*i*,*j*)={true,false,if the substring *S**i*…*S**j* is a palindromeotherwise.
+
+Therefore,
+
+P(i, j) = ( P(i+1, j-1) \text{ and } S_i == S_j )*P*(*i*,*j*)=(*P*(*i*+1,*j*−1) and *S**i*==*S**j*)
+
+The base cases are:
+
+P(i, i) = true*P*(*i*,*i*)=*t**r**u**e*
+
+P(i, i+1) = ( S_i == S_{i+1} )*P*(*i*,*i*+1)=(*S**i*==*S**i*+1)
+
+This yields a straight forward DP solution, which we first initialize the one and two letters palindromes, and work our way up finding all three letters palindromes, and so on...
+
+```java
+public String longestPalindrome(String s) {
+    if (s == null || s.length() == 0) return s;
+    int n = s.length();
+    char[] chars = s.toCharArray();
+    boolean[][] dp = new boolean[n][n];
+    int row = 0, col = 0;
+    for (int i = n - 1; i >= 0; --i) {
+        for (int j = i; j < n; ++j) {
+            // 初始化
+            if (j == i || (chars[i] == chars[j] && j-i <= 1)) {
+                dp[i][j] = true;
+            } else {
+                //通项公式
+                dp[i][j] = dp[i+1][j-1] && chars[i] == chars[j];
+            }
+            if (dp[i][j] && (j - i > col - row)) {
+                col = j;
+                row = i;
+            }
+        }
+    }
+    return s.substring(row, col+1);
+}
+```
+
 ### 55. Jump Game
 
 Given an array of non-negative integers, you are initially positioned at the first index of the array.
@@ -269,6 +321,35 @@ class Trie {
     private int charToIndex(char c) {
         return c - 'a';
     }
+}
+```
+
+### 213. House Robber II
+
+You are a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed. All houses at this place are **arranged in a circle.** That means the first house is the neighbor of the last one. Meanwhile, adjacent houses have security system connected and **it will automatically contact the police if two adjacent houses were broken into on the same night**.
+
+Given a list of non-negative integers representing the amount of money of each house, determine the maximum amount of money you can rob tonight **without alerting the police**.
+
+**Solution:**
+
+cycle的情况分是否rob第一个。用两个dp，dp1的通项公式有点不懂。
+
+```java
+public int rob(int[] nums) {
+    if (nums == null || nums.length == 0) return 0;
+    if (nums.length == 1) return nums[0];
+    int n = nums.length;
+    int[] dp1 = new int[nums.length];
+    int[] dp2 = new int[nums.length];
+
+    // rob nums[0]
+    dp1[1] =  nums[0];
+    dp2[1] = nums[1];
+    for (int i = 1; i < n - 1; ++i) {
+        dp1[i+1] = Math.max(dp1[i], dp1[i-1] + nums[i]);
+        dp2[i+1] = Math.max(dp2[i], dp2[i-1] + nums[i+1]);
+    }
+    return Math.max(dp1[n-1], dp2[n-1]);
 }
 ```
 
@@ -1034,6 +1115,85 @@ public boolean checkRecord(String s) {
         if(cntA > 1) return false;
     }
     return true;
+}
+```
+
+### *659. Split Array into Consecutive Subsequences
+
+Given an array `nums` sorted in ascending order, return `true` if and only if you can split it into 1 or more subsequences such that each subsequence consists of consecutive integers and has length at least 3.
+
+**Example 1:**
+
+```
+Input: [1,2,3,3,4,5]
+Output: True
+Explanation:
+You can split them into two consecutive subsequences : 
+1, 2, 3
+3, 4, 5
+```
+
+**Soluiton:**
+
+Greedy. 先把所有count存下，对于每一个num，去看能否把它加到当前存在的chain中，不能的话就propose一个新的chain(x,x+1,x+2)。tails[i]表示的是目前有一个chain以i-1结尾。 比如说1，2，3，3，4，5. 处理1的时候，把2，3的frequcny都-1，那么2就get不到，3的话不能加到当前的chain所以propose一个新的chain，把，4，5加进去。如果这两个条件都不能满足返回false。
+
+#### Opening and Closing Events
+
+We can think of the problem as drawing intervals on a number line. This gives us the idea of opening and closing events.
+
+To illustrate this concept, say we have `nums = [10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 13]`, with no `9`s and no `14`s. We must have two sequences start at 10, two sequences start at 11, and 3 sequences end at 12.
+
+In general, when considering a chain of consecutive integers `x`, we must have `C = count[x+1] - count[x]` sequences start at `x+1` when `C > 0`, and `-C` sequences end at `x` if `C < 0`. Even if there are more endpoints on the intervals we draw, there must be at least this many endpoints.
+
+With the above example, `count[11] - count[10] = 2` and `count[13] - count[12] = -3` show that two sequences start at `11`, and three sequences end at `12`.
+
+Also, if for example we know some sequences must start at time `1` and `4` and some sequences end at `5` and `7`, to maximize the smallest length sequence, we should pair the events together in the order they occur: ie., `1` with `5` and `4` with `7`.
+
+Call a *chain* a sequence of 3 or more consecutive numbers.
+
+Considering numbers `x` from left to right, if `x` can be added to a current chain, it's at least as good to add `x` to that chain first, rather than to start a new chain.
+
+Why? If we started with numbers `x` and greater from the beginning, the shorter chains starting from `x` could be concatenated with the chains ending before `x`, possibly helping us if there was a "chain" from `x` that was only length 1 or 2.
+
+**Algorithm**
+
+Say we have a count of each number, and let `tails[x]` be the number of chains ending right before `x`.
+
+Now let's process each number. If there's a chain ending before `x`, then add it to that chain. Otherwise, if we can start a new chain, do so.
+
+```java
+class Solution {
+    public boolean isPossible(int[] nums) {
+        Counter count = new Counter();
+        Counter tails = new Counter();
+        for (int x: nums) count.add(x, 1);
+
+        for (int x: nums) {
+            if (count.get(x) == 0) {
+                continue;
+            } else if (tails.get(x) > 0) {
+                tails.add(x, -1);
+                tails.add(x+1, 1);
+            } else if (count.get(x+1) > 0 && count.get(x+2) > 0) {
+                count.add(x+1, -1);
+                count.add(x+2, -1);
+                tails.add(x+3, 1);
+            } else {
+                return false;
+            }
+            count.add(x, -1);
+        }
+        return true;
+    }
+}
+class Counter extends HashMap<Integer, Integer> {
+    public int get(int k) {
+        return containsKey(k) ? super.get(k) : 0;
+    }
+    
+    public void add(int k, int v) {
+        put(k, get(k) + v);
+    }
 }
 ```
 
