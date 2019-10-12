@@ -434,6 +434,95 @@ public int countNodes(TreeNode root) {
 }
 ```
 
+### 241. Different Ways to Add Parentheses
+
+Given a string of numbers and operators, return all possible results from computing all the different possible ways to group numbers and operators. The valid operators are `+`, `-` and `*`.
+
+**Example 1:**
+
+```
+Input: "2-1-1"
+Output: [0, 2]
+Explanation: 
+((2-1)-1) = 0 
+(2-(1-1)) = 2
+```
+
+**Example 2:**
+
+```
+Input: "2*3-4*5"
+Output: [-34, -14, -10, -10, 10]
+Explanation: 
+(2*(3-(4*5))) = -34 
+((2*3)-(4*5)) = -14 
+((2*(3-4))*5) = -10 
+(2*((3-4)*5)) = -10 
+```
+
+**Solution:**
+
+先把数字和运算符分别存在两个arraylist中。
+
+dp[i] [j] 表示从第i个数字到第j个数字之间各种运算符所有可能出现的结果。dp[i] [j] 则是dp[i] [k] 和dp[k+1] [j]中的所有数字在第k个运算符下的所有的combination。i < k, k < j所以要知道dp[i] [j] 则必须知道dp[i] [k] 和dp[k+1] [j]，则i是从右向左走，j 是从i开始向右走，k是从i到j。
+
+在ops最后加一个+使得数字和运算符的个数相同。
+
+```java
+public List<Integer> diffWaysToCompute(String input) {
+    List<Integer> data = new ArrayList<>();
+    List<Character> ops = new ArrayList<>();
+
+    for (int i = 0; i < input.length();) {
+        if (input.charAt(i) == '+' || input.charAt(i) == '-' || input.charAt(i) == '*') {
+            ops.add(input.charAt(i));
+            ++i;
+        } else {
+            StringBuilder sb = new StringBuilder();
+            while (i < input.length() && input.charAt(i) != '+' && input.charAt(i) != '-' && input.charAt(i) != '*') {
+                sb.append(input.charAt(i));
+                ++i;
+            }
+            data.add(Integer.valueOf(sb.toString()));
+        }
+    }
+
+    ops.add('+');
+    int size = data.size();
+
+    //array of list 的定义方法
+    List<Integer>[][] dp = new List[size][size];
+    for (int i = 0; i < size; ++i) {
+        for (int j = 0; j < size; ++j) {
+            dp[i][j] = new ArrayList<>();
+        }
+    }
+    for (int i = size; i >= 0; --i) {
+        for (int j = i; j < size; ++j) {
+            // 初始化
+            if (i == j) { dp[i][j].add(data.get(i)); continue;}
+            for (int k = i; k < j; k++) {
+                for (int left : dp[i][k]) {
+                    for (int right : dp[k+1][j]) {
+                        int val = 0;
+                        switch (ops.get(k)) {
+                            // 别忘了break
+                            case '+' : val = left + right; break;
+                            case '-' : val = left - right; break;
+                            case '*' : val = left * right; break;
+                        }
+                        dp[i][j].add(val);
+                    }
+                }
+            }
+        }
+    }
+    return dp[0][size-1];
+}
+```
+
+
+
 ### 243. Shortest Word Distance
 
 Given a list of words and two words *word1* and *word2*, return the shortest distance between these two words in the list.
@@ -1221,6 +1310,77 @@ public int repeatedStringMatch(String A, String B) {
     if (sb.indexOf(B) >= 0) return cnt;
     if (sb.append(A).indexOf(B) >= 0) return cnt+1;
     return -1;
+}
+```
+
+### 767. Reorganize String
+
+Given a string `S`, check if the letters can be rearranged so that two characters that are adjacent to each other are not the same.
+
+If possible, output any possible result.  If not possible, return the empty string.
+
+**Example 1:**
+
+```
+Input: S = "aab"
+Output: "aba"
+```
+
+**Example 2:**
+
+```
+Input: S = "aaab"
+Output: ""
+```
+
+**Solution:**
+
+统计所有字母的count, count > (n+1) / 2 则不可能。
+
+用PriorityQueue来存letter 和 count的pair，按照count排序。
+
+每次poll两个字母下来(当前count最多和第二多的字母)，把这两个append上去，（保证了相邻两个不会相同），不能只poll一个。
+
+Time Complexity : O(NlogA) A为字母表的长度，即为26，每次poll，pq都要从剩下的中找到最大的，是logA的复杂度。
+
+注意定义PriorityQueue的排序。
+
+```java
+class Pair {
+    int count;
+    char letter;
+    public Pair(int ct, char ch) {
+        count = ct;
+        letter = ch;
+    }
+}
+class Solution {
+    public String reorganizeString(String S) {
+        int n = S.length();
+        int[] count = new int[26];
+        for (char c : S.toCharArray()) count[c - 'a']++;
+        PriorityQueue<Pair> pq = new PriorityQueue<Pair>((a,b) -> a.count == b.count ? a.letter - b.letter : b.count - a.count);
+        
+        for (int i = 0; i < 26; ++i) {
+            if (count[i] > 0) {
+                if (count[i] > (n+1)/2) return "";
+                pq.add(new Pair(count[i], (char)(i + 'a')));
+            }
+        }
+        
+        StringBuilder res = new StringBuilder();
+        while (pq.size() >= 2) {
+            Pair c1 = pq.poll();
+            Pair c2 = pq.poll();
+            res.append(c1.letter);
+            res.append(c2.letter);
+            if (--c1.count > 0) pq.add(c1);
+            if (--c2.count > 0) pq.add(c2);
+        }
+        
+        if (pq.size() > 0) res.append(pq.poll().letter);
+        return res.toString();
+    }
 }
 ```
 
