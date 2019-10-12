@@ -1,5 +1,41 @@
 ## Google tag
 
+### 3. Longest Substring Without Repeating Characters
+
+Given a string, find the length of the **longest substring** without repeating characters.
+
+**Example 1:**
+
+```
+Input: "abcabcbb"
+Output: 3 
+Explanation: The answer is "abc", with the length of 3. 
+```
+
+**Solution:**
+
+Sliding window, 用双指针i,j去指向不重复的字符串，window的两端。
+
+```java
+public int lengthOfLongestSubstring(String s) {
+    int n = s.length(), ans = 0;
+    int[] index = new int[128];
+    Arrays.fill(index, -1);
+    int i = 0;
+    //sliding window [i, j]
+    for (int j = 0; j < n; ++j) {
+        // 如果上次出现的s.charAt(j)在当前的sliding window中，则表明重复
+        if (index[s.charAt(j)] < i) {
+            ans = Math.max(ans, j - i + 1);
+        } else {
+            i = index[s.charAt(j)] + 1;
+        }
+        index[s.charAt(j)] = j;
+    }
+    return ans;
+}
+```
+
 ### 5. Longest Palindromic Substring
 
 Given a string **s**, find the longest palindromic substring in **s**. You may assume that the maximum length of **s** is 1000.
