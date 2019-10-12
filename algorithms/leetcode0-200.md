@@ -1,5 +1,3 @@
-# LeetCode Problems 0-200
-
 ### 2. Add Two Numbers
 
 You are given two **non-empty** linked lists representing two non-negative integers. The digits are stored in **reverse order** and each of their nodes contain a single digit. Add the two numbers and return it as a linked list.
@@ -46,26 +44,6 @@ public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
     return dummy_head.next;
 }
 ```
-
-
-
-### 3. Longest Substring Without Repeating Characters
-
-Given a string, find the length of the **longest substring** without repeating characters.
-
-**Example :**
-
-```
-Input: "abcabcbb" Output: 3 Explanation: The answer is "abc", with the length of 3. 
-Input: "bbbbb" Output: 1 Explanation: The answer is "b", with the length of 1.
-Input: "pwwkew" Output: 3 Explanation: The answer is "wke", with the length of 3. 
-            
-Note that the answer must be a substring, "pwke" is a subsequence and not a substring.
-```
-
-**Solution:**
-
-
 
 ### 13. Roman to Integer
 

@@ -2032,6 +2032,61 @@ private String afterBackspace(String s) {
 }
 ```
 
+### 855. Exam Room
+
+In an exam room, there are `N` seats in a single row, numbered `0, 1, 2, ..., N-1`.
+
+When a student enters the room, they must sit in the seat that maximizes the distance to the closest person.  If there are multiple such seats, they sit in the seat with the lowest number.  (Also, if no one is in the room, then the student sits at seat number 0.)
+
+Return a class `ExamRoom(int N)` that exposes two functions: `ExamRoom.seat()` returning an `int` representing what seat the student sat in, and `ExamRoom.leave(int p)` representing that the student in seat number `p` now leaves the room.  It is guaranteed that any calls to `ExamRoom.leave(p)` have a student sitting in seat `p`.
+
+**Solution:**
+
+We need a data structure to record which seats are not available. 并且在seat的时候要找到距离这些被坐的座位最大的距离的座位。在remove时候直接将这个座位remove出去就好。那么就是怎么找最大的距离，那就是找相邻两个座位并且其之间距离最大。这样我们就需要一个sorted data structure，为了方便online，我们不用sort，直接用treeset去记录当前坐了座位的index。
+
+Note：第一眼看到题straitforward 的想法有一个长度为N的array，array为true或者某个数表示有人，这样也行，但其实，没有人的座位不需要遍历，所以只记录坐人的座位的index就好了。
+
+找最大的距离，就是相邻两个距离，大则更新。注意第零个到第一个有人的位置和最后一个有人的位置到N-1.
+
+```java
+class ExamRoom {
+    int N;
+    TreeSet<Integer> students;
+    public ExamRoom(int N) {
+        this.N = N;
+        students = new TreeSet();
+    }
+    
+    public int seat() {
+        if (students.size() == 0) {
+            students.add(0);
+            return 0;
+        }
+        int student = 0;
+        int dist = students.first();
+        Integer prev = null;
+        for (Integer s : students) {
+            if (prev != null) {
+                int d = (s - prev) / 2;
+                if (d > dist) {
+                    dist = d;
+                    student = prev + d;
+                }
+            }
+            prev = s;
+        }
+        if (N - 1 - students.last() > dist) student = N - 1;
+        
+        students.add(student);
+        return student;
+    }
+    
+    public void leave(int p) {
+        students.remove(p);
+    }
+}
+```
+
 ### 889. Construct Binary Tree from Preorder and Postorder Traversal
 
 Return any binary tree that matches the given preorder and postorder traversals.
