@@ -468,6 +468,8 @@ dp[i] [j] 表示从第i个数字到第j个数字之间各种运算符所有可�
 
 在ops最后加一个+使得数字和运算符的个数相同。
 
+是典型的divide conquer的题，对于一个符号，分别算左边的和右边的然后把左右两边用此富豪连接起来。divide conquer要用recursion写。
+
 ```java
 public List<Integer> diffWaysToCompute(String input) {
     List<Integer> data = new ArrayList<>();
