@@ -1459,6 +1459,43 @@ public int repeatedStringMatch(String A, String B) {
 }
 ```
 
+### 702. Search in a Sorted Array of Unknown Size
+
+Given an integer array sorted in ascending order, write a function to search `target` in `nums`.  If `target` exists, then return its index, otherwise return `-1`. **However, the array size is unknown to you**. You may only access the array using an `ArrayReader` interface, where `ArrayReader.get(k)` returns the element of the array at index `k` (0-indexed).
+
+You may assume all integers in the array are less than `10000`, and if you access the array out of bounds, `ArrayReader.get` will return `2147483647`. 
+
+**Solution:**
+
+对于这种sorted实际上是单调递增的去找去判断等问题，binary search。由于右边界未知，所以本题先找右边界然后再binary search。
+
+```java
+public int search(ArrayReader reader, int target) {
+    if (reader.get(0) == target) return 0;
+
+    // search boundaries
+    int left = 0, right = 1;
+    while (reader.get(right) < target) {
+      left = right;
+      right <<= 1;
+    }
+
+    // binary search
+    int pivot, num;
+    while (left <= right) {
+      pivot = left + ((right - left) >> 1);
+      num = reader.get(pivot);
+
+      if (num == target) return pivot;
+      if (num > target) right = pivot - 1;
+      else left = pivot + 1;
+    }
+
+    // there is no target element
+    return -1;
+}
+```
+
 ### 767. Reorganize String
 
 Given a string `S`, check if the letters can be rearranged so that two characters that are adjacent to each other are not the same.
