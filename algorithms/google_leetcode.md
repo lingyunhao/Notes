@@ -2081,6 +2081,51 @@ private String afterBackspace(String s) {
 }
 ```
 
+### 846. Hand of Straights
+
+Alice has a `hand` of cards, given as an array of integers.
+
+Now she wants to rearrange the cards into groups so that each group is size `W`, and consists of `W` consecutive cards.
+
+Return `true` if and only if she can.
+
+**Example 1:**
+
+```
+Input: hand = [1,2,3,6,2,3,4,7,8], W = 3
+Output: true
+Explanation: Alice's hand can be rearranged as [1,2,3],[2,3,4],[6,7,8].
+```
+
+**Solution:**
+
+TreeMap brute force(straight forward)
+
+既要order又要search -> TreeMap
+
+```java
+public boolean isNStraightHand(int[] hand, int W) {
+    TreeMap<Integer, Integer> count = new TreeMap();
+    for (int card : hand) {
+        if (!count.containsKey(card)) count.put(card,1);
+             // treemap replace
+        else count.replace(card, count.get(card) + 1);
+    }
+
+    while (count.size() > 0) {
+        int first = count.firstKey();
+        for (int card = first; card < first + W; ++card) {
+            if (!count.containsKey(card)) return false;
+            int c = count.get(card);
+            if (c == 1) count.remove(card);
+            else count.replace(card, c - 1);
+        }
+    }
+
+    return true;
+}
+```
+
 ### 855. Exam Room
 
 In an exam room, there are `N` seats in a single row, numbered `0, 1, 2, ..., N-1`.
@@ -2206,6 +2251,82 @@ class Solution {
         root.left = make(iPre+1, iPost, L, pre, post);
         root.right = make(iPre+L+1, iPost+L, N-1-L, pre, post);
         return root;
+    }
+}
+```
+
+### 934.Shortest Bridge
+
+In a given 2D binary array `A`, there are two islands.  (An island is a 4-directionally connected group of `1`s not connected to any other 1s.)
+
+Now, we may change `0`s to `1`s so as to connect the two islands together to form 1 island.
+
+Return the smallest number of `0`s that must be flipped.  (It is guaranteed that the answer is at least 1.)
+
+**Solution:**
+
+用dfs去找到一个岛，并把这个岛标为2，同时把岛的边界（外面一圈为0的pair）加到queue中。
+
+以第一个岛外围的0作为第一层开始bfs直到找到第二个岛为止。
+
+```java
+class Pair {
+    int x;
+    int y;
+    public Pair(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+class Solution {
+    public int[][] directions = new int[][]{{-1,0},{1,0},{0,1},{0,-1}};
+    public int shortestBridge(int[][] A) {
+        if (A == null || A.length == 0) return 0;
+        int m = A.length, n = A[0].length;
+        Queue<Pair> queue = new LinkedList<>();
+        boolean found = false;
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (A[i][j] == 1) {
+                    dfs(A, i, j, m, n, queue);
+                    found = true;
+                    break;
+                }
+            }
+            if (found) break;
+        }
+        int path = 0;
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            path++;
+            for (int i = 0; i < size; ++i) {
+                Pair p = queue.poll();
+                for (int[] d : directions) {
+                    int newx = p.x + d[0];
+                    int newy = p.y + d[1];
+                    if (newx < 0 || newx >= m || newy < 0 || newy >= n || A[newx][newy] == 2) continue;
+                    if (A[newx][newy] == 1) return path;
+                    A[newx][newy] = 2;
+                    queue.add(new Pair(newx, newy));
+                }
+            }
+        }
+        return path;
+    }
+    
+    //find an island
+    private void dfs(int[][] A, int i, int j, int m, int n, Queue<Pair> queue) {
+        if (A[i][j] == 0) { 
+            queue.add(new Pair(i, j)); 
+            return; 
+        }
+        if (A[i][j] == 2) return;
+        A[i][j] = 2;
+        for (int[] d : directions) {
+            if (i + d[0] >= 0 && i + d[0] < m && j + d[1] >= 0 && j + d[1] < n) {
+                dfs(A, i + d[0], j + d[1], m, n, queue);
+            }
+        }
     }
 }
 ```
