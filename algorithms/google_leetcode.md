@@ -1760,6 +1760,70 @@ public int networkDelayTime(int[][] times, int N, int K) {
 }
 ```
 
+### 792. Number of Matching Subsequences
+
+Given string `S` and a dictionary of words `words`, find the number of `words[i]` that is a subsequence of `S`.
+
+```
+Example :
+Input: 
+S = "abcde"
+words = ["a", "bb", "acd", "ace"]
+Output: 3
+Explanation: There are three words in words that are a subsequence of S: "a", "acd", "ace".
+```
+
+**Solution:**
+
+Brute force 是可以对每个word去S中找。这样S会被重复words.length遍。Since the length of `S` is large, let's think about ways to iterate through `S` only once, instead of many times as in the brute force solution.
+
+**注意本题是subsequence而不是substring所以要新建一个Node以及index去存当前走到word的哪一位char了**
+
+We can put words into buckets by starting character. If for example we have `words = ['dog', 'cat', 'cop']`, then we can group them `'c' : ('cat', 'cop'), 'd' : ('dog',)`. This groups words by what letter they are currently waiting for. Then, while iterating through letters of `S`, we will move our words through different buckets. 
+
+用一些bucktes（heads）去存以这个字母开头的单词有哪些，然后遍历S时，每一位char，找到相应的bucket，把buket的index向后移一位，如果移到头了说明存在，没有移到头，把这个word加到以下一位char为head的bucket中。
+
+```java
+class Solution {
+    public int numMatchingSubseq(String S, String[] words) {
+        int ans = 0;
+        // 注意声明一个arraylist数组的方法
+        ArrayList<Node>[] heads = new ArrayList[26];
+        for (int i = 0; i < 26; ++i)
+            heads[i] = new ArrayList<Node>();
+
+        for (String word: words)
+            heads[word.charAt(0) - 'a'].add(new Node(word, 0));
+
+        for (char c: S.toCharArray()) {
+            ArrayList<Node> old_bucket = heads[c - 'a'];
+            heads[c - 'a'] = new ArrayList<Node>();
+
+            for (Node node: old_bucket) {
+                node.index++;
+                if (node.index == node.word.length()) {
+                    ans++;
+                } else {
+                    heads[node.word.charAt(node.index) - 'a'].add(node);
+                }
+            }
+            old_bucket.clear();
+        }
+        return ans;
+    }
+
+}
+
+class Node {
+    String word;
+    int index;
+    public Node(String w, int i) {
+        word = w;
+        index = i;
+    }
+}
+```
+
 ### 809. Expressive Words
 
 Sometimes people repeat letters to represent extra feeling, such as "hello" -> "heeellooo", "hi" -> "hiiii".  In these strings like "heeellooo", we have *groups* of adjacent letters that are all the same:  "h", "eee", "ll", "ooo".
