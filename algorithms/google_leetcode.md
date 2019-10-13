@@ -1132,6 +1132,55 @@ public int maxSumSubmatrix(int[][] matrix, int k) {
 }
 ```
 
+### 369. Plus One Linked List
+
+Given a non-negative integer represented as **non-empty** a singly linked list of digits, plus one to the integer.
+
+You may assume the integer do not contain any leading zero, except the number 0 itself.
+
+The digits are stored such that the most significant digit is at the head of the list.
+
+**Example :**
+
+```
+Input: [1,2,3]
+Output: [1,2,4]
+```
+
+**Solution:**
+
+不可以遍历list得到int num然后num+1，再变回去，int会溢出。
+
+普遍答案是用recursion写，这样就不用reverse，直接处理最后的个位，然后一路带着carry返回。recursion函数表示的是，已经处理好的上一位(prev)返回了其进位，然后把自己的node改成相应的val，再返回前一位自己有没有进位。
+
+```java
+public ListNode plusOne(ListNode head) {
+    int carry = add(head);
+    if (carry == 1) {
+        ListNode carryNode = new ListNode(1);
+        carryNode.next = head;
+        return carryNode;
+    }
+    return head;
+
+}
+
+//recursion定义：改变当前node的val（前一位的进位+node.val)，返回这一位有没有进位
+int add(ListNode node) {
+    // recursion 出口
+    if (node.next == null) {
+        int sum = node.val + 1;
+        node.val = sum % 10;
+        return sum / 10;
+    }
+    // 递推关系 与下一位的关系
+    int nextResult = add(node.next);
+    int sum = nextResult + node.val;
+    node.val = sum % 10;
+    return sum /10; 
+}
+```
+
 ### 482. License Key Formatting
 
 You are given a license key represented as a string S which consists only alphanumeric character and dashes. The string is separated into N+1 groups by N dashes.
