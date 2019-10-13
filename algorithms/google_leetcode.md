@@ -191,6 +191,65 @@ public int[][] merge(int[][] intervals) {
 }
 ```
 
+### 85. Maximal Rectangle
+
+Given a 2D binary matrix filled with 0's and 1's, find the largest rectangle containing only 1's and return its area.
+
+**Example:**
+
+```
+Input:
+[
+  ["1","0","1","0","0"],
+  ["1","0","1","1","1"],
+  ["1","1","1","1","1"],
+  ["1","0","0","1","0"]
+]
+Output: 6
+```
+
+**Solution:**
+
+Trivially we can enumerate every possible rectangle. This is done by iterating over all possible combinations of coordinates `(x1, y1)` and `(x2, y2)` and letting them define a rectangle with the coordinates being opposite corners. BruteForce的Time Complexity 是O($n^3$*$m^3$)  = O($n^2$$m^2$)(*find a rectangle) O(nm) (compute the sum)。
+
+We can compute the maximum width of a rectangle that ends at a given coordinate in constant time. We do this by keeping track of the number of consecutive ones each square in each row. As we iterate over each row we update the maximum possible width at that point. This is done using `row[i] = row[i - 1] + 1 if row[i] == '1'`.
+
+Once we know the maximum widths for each point above a given point, we can compute the maximum rectangle with the lower right corner at that point in linear time. As we iterate up the column, we know that the maximal width of a rectangle spanning from the original point to the current point is the running minimum of each maximal width we have encountered.
+
+We define:
+
+maxWidth = min(maxWidth, widthHere)*m**a**x**W**i**d**t**h*=*m**i**n*(*m**a**x**W**i**d**t**h*,*w**i**d**t**h**H**e**r**e*)
+
+curArea = maxWidth * (currentRow - originalRow + 1)*c**u**r**A**r**e**a*=*m**a**x**W**i**d**t**h*∗(*c**u**r**r**e**n**t**R**o**w*−*o**r**i**g**i**n**a**l**R**o**w*+1)
+
+maxArea = max(maxArea, curArea)*m**a**x**A**r**e**a*=*m**a**x*(*m**a**x**A**r**e**a*,*c**u**r**A**r**e**a*)
+
+先累积求一行的最大宽度，然后以当前的格子为右下角，向上遍历列，找到以当前格子为右下角的最大面积。为0什么都不做。
+
+```java
+public int maximalRectangle(char[][] matrix) {
+    if (matrix.length == 0) return 0;
+    int m = matrix.length, n = matrix[0].length;
+    int[][] dp = new int[m][n];
+    int maxArea = 0;
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (matrix[i][j] == '1') {
+                // compute the maximum width and update dp with it
+                dp[i][j] = j == 0 ? 1 : dp[i][j-1] + 1;
+            }
+            int width = dp[i][j];
+            // compute the maximum area rectangle with a lower right corner at [i, j]
+            for (int k = i; k >= 0; k--) {
+                width = Math.min(width, dp[k][j]);
+                maxArea = Math.max(maxArea, width * ((i-k) + 1));
+            }
+        }
+    }
+    return maxArea;
+}
+```
+
 ### 171. Excel Sheet Column Number
 
 Given a column title as appear in an Excel sheet, return its corresponding column number.
