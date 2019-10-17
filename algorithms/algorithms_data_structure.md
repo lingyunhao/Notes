@@ -474,6 +474,14 @@ Explanation: T is "aa" which its length is 2.
 
 sliding window + map, map 存每个字母rightmost position, 用一个sliding window(left,right)去维持一个distince character少于k的substring，并且相对应一个map。
 
+当size超过k，说明新的字母来了。所以要删掉map中字符中rightmost最靠左的character。并且把left移到右边。
+
+注意这里不能简单的left+1，画图可知。
+
+这里的map可以用 unorderedmap也就是hashmap，或者ordered map方便找最小的value，linkedhashmap，或者treemap。
+
+**Sliding window + hash map**
+
 ```java
 public int lengthOfLongestSubstringKDistinct(String s, int k) {
     int n = s.length();
@@ -493,6 +501,48 @@ public int lengthOfLongestSubstringKDistinct(String s, int k) {
         max = Math.max(max, right - left);
     }
     return max;
+}
+```
+
+**Sliding window + linkedhashmap**
+
+```java
+class Solution {
+  public int lengthOfLongestSubstringKDistinct(String s, int k) {
+    int n = s.length();
+    if (n*k == 0) return 0;
+
+    // sliding window left and right pointers
+    int left = 0;
+    int right = 0;
+    // hashmap character -> its rightmost position 
+    // in the sliding window
+    LinkedHashMap<Character, Integer> hashmap = new LinkedHashMap<Character, Integer>(k + 1);
+
+    int max_len = 1;
+
+    while (right < n) {
+      Character character = s.charAt(right);
+      // if character is already in the hashmap -
+      // delete it, so that after insert it becomes
+      // the rightmost element in the hashmap
+      if (hashmap.containsKey(character))
+        hashmap.remove(character);
+      hashmap.put(character, right++);
+
+      // slidewindow contains k + 1 characters
+      if (hashmap.size() == k + 1) {
+        // delete the leftmost character
+        Map.Entry<Character, Integer> leftmost = hashmap.entrySet().iterator().next();
+        hashmap.remove(leftmost.getKey());
+        // move left pointer of the slidewindow
+        left = leftmost.getValue() + 1;
+      }
+
+      max_len = Math.max(max_len, right - left);
+    }
+    return max_len;
+  }
 }
 ```
 
@@ -1308,6 +1358,8 @@ DFS在inplement时，要注意以下问题：
 
 找出所有方案的题，一般是DFS，DFS经常是排列、组合的题。一般DFS可以用recursion实现，（如果面试官不要求用non-recursion的办法写DFS的话）
 
+DFS广泛用于树和图中，或者可以转化为树和图的问题。
+
 **Recursion三要素**
 
 * 递归的定义（递归函数求的是什么，完成了什么功能，类似dp[i]表示什么）
@@ -1320,7 +1372,7 @@ DFS在inplement时，要注意以下问题：
 
 问题模型：求出所有满足条件的组合
 
-判断条件：组合中的元素是顺序无关的（有关的事排列）
+判断条件：组合中的元素是顺序无关的（有关的是排列）
 
 时间复杂度：与O($2^n$)有关
 
@@ -1336,9 +1388,28 @@ DFS在inplement时，要注意以下问题：
 
 BackTracking 属于DFS ：
 
+- 普通 DFS 主要用在 **可达性问题** ，这种问题只需要执行到特点的位置然后返回即可。
+- 而 Backtracking 主要用于求解 **排列组合** 问题，例如有 { 'a','b','c' } 三个字符，求解所有由这三个字符排列得到的字符串，这种问题在执行到特定的位置返回之后还会继续执行求解过程。
+
+因为 Backtracking 不是立即就返回，而要继续求解，因此在程序实现时，需要注意对元素的标记问题：
+
+- 在访问一个新元素进入新的递归调用时，需要将新元素标记为已经访问，这样才能在继续递归调用时不用重复访问该元素；
+- 但是在递归返回时，需要将元素标记为未访问，因为只需要保证在一个递归链中不同时访问一个元素，可以访问已经访问过但是不在当前递归链中的元素。
+
+Backtracking 修改一般有两种情况，一种是**修改最后一位输出**，比如排列组合；一种是**修改访问标记**，比如矩阵里搜字符串。
+
 **普通DFS examples(不需要backtracking):**
 
 DFS可以用来求最大面积，求方案总数等等（同dp）。
+
+**判断有向图是否存在环**
+
+1. dfs 记录每个遍历过的结点的父结点，若一个结点被再次遍历且父结点不同于上次遍历时的父结点，说明存在环。
+2. topological sort。 If finally there exist node whose indegree is not 0 means there's a cycle
+
+**判断无向图是否存在环**
+
+union and find
 
 **695. Max Area of Island**
 
@@ -1908,3 +1979,10 @@ while (fast.next != null && fast.next.next != null) {
 
 
 
+### 待学习知识点
+
+dfs non-recursion写法（stack)
+
+sort(merge,quick selection,bucket etc.)
+
+topological sort(bfs)
