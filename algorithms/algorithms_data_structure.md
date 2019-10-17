@@ -88,6 +88,51 @@ public int candy(int[] ratings) {
 }
 ```
 
+**406. Queue Reconstruction by Height**
+
+Suppose you have a random list of people standing in a queue. Each person is described by a pair of integers `(h, k)`, where `h` is the height of the person and `k` is the number of people in front of this person who have a height greater than or equal to `h`. Write an algorithm to reconstruct the queue.
+
+**Note:**
+The number of people is less than 1,100.
+
+**Example**
+
+```
+Input:
+[[7,0], [4,4], [7,1], [5,0], [6,1], [5,2]]
+
+Output:
+[[5,0], [7,0], [5,2], [6,1], [4,4], [7,1]]
+```
+
+**Solution:**
+
+Greedy，总是优先排搞身高高的，因为矮的对于高的来说是 invisible的，所以顺序是对的。
+
+ The smaller persons are "invisible" for the taller ones, and hence one could first arrange the tallest guys as if there was no one else.
+
+- Sort people:
+  - In the descending order by height.
+  - Among the guys of the same height, in the ascending order by k-values.
+- Take guys one by one, and place them in the output array at the indexes equal to their k-values.
+- Return output array.
+
+```java
+public int[][] reconstructQueue(int[][] people) {
+    Arrays.sort(people, new Comparator<int[]>() {
+        public int compare(int[] a, int[] b) {
+            return a[0] == b[0] ? a[1] - b[1] : b[0] - a[0];
+        }
+    });
+    List<int[]> res = new LinkedList<>();
+    for (int[] p : people) {
+        res.add(p[1],p);
+    }
+    int n = people.length;
+    return res.toArray(new int[n][2]);
+}
+```
+
 **435. Non-overlapping Intervals**
 
 Given a collection of intervals, find the minimum number of intervals you need to remove to make the rest of the intervals non-overlapping.
@@ -147,7 +192,9 @@ public int findMinArrowShots(int[][] points) {
 
 题目描述：判断一个数组能不能只修改一个数就成为非递减数组。
 
-在出现 nums[i] < nums[i - 1] 时，需要考虑的是应该修改数组的哪个数，使得本次修改能使 i 之前的数组成为非递减数组，并且不影响后续的操作 。优先考虑令 nums[i - 1] = nums[i]，因为如果修改 nums[i] = nums[i - 1] 的话，那么 nums[i] 这个数会变大，就有可能比 nums[i + 1] 大，从而影响了后续操作。还有一个比较特别的情况就是 nums[i] < nums[i - 2]，只修改 nums[i - 1] = nums[i] 不能使数组成为非递减数组，只能修改 nums[i] = nums[i - 1]。
+这种两边矛盾的问题，让一边固定下来，另一遍去操作。
+
+在出现 nums[i] < nums[i - 1] 时，需要考虑的是应该修改数组的哪个数，使得本次修改能使 i 之前的数组成为非递减数组，并且不影响后续的操作 。**优先考虑令 nums[i - 1] = nums[i]，因为如果修改 nums[i] = nums[i - 1] 的话，那么 nums[i] 这个数会变大，就有可能比 nums[i + 1] 大**，从而影响了后续操作。还有一个比较特别的情况就是 nums[i] < nums[i - 2]，只修改 nums[i - 1] = nums[i] 不能使数组成为非递减数组，只能修改 nums[i] = nums[i - 1]。
 
 ```java
 public boolean checkPossibility(int[] nums) {
