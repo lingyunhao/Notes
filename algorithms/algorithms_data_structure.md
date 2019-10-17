@@ -20,6 +20,108 @@ O($2^n$) 与组合有关的搜索
 
 O(n!) 与排列有关的搜索
 
+### Greedy 
+
+保证每次操作都是局部最优的，并且结果也是最优的。
+
+**455. Assign Cookies**
+
+给一些孩子分配饼干，饼干有size，孩子有满足度，只有size>=满足度孩子才content，给一些饼干和孩子，求最多能content的孩子。每个孩子最多一个饼干。
+
+**Solution:**
+
+贪心策略，从满足度最小的孩子开始分起，从最小size的饼干开始分起，这样就可以留更多的饼干给后边的孩子。
+
+```java
+public int findContentChildren(int[] g, int[] s) {
+    Arrays.sort(g);
+    Arrays.sort(s);
+    int gi=0,si=0;
+    while(gi < g.length && si < s.length) { 
+        if(g[gi] <= s[si]){
+            gi++;
+        }
+        si++;
+    }
+    return gi;
+}
+```
+
+**135. Candy**
+
+There are *N* children standing in a line. Each child is assigned a rating value.
+
+You are giving candies to these children subjected to the following requirements:
+
+- Each child must have at least one candy.
+- Children with a higher rating get more candies than their neighbors.
+
+What is the minimum candies you must give?
+
+**Solution:**
+
+Greedy, 遍历ratings，只要rating比前一个大，那么久更新candies到前一个的糖果个数+1。因为这道题需要满足两边的关系，所以从左往右扫一遍还要从右往左扫一遍。
+
+从左向右，保证右边的比左边的大的分配更多，从右往左，保证左边的比右边大的分配更多。注意第二遍本来就多的话就不用在分配了。
+
+因为每个人至少一个candy，先给数组全分配1.
+
+```java
+public int candy(int[] ratings) {
+    int  n = ratings.length;
+    int[] candies = new int[n];
+    Arrays.fill(candies,1);
+    for (int i = 1; i < n; ++i) {
+        if (ratings[i] > ratings[i-1]) {
+            candies[i] = candies[i-1] + 1;
+        }
+    }
+    int res = candies[n-1];
+    for (int i = n-2; i >=0; --i) {
+        // 本来就满足关系的话就不用再分配了。
+        if (ratings[i] > ratings[i+1] && candies[i] <= candies[i+1]) {
+            candies[i] = candies[i+1] + 1;
+        }
+        res += candies[i];
+    }
+   return res;
+}
+```
+
+**435. Non-overlapping Intervals**
+
+Given a collection of intervals, find the minimum number of intervals you need to remove to make the rest of the intervals non-overlapping.
+
+**Solution:**
+
+计算能组成的最多的不重叠区间，用总长度减去能组成的最多的不重叠区间的个数。
+
+想要组成最多的不重叠区间，那么结尾很重要，每次贪心的选择结尾小的，就能给后边留更多的空间。
+
+**按照end从小到大排序。每次贪心的选择结尾小的，就能给后边留更多的空间**
+
+```java
+public int eraseOverlapIntervals(int[][] intervals) {
+    if(intervals.length == 0) return 0;
+    Arrays.sort(intervals, new Comparator<int[]>() {
+        public int compare(int[] i1, int[] i2) {
+            return i1[1] - i2[1];
+        }
+    });
+    // 第一个肯定被选
+    int cnt=1;
+    int end = intervals[0][1];
+    for(int i=1; i<intervals.length; i++) {
+        if(intervals[i][0] < end){
+            continue;
+        }
+        end = intervals[i][1];
+        cnt++;
+    }
+    return intervals.length - cnt;
+}
+```
+
 ### Binary Search
 
 **Time Complexity : O(logn)**  
@@ -1276,8 +1378,6 @@ public int lengthOfLIS(int[] nums) {
     return result;
 }
 ```
-
-
 
 **413. Arithmetic Slices**
 
