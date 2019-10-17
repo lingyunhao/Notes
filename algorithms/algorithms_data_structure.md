@@ -214,7 +214,57 @@ public boolean checkPossibility(int[] nums) {
 
 ### Two Pointers
 
+双指针主要用于遍历数组，两个指针指向不同的元素，从而协同完成任务。有通向双指针、相向双指针。若两个指针指向同一数组、遍历方向相同且不会相交，则也称为**滑动窗口**。
 
+**633. Sum of Square Numbers**
+
+Given a non-negative integer `c`, your task is to decide whether there're two integers `a` and `b` such that a2 + b2 = c.
+
+**Solution:**
+
+找到左右界限。注意区分 two pointer 和 binary search， 他们都是有隐形递增，两个端点移动，但bs是通过某种条件排除一般的candidate，需要求mid，tp只是左右端点++- -的。
+
+```java
+public boolean judgeSquareSum(int c) {
+    int i = 0, j = (int)Math.sqrt(c);
+    while(i<=j) {
+        int powerSum = i*i+j*j;
+        if (powerSum == c) return true;
+        else if (powerSum < c) i++;
+        else j--;
+    }
+    return false;
+}
+```
+
+**345. Reverse Vowels of a String**
+
+Write a function that takes a string as input and reverse only the vowels of a string.
+
+**Solution:**
+
+使用双指针，指向待反转的两个元音字符，一个指针从头向尾遍历，一个指针从尾到头遍历。
+
+```java
+private static final HashSet<Character> vowels = new HashSet<>(Arrays.asList('a', 'e', 'i', 'o', 'u','A', 'E', 'I', 'O', 'U'));
+public String reverseVowels(String s) {
+    int i = 0, j = s.length()-1;
+    char[] ret = new char[s.length()];
+    while(i<=j) {
+        char ci = s.charAt(i);
+        char cj = s.charAt(j);
+        if(!vowels.contains(ci)){
+            ret[i++] = ci;
+        } else if(!vowels.contains(cj)) {
+            ret[j--] = cj;
+        } else {
+            ret[i++] = cj;
+            ret[j--] = ci;
+        }
+    }
+    return new String(ret);
+}
+```
 
 ### Binary Search
 
