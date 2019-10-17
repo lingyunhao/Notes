@@ -216,6 +216,34 @@ public boolean checkPossibility(int[] nums) {
 
 双指针主要用于遍历数组，两个指针指向不同的元素，从而协同完成任务。有通向双指针、相向双指针。若两个指针指向同一数组、遍历方向相同且不会相交，则也称为**滑动窗口**。
 
+linked list问题经常会用双指针。尤其是快慢指针。
+
+#### 快慢指针
+
+slow和fast都从head开始，根据判断条件的不同，最后slow的位置不同，如果linked list长度为奇数，来年各种功能写法是一样的最后都停在中间的位置上，如果为偶数则不同。（记不住时，举个栗子）
+
+```java
+// version 1
+// [1,2,3,4] slow 停在 3
+// [1,2,3,4,5] slow 停在 3
+ListNode slow = head;
+ListNode fast = head;
+while (fast != null && fast.next != null) {
+  slow = slow.next;
+  fast = fast.next.next;
+}
+
+// version 2
+// [1,2,3,4] slow 停在 2
+// [1,2,3,4,5] slow 停在 3
+ListNode slow = head;
+ListNode fast = head;
+while (fast.next != null && fast.next.next != null) {
+  slow = slow.next;
+  fast = fast.next.next;
+}
+```
+
 **633. Sum of Square Numbers**
 
 Given a non-negative integer `c`, your task is to decide whether there're two integers `a` and `b` such that a2 + b2 = c.
@@ -263,6 +291,117 @@ public String reverseVowels(String s) {
         }
     }
     return new String(ret);
+}
+```
+
+**680. Valid Palindrome II**
+
+Given a non-empty string `s`, you may delete **at most** one character. Judge whether you can make it a palindrome.
+
+**Solution:**
+
+遇到不相同的位置，去判断删除i还是j。
+
+```java
+public boolean validPalindrome(String s) {
+    int i = -1, j = s.length();
+    while(i++ < j--) {
+        if(s.charAt(i) != s.charAt(j)) {
+            return isPalindrome(s, i, j-1) || isPalindrome(s, i+1, j);
+        }
+    }
+    return true;
+}
+private boolean isPalindrome(String s, int i, int j) {
+    while(i < j) {
+        if(s.charAt(i++) != s.charAt(j--)) {
+            return false;
+        }
+    }
+    return true;
+}
+```
+
+**88. Merge Sorted Array**
+
+```
+Input:
+nums1 = [1,2,3,0,0,0], m = 3
+nums2 = [2,5,6],       n = 3
+Output: [1,2,2,3,5,6]
+```
+
+**Solution:**
+
+倒着归并到nums1，最后归并剩下的那个数组。
+
+```java
+public void merge(int[] nums1, int m, int[] nums2, int n) {
+    int index1 = m-1, index2 = n-1, indexMerge = m+n-1;
+    while (index1>=0 || index2>=0) {
+        if(index1 < 0) {
+            nums1[indexMerge--] = nums2[index2--];
+        } else if (index2 < 0) {
+            nums1[indexMerge--] = nums1[index1--];
+        } else if (nums1[index1] > nums2[index2]) {
+            nums1[indexMerge--] = nums1[index1--];
+        } else {
+            nums1[indexMerge--] = nums2[index2--];
+        }
+    }
+}
+```
+
+**142. Linked List Cycle II**
+
+Given a linked list, return the node where the cycle begins. If there is no cycle, return `null`.
+
+To represent a cycle in the given linked list, we use an integer `pos` which represents the position (0-indexed) in the linked list where tail connects to. If `pos` is `-1`, then there is no cycle in the linked list.
+
+**Solution：**
+
+**Example 1:**
+
+```
+Input: head = [3,2,0,-4], pos = 1
+Output: tail connects to node index 1
+Explanation: There is a cycle in the linked list, where tail connects to the second node.
+```
+
+![img](https://assets.leetcode.com/uploads/2018/12/07/circularlinkedlist.png)
+
+**Example 2:**
+
+```
+Input: head = [1,2], pos = 0
+Output: tail connects to node index 0
+Explanation: There is a cycle in the linked list, where tail connects to the first node.
+```
+
+![img](https://assets.leetcode.com/uploads/2018/12/07/circularlinkedlist_test2.png)
+
+**Solution:**
+
+使用双指针，一个指针每次移动一个节点，一个指针每次移动两个节点，如果存在环，那么这两个指针一定会相遇。相遇后把其中一个指针放到链表头，再同速前进，最后相遇的位置即为环路节点。
+
+注意corner case： example 2，判断是否存在环路等
+
+```java
+public ListNode detectCycle(ListNode head) {
+    if (head == null || head.next == null) return null;
+    ListNode slow = head, fast = head;
+    do {
+        // 判断是否存在环路
+        if (fast == null || fast.next == null) return null;
+        slow = slow.next;
+        fast = fast.next.next;
+    } while (slow != fast);
+    slow = head;
+    while (slow != fast) {
+        slow = slow.next;
+        fast = fast.next;
+    }
+    return slow;
 }
 ```
 
