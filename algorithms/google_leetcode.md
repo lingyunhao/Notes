@@ -250,6 +250,55 @@ public int maximalRectangle(char[][] matrix) {
 }
 ```
 
+### 130. Surrounded Regions
+
+Given a 2D board containing `'X'` and `'O'` (**the letter O**), capture all regions surrounded by `'X'`.
+
+A region is captured by flipping all `'O'`s into `'X'`s in that surrounded region.
+
+**Example:**
+
+```
+X X X X
+X O O X
+X X O X
+X O X X
+```
+
+**Solution:**
+
+先用dfs把最外围的联通量改成另一个字母'T',然后把里边的'O'全改为'X',最后把'T'全部改回来。
+
+```java
+public void solve(char[][] board) {
+    if (board == null || board.length == 0) return;
+    int m = board.length, n = board[0].length;
+    for (int i = 0; i < m; ++i) {
+        dfs(board, i, 0, m, n);
+        dfs(board, i, n-1, m, n);
+    }
+    for (int i = 0; i < n; ++i) {
+        dfs(board, 0, i, m, n);
+        dfs(board, m-1, i, m, n);
+    }
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (board[i][j] == 'O') board[i][j] = 'X';
+            if (board[i][j] == 'T') board[i][j] = 'O';
+        }
+    }
+}
+
+public void dfs(char[][] board, int r, int c, int m, int n) {
+    if (r < 0 || r >= m || c < 0 || c >= n ||  board[r][c] != 'O') return;
+    board[r][c] = 'T';
+    dfs(board, r+1, c, m, n);
+    dfs(board, r-1, c, m, n);
+    dfs(board, r, c+1, m, n);
+    dfs(board, r, c-1, m, n);
+}
+```
+
 ### 171. Excel Sheet Column Number
 
 Given a column title as appear in an Excel sheet, return its corresponding column number.
