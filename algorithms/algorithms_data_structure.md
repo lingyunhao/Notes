@@ -405,6 +405,97 @@ public ListNode detectCycle(ListNode head) {
 }
 ```
 
+**524. Longest Word in Dictionary through Deleting**
+
+Given a string and a string dictionary, find the longest string in the dictionary that can be formed by deleting some characters of the given string. If there are more than one possible results, return the longest word with the smallest lexicographical order. If there is no possible result, return the empty string.
+
+**Example 1:**
+
+```
+Input:
+s = "abpcplea", d = ["ale","apple","monkey","plea"]
+Output: 
+"apple"
+```
+
+**Solution：**
+
+用双指针判断是否是subsequence.
+
+```java
+public String findLongestWord(String s, List<String> d) {
+    String ret = "";
+    for(String str : d) {
+        int l1 = ret.length(), l2 = str.length();
+        // 字典序 比较字符串 compareTo
+        if(l1 > l2 || (l1 == l2 && ret.compareTo(str) < 0)){
+            continue;
+        }
+        if(isValid(s, str)) {
+            ret = str;
+        }
+    }
+    return ret;
+}
+
+private boolean isValid(String s, String d) {
+    int i = 0,j = 0;
+    while(i < s.length() && j < d.length()) {
+        if(s.charAt(i) == d.charAt(j)) {
+            j++;
+        }
+        i++;
+    }
+    return j == d.length();
+}
+```
+
+**340. Longest Substring with At Most K Distinct Characters**
+
+Given a string, find the length of the longest substring T that contains at most *k* distinct characters.
+
+**Example 1:**
+
+```
+Input: s = "eceba", k = 2
+Output: 3
+Explanation: T is "ece" which its length is 3.
+```
+
+**Example 2:**
+
+```
+Input: s = "aa", k = 1
+Output: 2
+Explanation: T is "aa" which its length is 2.
+```
+
+**Solution:**
+
+sliding window + map, map 存每个字母rightmost position, 用一个sliding window(left,right)去维持一个distince character少于k的substring，并且相对应一个map。
+
+```java
+public int lengthOfLongestSubstringKDistinct(String s, int k) {
+    int n = s.length();
+    if (n * k == 0) return 0;
+    // sliding window left and right pointers
+    int left = 0, right = 0;
+    // hashmap character -> its rightmost position
+    Map<Character, Integer> map = new HashMap<>();
+    int max = 1;
+    while (right < n) {
+        map.put(s.charAt(right), right++);
+        if (map.size() == k + 1) {
+            int del =  Collections.min(map.values());
+            map.remove(s.charAt(del));
+            left = del + 1;
+        }
+        max = Math.max(max, right - left);
+    }
+    return max;
+}
+```
+
 ### Binary Search
 
 **Time Complexity : O(logn)**  
