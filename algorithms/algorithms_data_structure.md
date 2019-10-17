@@ -1638,6 +1638,64 @@ public void dfs(char[][] board, int r, int c, int m, int n) {
 
 ### 
 
+**417. Pacific Atlantic Water Flow**
+
+Given an `m x n` matrix of non-negative integers representing the height of each unit cell in a continent, the "Pacific ocean" touches the left and top edges of the matrix and the "Atlantic ocean" touches the right and bottom edges.
+
+Water can only flow in four directions (up, down, left, or right) from a cell to another one with height equal or lower.
+
+Find the list of grid coordinates where water can flow to both the Pacific and Atlantic ocean.
+
+**Solution:**
+
+DFS, 起始结点是第0行，n-1行，第0列，n-1列。把和第0行，n-1行，第0列，n-1列联通的node设置为相应的true。相连的定义是从起始结点开始，cur的值<=next的值，相当于水倒着流去推的。用两个boolean分别去记录Atlantic 和 Pacific
+
+```java
+int[][] directions = new int[][]{{1,0}, {-1,0}, {0,1}, {0,-1}};
+public List<List<Integer>> pacificAtlantic(int[][] matrix) {
+    if (matrix == null) return null;
+    if (matrix.length == 0) return new ArrayList();
+    List<List<Integer>> res = new ArrayList<>();
+    int m = matrix.length, n = matrix[0].length;
+    boolean[][] reach_p = new boolean[m][n];
+    boolean[][] reach_a = new boolean[m][n];
+    // 与第0列相连的（相连的定义有海拔限制）可以到达pacific
+    // 与最后一列相连的，可以到达atlantic
+    for (int i = 0; i < m; ++i) {
+        dfs(matrix, reach_p, i, 0, m, n);
+        dfs(matrix, reach_a, i, n-1, m, n);
+    }
+    // 与第0行相连的（相连的定义有海拔限制）可以到达pacific
+    // 与最后一行相连的，可以到达atlantic
+    for (int i = 0; i < n; ++i) {
+        dfs(matrix, reach_p, 0, i, m, n);
+        dfs(matrix, reach_a, m-1, i, m, n);
+    }
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (reach_p[i][j] && reach_a[i][j]) 
+                res.add(new ArrayList(Arrays.asList(i, j)));
+        }
+    }
+    return res;
+}
+
+// 将联通区域设置为ture（此时的联通定义中多了个条件就是海拔高度限制
+private void dfs(int[][] matrix, boolean[][] can_reach, int r, int c, int m, int n) {
+    // 出口
+    if (can_reach[r][c]) return;
+    can_reach[r][c] = true;
+    for (int[] d : directions) {
+        int nextR = r + d[0], nextC = c + d[1];
+        // 出口
+        if (nextR < 0 || nextR >= m || nextC < 0 || nextC >= n || matrix[r][c] > matrix[nextR][nextC]) continue;
+        dfs(matrix, can_reach, nextR, nextC, m, n);
+    }
+}
+```
+
+
+
 ### Dynamic Programming
 
 动态规划和递归(divide conquer)都是将原问题拆成多个字问题然后进行求解，他们之间最本质的区别是dp保留了子问题的解避免了重复计算。实际上，dp就相当于dfs + memorization。
