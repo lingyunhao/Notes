@@ -1496,6 +1496,47 @@ public int search(ArrayReader reader, int target) {
 }
 ```
 
+### 763. Partition Labels
+
+**Example 1:**
+
+```
+Input: S = "ababcbacadefegdehijhklij"
+Output: [9,7,8]
+Explanation:
+The partition is "ababcbaca", "defegde", "hijhklij".
+This is a partition so that each letter appears in at most one part.
+A partition like "ababcbacadefegde", "hijhklij" is incorrect, because it splits S into less parts.
+```
+
+**Solution：**
+
+贪心？设定一个start，然后动态
+
+```java
+public List<Integer> partitionLabels(String S) {
+    int[] lastIndexofChar = new int[26];
+    for(int i=0; i<S.length(); i++) {
+        lastIndexofChar[S.charAt(i) - 'a'] = i;
+    }
+    int firstIndex = 0;
+    List<Integer> ret = new ArrayList<>();
+    while(firstIndex < S.length()){
+        int lastIndex = firstIndex;
+        // 重复更新lastindex知道partition完毕
+        for(int i=firstIndex; i<S.length() && i<=lastIndex; i++) {
+            int index = lastIndexofChar[S.charAt(i) - 'a'];
+            if(index > lastIndex){
+                lastIndex = index;
+            }
+        }
+        ret.add(lastIndex - firstIndex + 1);
+        firstIndex = lastIndex + 1;
+    }
+    return ret;
+}
+```
+
 ### 767. Reorganize String
 
 Given a string `S`, check if the letters can be rearranged so that two characters that are adjacent to each other are not the same.

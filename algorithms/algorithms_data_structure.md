@@ -122,6 +122,53 @@ public int eraseOverlapIntervals(int[][] intervals) {
 }
 ```
 
+**452. Minimum Number of Arrows to Burst Balloons**
+
+题目描述：气球在一个水平数轴上摆放，可以重叠，飞镖垂直投向坐标轴，使得路径上的气球都会刺破。求解最小的投飞镖次数使所有气球都被刺破。
+
+同435计算不重叠区间的个数。注意相等算不算重叠的情况。
+
+```java
+public int findMinArrowShots(int[][] points) {
+    if(points.length == 0) return 0;
+    Arrays.sort(points, Comparator.comparingInt(o -> o[1]));
+    int cnt = 1;
+    int end = points[0][1];
+    for(int i=1; i<points.length; i++) {
+        if(points[i][0] <= end) continue;
+        cnt++;
+        end = points[i][1];
+    }
+    return cnt;
+}
+```
+
+**665. Non-decreasing Array**
+
+题目描述：判断一个数组能不能只修改一个数就成为非递减数组。
+
+在出现 nums[i] < nums[i - 1] 时，需要考虑的是应该修改数组的哪个数，使得本次修改能使 i 之前的数组成为非递减数组，并且不影响后续的操作 。优先考虑令 nums[i - 1] = nums[i]，因为如果修改 nums[i] = nums[i - 1] 的话，那么 nums[i] 这个数会变大，就有可能比 nums[i + 1] 大，从而影响了后续操作。还有一个比较特别的情况就是 nums[i] < nums[i - 2]，只修改 nums[i - 1] = nums[i] 不能使数组成为非递减数组，只能修改 nums[i] = nums[i - 1]。
+
+```java
+public boolean checkPossibility(int[] nums) {
+    int cnt = 0;
+    for(int i=1; i<nums.length && cnt<2; i++) {
+        if(nums[i] >= nums[i-1]) continue;
+        cnt++;
+        if(i-2>=0 && nums[i] < nums[i-2]) {
+            nums[i] = nums[i-1];
+        } else {
+            nums[i-1] = nums[i];
+        }
+    }
+    return cnt <= 1;
+}
+```
+
+### Two Pointers
+
+
+
 ### Binary Search
 
 **Time Complexity : O(logn)**  
