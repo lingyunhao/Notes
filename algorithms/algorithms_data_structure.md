@@ -901,8 +901,6 @@ public int searchInsert(int[] nums, int target) {
 
 **Smallest Rectangle Enclosing Black Pixels**
 
-**Search In a Big Sorted Array**
-
 **33. Search In Rotated Sorted Array**
 
 **Find Peak Element**
@@ -1694,6 +1692,300 @@ private void dfs(int[][] matrix, boolean[][] can_reach, int r, int c, int m, int
 }
 ```
 
+### BackTracking
+
+回溯法（Backtracking）属于 DFS。
+
+- 普通 DFS 主要用在 **可达性问题** ，这种问题只需要执行到特点的位置然后返回即可。
+- 而 Backtracking 主要用于求解 **排列组合** 问题，例如有 { 'a','b','c' } 三个字符，求解所有由这三个字符排列得到的字符串，这种问题在执行到特定的位置返回之后还会继续执行求解过程。
+
+因为 Backtracking 不是立即就返回，而要继续求解，因此在程序实现时，需要注意对元素的标记问题：
+
+- 在访问一个新元素进入新的递归调用时，需要将新元素标记为已经访问，这样才能在继续递归调用时不用重复访问该元素；
+- 但是在递归返回时，需要将元素标记为未访问，因为只需要保证在一个递归链中不同时访问一个元素，可以访问已经访问过但是不在当前递归链中的元素。
+
+Backtracking 修改一般有两种情况，一种是**修改最后一位输出**，比如排列组合；一种是**修改访问标记**，比如矩阵里搜字符串。
+
+**79. Word Search**
+
+Given a 2D board and a word, find if the word exists in the grid.
+
+The word can be constructed from letters of sequentially adjacent cell, where "adjacent" cells are those horizontally or vertically neighboring. The same letter cell may not be used more than once.
+
+**Example:**
+
+```
+board =
+[
+  ['A','B','C','E'],
+  ['S','F','C','S'],
+  ['A','D','E','E']
+]
+Given word = "ABCCED", return true.
+Given word = "SEE", return true.
+Given word = "ABCB", return false.
+```
+
+**Solution:**
+
+```java
+private int m,n;
+private int[][] directions = {{0,1},{0,-1},{1,0},{-1,0}};
+public boolean exist(char[][] board, String word) {
+    if(word == null || word.length() == 0) {
+        return true;
+    }
+    if(board == null || board.length == 0 || board[0].length == 0) {
+        return false;
+    }
+    m = board.length;
+    n = board[0].length;
+    boolean[][] visited = new boolean[m][n];
+    for(int i=0; i<m; i++) {
+        for(int j=0; j<n; j++) {
+            if (backtracking(0, i, j, visited, board, word)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// 判断word中对应到curlen的character能否四向找到。
+private boolean backtracking(int curLen, int r, int c, boolean[][] visited, final char[][] board, String word) {
+    // recursion 出口
+    if (curLen == word.length()) {
+        return true;
+    }
+    // 还没找到但是已经invalid
+    if (r<0 || r>=m || c<0 || c>=n 
+        || board[r][c] != word.charAt(curLen) || visited[r][c]) {
+        return false;
+    }
+    visited[r][c] = true;
+   // dfs 遇到对的就一路找下去，如果不对就返回上一步看下一个方向，
+    for(int[] d: directions) {
+        if(backtracking(curLen+1, r+d[0], c+d[1], visited, board, word)){
+            return true;
+        }
+    }
+    visited[r][c] = false;
+    return false;
+}
+```
+
+**257. Binary Tree Paths**
+
+Given a binary tree, return all root-to-leaf paths.
+
+**Note:** A leaf is a node with no children.
+
+**Example:**
+
+```
+Input:
+
+   1
+ /   \
+2     3
+ \
+  5
+
+Output: ["1->2->5", "1->3"]
+
+Explanation: All root-to-leaf paths are: 1->2->5, 1->3
+```
+
+**Solution:**
+
+```java
+public List<String> binaryTreePaths(TreeNode root) {
+    List<String> paths = new ArrayList();
+    if(root == null) return paths;
+    List<Integer> values = new ArrayList();
+    backtracking(root, values, paths);
+    return paths;
+}
+// 将当前的node加到路径 values中，如果当前node为leaf，则把path加到结果中
+private void backtracking(TreeNode node, List<Integer> values, List<String> paths) {
+    // parent node 不是leaf，但是left right可能有一个为null
+    if(node == null) return;
+    values.add(node.val);
+    if(isLeaf(node)) {
+        paths.add(buildPath(values));
+    } else {
+        backtracking(node.left, values, paths);
+        backtracking(node.right, values, paths);
+    }
+    //backtracking
+    values.remove(values.size()-1);
+}
+
+private boolean isLeaf(TreeNode node) {
+    return node.left == null  && node.right == null;
+}
+
+private String buildPath(List<Integer> values) {
+    StringBuilder sb = new StringBuilder();
+    for(int i=0; i<values.size(); i++) {
+        sb.append(values.get(i));
+        if(i!=values.size()-1) {
+            sb.append("->");
+        }
+    }
+    return sb.toString();
+}
+```
+
+**46. Permutations**
+
+Given a collection of **distinct** integers, return all possible permutations.
+
+不含相同元素排列
+
+**Example:**
+
+```
+Input: [1,2,3]
+Output:
+[
+  [1,2,3],
+  [1,3,2],
+  [2,1,3],
+  [2,3,1],
+  [3,1,2],
+  [3,2,1]
+]
+```
+
+**Solution:**
+
+背
+
+```java
+public List<List<Integer>> permute(int[] nums) {
+    List<List<Integer>> permutes = new ArrayList<>();
+    List<Integer> permuteList = new ArrayList<>();
+    boolean[] visited = new boolean[nums.length];
+    backtracking(permutes, permuteList, visited, nums);
+    return permutes;
+}
+
+private void backtracking(List<List<Integer>> permutes, List<Integer> permuteList, boolean[] visited, int[] nums) {
+    if(permuteList.size() == visited.length) {
+        permutes.add(new ArrayList<>(permuteList));
+        return;
+    }
+    for(int i=0; i<visited.length; i++) {
+        if(visited[i]) continue;
+        visited[i] = true;
+        permuteList.add(nums[i]);
+        backtracking(permutes, permuteList, visited, nums);
+        permuteList.remove(permuteList.size()-1);
+        visited[i] = false;
+    }
+}
+```
+
+**47. Permutations II**
+
+Given a collection of numbers that might contain duplicates, return all possible unique permutations.
+
+含有相同元素排列
+
+**Example:**
+
+```
+Input: [1,1,2]
+Output:
+[
+  [1,1,2],
+  [1,2,1],
+  [2,1,1]
+]
+```
+
+**Solution:**
+
+数组元素可能含有相同的元素，进行排列时就有可能出现重复的排列，要求重复的排列只返回一个。
+
+先sort然后多判断了一下
+
+```java
+public List<List<Integer>> permuteUnique(int[] nums) {
+    List<List<Integer>> permutes = new ArrayList<>();
+    List<Integer> permuteList = new ArrayList<>();
+    Arrays.sort(nums);
+    boolean[] visited = new boolean[nums.length];
+    backtracking(permutes, permuteList, visited, nums);
+    return permutes;
+}
+
+private void backtracking(List<List<Integer>> permutes, List<Integer> permuteList, boolean[] visited, int[] nums) {
+    if(permuteList.size() == nums.length) {
+        permutes.add(new ArrayList<>(permuteList));
+        return;
+    }
+
+    for(int i=0; i<visited.length; i++) {
+        //排除重复
+        if(i!=0 && nums[i] == nums[i-1] && !visited[i-1]) {
+            continue;
+        }
+        if(visited[i]) continue;
+        visited[i] = true;
+        permuteList.add(nums[i]);
+        backtracking(permutes, permuteList, visited, nums);
+        permuteList.remove(permuteList.size()-1);
+        visited[i] = false;
+    }
+} 
+```
+
+**77. Combinations**
+
+Given two integers *n* and *k*, return all possible combinations of *k* numbers out of 1 ... *n*.
+
+**Example:**
+
+```
+Input: n = 4, k = 2
+Output:
+[
+  [2,4],
+  [3,4],
+  [2,3],
+  [1,2],
+  [1,3],
+  [1,4],
+]
+```
+
+**Solution：**
+
+背。
+
+```java
+public List<List<Integer>> combine(int n, int k) {
+    List<List<Integer>> combines = new ArrayList<>();
+    List<Integer> combineList = new ArrayList<>();
+    backtracking(combines,combineList,1,k,n);
+    return combines;
+}
+
+private void backtracking(List<List<Integer>> combines, List<Integer> combineList, int start, int k, int n) {
+    if(k == 0) {
+        combines.add(new ArrayList<>(combineList));
+        return;
+    }
+    for(int i = start; i<=n-k+1; i++) {
+        combineList.add(i);
+        backtracking(combines, combineList, i+1, k-1, n);
+        combineList.remove(combineList.size()-1);
+    }
+}
+```
+
 
 
 ### Dynamic Programming
@@ -2098,3 +2390,5 @@ dfs non-recursion写法（stack)
 sort(merge,quick selection,bucket etc.)
 
 topological sort(bfs)
+
+排列组合backtracking并没有很懂

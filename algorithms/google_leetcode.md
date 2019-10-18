@@ -88,6 +88,113 @@ public String longestPalindrome(String s) {
 }
 ```
 
+###46. Permutations
+
+Given a collection of **distinct** integers, return all possible permutations.
+
+不含相同元素排列
+
+**Example:**
+
+```
+Input: [1,2,3]
+Output:
+[
+  [1,2,3],
+  [1,3,2],
+  [2,1,3],
+  [2,3,1],
+  [3,1,2],
+  [3,2,1]
+]
+```
+
+**Solution:**
+
+背
+
+```java
+public List<List<Integer>> permute(int[] nums) {
+    List<List<Integer>> permutes = new ArrayList<>();
+    List<Integer> permuteList = new ArrayList<>();
+    boolean[] visited = new boolean[nums.length];
+    backtracking(permutes, permuteList, visited, nums);
+    return permutes;
+}
+
+private void backtracking(List<List<Integer>> permutes, List<Integer> permuteList, boolean[] visited, int[] nums) {
+    if(permuteList.size() == visited.length) {
+        permutes.add(new ArrayList<>(permuteList));
+        return;
+    }
+    for(int i=0; i<visited.length; i++) {
+        if(visited[i]) continue;
+        visited[i] = true;
+        permuteList.add(nums[i]);
+        backtracking(permutes, permuteList, visited, nums);
+        permuteList.remove(permuteList.size()-1);
+        visited[i] = false;
+    }
+}
+```
+
+###47. Permutations II
+
+Given a collection of numbers that might contain duplicates, return all possible unique permutations.
+
+含有相同元素排列
+
+**Example:**
+
+```
+Input: [1,1,2]
+Output:
+[
+  [1,1,2],
+  [1,2,1],
+  [2,1,1]
+]
+```
+
+**Solution:**
+
+数组元素可能含有相同的元素，进行排列时就有可能出现重复的排列，要求重复的排列只返回一个。
+
+先sort然后多判断了一下
+
+```java
+public List<List<Integer>> permuteUnique(int[] nums) {
+    List<List<Integer>> permutes = new ArrayList<>();
+    List<Integer> permuteList = new ArrayList<>();
+    Arrays.sort(nums);
+    boolean[] visited = new boolean[nums.length];
+    backtracking(permutes, permuteList, visited, nums);
+    return permutes;
+}
+
+private void backtracking(List<List<Integer>> permutes, List<Integer> permuteList, boolean[] visited, int[] nums) {
+    if(permuteList.size() == nums.length) {
+        permutes.add(new ArrayList<>(permuteList));
+        return;
+    }
+
+    for(int i=0; i<visited.length; i++) {
+        //排除重复
+        if(i!=0 && nums[i] == nums[i-1] && !visited[i-1]) {
+            continue;
+        }
+        if(visited[i]) continue;
+        visited[i] = true;
+        permuteList.add(nums[i]);
+        backtracking(permutes, permuteList, visited, nums);
+        permuteList.remove(permuteList.size()-1);
+        visited[i] = false;
+    }
+} 
+```
+
+
+
 ### 55. Jump Game
 
 Given an array of non-negative integers, you are initially positioned at the first index of the array.
@@ -190,6 +297,74 @@ public int[][] merge(int[][] intervals) {
     return ret;
 }
 ```
+
+###**79. Word Search**
+
+Given a 2D board and a word, find if the word exists in the grid.
+
+The word can be constructed from letters of sequentially adjacent cell, where "adjacent" cells are those horizontally or vertically neighboring. The same letter cell may not be used more than once.
+
+**Example:**
+
+```
+board =
+[
+  ['A','B','C','E'],
+  ['S','F','C','S'],
+  ['A','D','E','E']
+]
+Given word = "ABCCED", return true.
+Given word = "SEE", return true.
+Given word = "ABCB", return false.
+```
+
+**Solution:**
+
+```java
+private int m,n;
+private int[][] directions = {{0,1},{0,-1},{1,0},{-1,0}};
+public boolean exist(char[][] board, String word) {
+    if(word == null || word.length() == 0) {
+        return true;
+    }
+    if(board == null || board.length == 0 || board[0].length == 0) {
+        return false;
+    }
+    m = board.length;
+    n = board[0].length;
+    boolean[][] visited = new boolean[m][n];
+    for(int i=0; i<m; i++) {
+        for(int j=0; j<n; j++) {
+            if (backtracking(0, i,j,visited, board, word)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+private boolean backtracking(int curLen, int r, int c, boolean[][] visited, final char[][] board, String word) {
+    if (curLen == word.length()) {
+        return true;
+    }
+    if (r<0 || r>=m || c<0 || c>=n 
+        || board[r][c] != word.charAt(curLen) || visited[r][c]) {
+        return false;
+    }
+    visited[r][c] = true;
+
+    for(int[] d: directions) {
+        if(backtracking(curLen+1, r+d[0], c+d[1], visited, board, word)){
+            return true;
+        }
+    }
+    visited[r][c] = false;
+
+    return false;
+}
+```
+
+
 
 ### 85. Maximal Rectangle
 
@@ -836,6 +1011,71 @@ class Solution {
         }
         return min;
     }
+}
+```
+
+###**257. Binary Tree Paths**
+
+Given a binary tree, return all root-to-leaf paths.
+
+**Note:** A leaf is a node with no children.
+
+**Example:**
+
+```
+Input:
+
+   1
+ /   \
+2     3
+ \
+  5
+
+Output: ["1->2->5", "1->3"]
+
+Explanation: All root-to-leaf paths are: 1->2->5, 1->3
+```
+
+**Solution:**
+
+Backtracking(dfs),把当前node加入result，如果isleaf则算为一个path
+
+```java
+public List<String> binaryTreePaths(TreeNode root) {
+    List<String> paths = new ArrayList();
+    if(root == null) return paths;
+    List<Integer> values = new ArrayList();
+    backtracking(root, values, paths);
+    return paths;
+}
+// 将当前的node加到路径 values中，如果当前node为leaf，则把path加到结果中
+private void backtracking(TreeNode node, List<Integer> values, List<String> paths) {
+    // parent node 不是leaf，但是left right可能有一个为null
+    if(node == null) return;
+    values.add(node.val);
+    if(isLeaf(node)) {
+        paths.add(buildPath(values));
+    } else {
+        backtracking(node.left, values, paths);
+        backtracking(node.right, values, paths);
+    }
+    //backtracking
+    values.remove(values.size()-1);
+}
+
+private boolean isLeaf(TreeNode node) {
+    return node.left == null  && node.right == null;
+}
+
+private String buildPath(List<Integer> values) {
+    StringBuilder sb = new StringBuilder();
+    for(int i=0; i<values.size(); i++) {
+        sb.append(values.get(i));
+        if(i!=values.size()-1) {
+            sb.append("->");
+        }
+    }
+    return sb.toString();
 }
 ```
 
