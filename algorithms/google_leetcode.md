@@ -425,6 +425,54 @@ public int maximalRectangle(char[][] matrix) {
 }
 ```
 
+### 91. Decode Ways
+
+A message containing letters from `A-Z` is being encoded to numbers using the following mapping:
+
+```
+'A' -> 1
+'B' -> 2
+...
+'Z' -> 26
+```
+
+```
+Input: "12"
+Output: 2
+Explanation: It could be decoded as "AB" (1 2) or "L" (12).
+```
+
+**Solution:**
+
+这里开了n+1，所以i 和 i-1对应
+
+dp[i] 表示一charAt(i-1)结尾
+
+```java
+public int numDecodings(String s) {
+    int n = s.length();
+    if (n == 0) return 0;
+    int prev = s.charAt(0) - '0';
+    if (prev == 0) return 0;
+    if (n == 1) return 1;
+    int[] dp = new int[n+1];
+    Arrays.fill(dp, 1);
+    for (int i = 2; i <= n; ++i) {
+        int cur = s.charAt(i-1) - '0';
+        // 不可能decode成功的情况 0不能单独decode 必须和前一位组合
+        if ((prev == 0 || prev > 2) && cur == 0) return 0;
+        if (prev == 1 || prev == 2 && cur < 7) {
+            // .... 2 6   = (....) (26) + (.... 2) (6)
+            if (cur != 0) dp[i] = dp[i-2] + dp[i-1];
+            else dp[i] = dp[i-2];
+        }
+        else dp[i] = dp[i-1];
+        prev = cur;
+    }
+    return dp[n];
+}
+```
+
 ### 130. Surrounded Regions
 
 Given a 2D board containing `'X'` and `'O'` (**the letter O**), capture all regions surrounded by `'X'`.
@@ -473,6 +521,30 @@ public void dfs(char[][] board, int r, int c, int m, int n) {
     dfs(board, r, c-1, m, n);
 }
 ```
+
+### 139. Word Break
+
+Given a **non-empty** string *s* and a dictionary *wordDict* containing a list of **non-empty** words, determine if *s* can be segmented into a space-separated sequence of one or more dictionary words.
+
+**Solution: dp**
+
+```java
+public boolean wordBreak(String s, List<String> wordDict) {
+    int n = s.length();
+    boolean[] dp = new boolean[n+1];
+    dp[0] = true;
+    for (int i = 1; i <= n; ++i) {
+        for (String word : wordDict) {
+            int len = word.length();
+            if (i < len) continue;
+            if (s.substring(i - len, i).equals(word)) dp[i] = dp[i] || dp[i-len];
+        }
+    }
+    return dp[n];
+}
+```
+
+
 
 ### 171. Excel Sheet Column Number
 
@@ -1168,6 +1240,70 @@ public class Codec {
 }
 ```
 
+### 279. Perfect Squares
+
+Given a positive integer *n*, find the least number of perfect square numbers (for example, `1, 4, 9, 16, ...`) which sum to *n*.
+
+**Solution1: BFS**
+
+列出所有可能的方式，把squares看成图，走出一条路。
+
+```java
+public int numSquares(int n) {
+    List<Integer> squares = generateSquares(n);
+    Queue<Integer> queue = new LinkedList<>();
+    queue.add(n);
+    boolean[] marked = new boolean[n+1];
+    marked[n] = true;
+    int len = 0;
+    while(!queue.isEmpty()) {
+        int size = queue.size();
+        len++;
+        while(size-- > 0) {
+            int cur = queue.poll();
+            for(int square : squares){
+              int next = cur - square;
+              if(next < 0) break;
+              if(next == 0) return len;
+              if(marked[next]) continue;
+              marked[next] = true;
+              queue.add(next);
+            }
+        }
+    }
+    return n;
+}
+private List<Integer> generateSquares(int n) {
+    List<Integer> squares = new ArrayList<>();
+    int square = 1;
+    int diff = 3;
+    while(square <= n) {
+        squares.add(square);
+        square += diff;
+        diff += 2;
+    }
+    return squares;
+}
+```
+
+**Soluiton2:dp**
+
+dp[n] 表示最少由几个平方数组成。
+
+```java
+public int numSquares(int n) {
+    if (n <= 0) return 0;
+    int[] dp = new int[n+1];
+    dp[0] = 0;
+    for (int i = 1; i < n+1; ++i) {
+        int cnt = Integer.MAX_VALUE;
+        for (int j = 1; j * j <= i; ++j) cnt = Math.min(cnt, dp[i-j*j] + 1);
+        dp[i] = cnt;
+    }
+    return dp[n];
+}
+```
+
 ### 299. Bulls and Cows
 
 You are playing the following [Bulls and Cows](https://en.wikipedia.org/wiki/Bulls_and_Cows) game with your friend: You write down a number and ask your friend to guess what the number is. Each time your friend makes a guess, you provide a hint that indicates how many digits in said guess match your secret number exactly in both digit and position (called "bulls") and how many digits match the secret number but locate in the wrong position (called "cows"). Your friend will use successive guesses and hints to eventually derive the secret number.
@@ -1716,6 +1852,35 @@ public boolean checkRecord(String s) {
         if(cntA > 1) return false;
     }
     return true;
+}
+```
+
+###**583. Delete Operation for Two Strings**
+
+Given two words *word1* and *word2*, find the minimum number of steps required to make *word1* and *word2* the same, where in each step you can delete one character in either string.
+
+**Example 1:**
+
+```
+Input: "sea", "eat"
+Output: 2
+Explanation: You need one step to make "sea" to "ea" and another step to make "eat" to "ea".
+```
+
+**Solution:**
+
+等价于最长公共子序列问题。
+
+```java
+public int minDistance(String word1, String word2) {
+    int m = word1.length(), n = word2.length();
+    int[][] dp = new int[m+1][n+1];
+    for (int i = 1; i <= m; ++i) {
+        for (int j = 1; j <= n; ++j) {
+            dp[i][j] = word1.charAt(i-1) == word2.charAt(j-1) ? 1 + dp[i-1][j-1] : Math.max(dp[i-1][j], dp[i][j-1]);
+        }
+    }
+    return m + n - 2 * dp[m][n];
 }
 ```
 

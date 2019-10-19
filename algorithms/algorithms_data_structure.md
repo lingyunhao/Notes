@@ -2333,7 +2333,130 @@ public int integerBreak(int n) {
 }
 ```
 
+**1143. Longest Common Subsequence**
 
+Given two strings `text1` and `text2`, return the length of their longest common subsequence.
+
+A *subsequence* of a string is a new string generated from the original string with some characters(can be none) deleted without changing the relative order of the remaining characters. (eg, "ace" is a subsequence of "abcde" while "aec" is not). A *common subsequence* of two strings is a subsequence that is common to both strings.
+
+If there is no common subsequence, return 0.
+
+**Solution:**
+
+定义一个二维数组 dp 用来存储最长公共子序列的长度，其中 dp[i][j] 表示 S1 的前 i 个字符与 S2 的前 j 个字符最长公共子序列的长度。考虑 S1i 与 S2j 值是否相等，分为两种情况：
+
+- 当 S1i==S2j 时，那么就能在 S1 的前 i-1 个字符与 S2 的前 j-1 个字符最长公共子序列的基础上再加上 S1i 这个值，最长公共子序列长度加 1 ，即 dp[i][j] = dp[i-1][j-1] + 1。
+- 当 S1i != S2j 时，此时最长公共子序列为 S1 的前 i-1 个字符和 S2 的前 j 个字符最长公共子序列，与 S1 的前 i 个字符和 S2 的前 j-1 个字符最长公共子序列，它们的最大者，即 dp[i][j] = max{ dp[i-1][j], dp[i][j-1] }。
+
+对于长度为 N 的序列 S1 和 长度为 M 的序列 S2，dp[N][M] 就是序列 S1 和序列 S2 的最长公共子序列长度。
+
+与最长递增子序列相比，最长公共子序列有以下不同点：
+
+- 针对的是两个序列，求它们的最长公共子序列。
+- 在最长递增子序列中，dp[i] 表示以 Si 为结尾的最长递增子序列长度，子序列必须包含 Si ；在最长公共子序列中，dp[i][j] 表示 S1 中前 i 个字符与 S2 中前 j 个字符的最长公共子序列长度，不一定包含 S1i 和 S2j 。
+- 在求最终解时，最长公共子序列中 dp[N][M] 就是最终解，而最长递增子序列中 dp[N] 不是最终解，因为以 SN 为结尾的最长递增子序列不一定是整个序列最长递增子序列，需要遍历一遍 dp 数组找到最大者。
+
+```java
+public int longestCommonSubsequence(String text1, String text2) {
+    int m = text1.length(), n = text2.length();
+    int[][] dp = new int[m+1][n+1];
+    for (int i = 1; i <= m; ++i) {
+        for (int j = 1; j <= n; ++j) {
+            dp[i][j] = text1.charAt(i-1) == text2.charAt(j-1)? 1 + dp[i-1][j-1]: Math.max(dp[i-1][j], dp[i][j-1]);
+        }
+    }
+    return dp[m][n];
+}
+```
+
+**139. Word Break**
+
+Given a **non-empty** string *s* and a dictionary *wordDict* containing a list of **non-empty** words, determine if *s* can be segmented into a space-separated sequence of one or more dictionary words.
+
+**Solution: dp**
+
+```java
+public boolean wordBreak(String s, List<String> wordDict) {
+    int n = s.length();
+    boolean[] dp = new boolean[n+1];
+    dp[0] = true;
+    for (int i = 1; i <= n; ++i) {
+        for (String word : wordDict) {
+            int len = word.length();
+            if (i < len) continue;
+            if (s.substring(i - len, i).equals(word)) dp[i] = dp[i] || dp[i-len];
+        }
+    }
+    return dp[n];
+}
+```
+
+**583. Delete Operation for Two Strings**
+
+Given two words *word1* and *word2*, find the minimum number of steps required to make *word1* and *word2* the same, where in each step you can delete one character in either string.
+
+**Example 1:**
+
+```
+Input: "sea", "eat"
+Output: 2
+Explanation: You need one step to make "sea" to "ea" and another step to make "eat" to "ea".
+```
+
+**Solution:**
+
+等价于最长公共子序列问题。
+
+```java
+public int minDistance(String word1, String word2) {
+    int m = word1.length(), n = word2.length();
+    int[][] dp = new int[m+1][n+1];
+    for (int i = 1; i <= m; ++i) {
+        for (int j = 1; j <= n; ++j) {
+            dp[i][j] = word1.charAt(i-1) == word2.charAt(j-1) ? 1 + dp[i-1][j-1] : Math.max(dp[i-1][j], dp[i][j-1]);
+        }
+    }
+    return m + n - 2 * dp[m][n];
+}
+```
+
+**72. Edit Distance**
+
+Given two words *word1* and *word2*, find the minimum number of operations required to convert *word1* to *word2*.
+
+You have the following 3 operations permitted on a word:
+
+1. Insert a character
+2. Delete a character
+3. Replace a character
+
+**Example 1:**
+
+```
+Input: word1 = "horse", word2 = "ros"
+Output: 3
+Explanation: 
+horse -> rorse (replace 'h' with 'r')
+rorse -> rose (remove 'r')
+rose -> ros (remove 'e')
+```
+
+**Solution:**
+
+```java
+public int minDistance(String word1, String word2) {
+    int m = word1.length(), n = word2.length();
+    int[][] distance = new int[m+1][n+1];
+    for (int i = 0; i <= m; ++i) {
+        for (int j = 0; j <=n; ++j) {
+            if (i == 0) distance[i][j] = j;
+            else if (j == 0) distance[i][j] = i;
+            else distance[i][j] = Math.min(distance[i-1][j-1] + ((word1.charAt(i-1) == word2.charAt(j-1)) ? 0 : 1), Math.min(distance[i-1][j] + 1, distance[i][j-1] + 1));
+        }
+    }
+    return distance[m][n];
+}
+```
 
 **DP之背包问题**
 
@@ -2385,35 +2508,34 @@ int knapsack(vector<int> weights, vector<int> values, int N, int W) {
 **变种**
 
 - 完全背包：物品数量为无限个
-
 - 多重背包：物品数量有限制
-
 - 多维费用背包：物品不仅有重量，还有体积，同时考虑这两种限制
-
 - 其它：物品之间相互约束或者依赖
 
-  **完全背包**
+**完全背包**
 
-  ```java
-  int knapsack(vector<int> weights, vector<int> values, int N, int W) {
-      vector<vector<int>> dp (N + 1, vector<int>(W + 1, 0));
-      for (int i = 1; i <= N; ++i) {
-          int w = weights[i-1], v = values[i-1];
-          for (int j = 1; j <= W; ++j) {
-              if (j >= w) {
-                  dp[i][j] = max(dp[i-1][j], dp[i][j-w] + v);  // i - 1 changed to i
-              } else {
-                  dp[i][j] = dp[i-1][j];
-              }
-          }
-      }
-      return dp[N][W];
-  }
-  ```
+```java
+int knapsack(vector<int> weights, vector<int> values, int N, int W) {
+    vector<vector<int>> dp (N + 1, vector<int>(W + 1, 0));
+    for (int i = 1; i <= N; ++i) {
+        int w = weights[i-1], v = values[i-1];
+        for (int j = 1; j <= W; ++j) {
+            if (j >= w) {
+                dp[i][j] = max(dp[i-1][j], dp[i][j-w] + v);  // i - 1 changed to i
+            } else {
+                dp[i][j] = dp[i-1][j];
+            }
+        }
+    }
+    return dp[N][W];
+}
+```
 
-  **完全背包 vs 0-1背包的空间优化**
+**完全背包 vs 0-1背包的空间优化**
 
-  对于压缩内存的写法，**0-1背包对物品的迭代放在外层，里层的重量或价值从后往前遍历；完全背包对物品的迭代放在里层，外层则正常从前往后遍历重量或价值**。（若完全背包的依赖方向在矩阵上是左和上，而这个依赖关系在调转行列后仍然成立，那么在这种情况下里层外层可以互换；为了保险，完全背包都把物品放在里层即可）
+对于压缩内存的写法，**0-1背包对物品的迭代放在外层，里层的重量或价值从后往前遍历；完全背包对物品的迭代放在里层，外层则正常从前往后遍历重量或价值**。（若完全背包的依赖方向在矩阵上是左和上，而这个依赖关系在调转行列后仍然成立，那么在这种情况下里层外层可以互换；为了保险，完全背包都把物品放在里层即可）
+
+
 
 ### Trie
 
