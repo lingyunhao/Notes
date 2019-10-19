@@ -2269,6 +2269,72 @@ public int numberOfArithmeticSlices(int[] A) {
 }
 ```
 
+**221. Maximal Square**
+
+Given a 2D binary matrix filled with 0's and 1's, find the largest square containing only 1's and return its area.
+
+**Example:**
+
+```
+Input: 
+1 0 1 0 0
+1 0 1 1 1
+1 1 1 1 1
+1 0 0 1 0
+Output: 4
+```
+
+**Solution:**
+
+为了维持正方形的关系，取三向的min
+
+```java
+public int maximalSquare(char[][] matrix) {
+    if (matrix == null || matrix.length == 0) return 0;
+    int m = matrix.length, n = matrix[0].length;
+    int[][] dp = new int[m][n];
+    int max = Integer.MIN_VALUE;
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            if (i == 0 || j == 0) {
+                if (matrix[i][j] == '1') {
+                    dp[i][j] = 1;
+                } else {
+                    dp[i][j] = 0;
+                }
+            } else {
+                if (matrix[i][j] == '1') {
+                    dp[i][j] = Math.min(Math.min(dp[i-1][j], dp[i-1][j-1]), dp[i][j-1]) + 1; 
+                }
+            }
+            max = Math.max(max, dp[i][j]);
+        }
+    }
+    return max * max;
+}
+```
+
+**343. Integer Break**
+
+Given a positive integer *n*, break it into the sum of **at least** two positive integers and maximize the product of those integers. Return the maximum product you can get.
+
+**Solution：**
+
+```java
+public int integerBreak(int n) {
+    int[] dp = new int[n+1];
+    dp[1] = 1;
+    for (int i = 2; i <= n; ++i) {
+        for (int j = 1; j <= i - 1; ++j) {
+            dp[i] = Math.max(dp[i], Math.max(j * dp[i-j], j * (i - j)));
+        }
+    }
+    return dp[n];
+}
+```
+
+
+
 **DP之背包问题**
 
 有N个物品和容量为W的背包，要用这个背包装下物品的价值最大，这些物品有两个属性：体积 w 和价值 v。

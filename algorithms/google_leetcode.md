@@ -1326,6 +1326,27 @@ public boolean increasingTriplet(int[] nums) {
 }
 ```
 
+###343. Integer Break
+
+Given a positive integer *n*, break it into the sum of **at least** two positive integers and maximize the product of those integers. Return the maximum product you can get.
+
+**Solution：**
+
+```java
+public int integerBreak(int n) {
+    int[] dp = new int[n+1];
+    dp[1] = 1;
+    for (int i = 2; i <= n; ++i) {
+        for (int j = 1; j <= i - 1; ++j) {
+            dp[i] = Math.max(dp[i], Math.max(j * dp[i-j], j * (i - j)));
+        }
+    }
+    return dp[n];
+}
+```
+
+
+
 ### 346. Moving Average from Data Stream
 
 Given a stream of integers and a window size, calculate the moving average of all integers in the sliding window.
