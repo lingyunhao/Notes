@@ -1,3 +1,5 @@
+
+
 # Algorithms
 
 ### Time Complexity
@@ -990,125 +992,6 @@ The topological order can be:
 
 **Examples:**
 
-**120. Triangle**
-
-Given a triangle, find the minimum path sum from top to bottom. Each step you may move to adjacent numbers on the row below.
-
-**Example:**
-
-```
-[
-     [2],
-    [3,4],
-   [6,5,7],
-  [4,1,8,3]
-]
-```
-
-The minimum path sum from top to bottom is `11` (i.e., **2** + **3** + **5**+ **1** = 11).
-
-**Solution 1:**
-
-DP bottom up with O($n^2$) time complexity and exrta O($n^2$) space.
-
-自底向上的DP, 开一个NN的二维数组, 存的是从(i,j)出发走到最底层的最小路径，先初始化最后一层为其本身，两层for循环遍历前n-1层，每个节点的值depend on (i+1,j) 和 (i+1,j+1) 两个节点，取其最小值再加上本身即为从(i,j)出发到bottom的最短路径，直到求到(0,0)为止， return(0,0) (从(0,0)出发到bottom 的最小值)。
-
-```java
-public int minimumTotal(List<List<Integer>> triangle) {
-    int n = triangle.size();
-
-    // Record the minimum path from (i,j) to the bottom
-    int dp[][] = new int[n][n];
-
-    // Initialize the bottom
-    for(int i = 0; i < n; ++i) {
-        dp[n-1][i] = triangle.get(n-1).get(i); 
-    }
-
-    // DP function
-    for(int i = n - 2; i >= 0; --i) {
-        for(int j = 0; j <= i; ++j) {
-            dp[i][j] = Math.min(dp[i+1][j], dp[i+1][j+1]) + triangle.get(i).get(j);
-        }
-    }
-
-    return dp[0][0];
-}
-```
-
-初始化也可以放在两层赋值for循环中，加个if语句即可。
-
-```java
-public int minimumTotal(List<List<Integer>> triangle) {
-    int n = triangle.size();
-
-    // Record the minimum path from (i,j) to the bottom
-    int dp[][] = new int[n][n];
-
-    // DP function
-    for(int i = n - 1; i >= 0; --i) {
-        for(int j = 0; j <= i; ++j) {
-            // Initialize
-            if(i == n - 1) {
-                dp[i][j] = triangle.get(i).get(j);
-                continue;
-            }
-            dp[i][j] = Math.min(dp[i+1][j], dp[i+1][j+1]) + triangle.get(i).get(j);
-        }
-    }
-
-    return dp[0][0];
-}
-```
-
-**Solution 2:**
-
-DP bottom up with O($n^2$) time complexity and exrta O($n^2$) space.
-
-与Solution 1不同的是，dp(i,j) represents the minimum path from (0,0) to (i,j). 赋值时需要取两个前继节点的最小值取其本身，三角形左边右边只有一个前继节点，需要对三角形左边(i,0)右边(i,i)初始化为其唯一的前继节点+其本身。先初始化顶点，然后左边后边，初始化可以在外边也可以在两层for循环内加if语句完成。最后在最底层打擂台得到状态矩阵最底层的最小值。
-
-```java
-public int minimumTotal(List<List<Integer>> triangle) {
-    int n = triangle.size();
-
-    // Record the minimum path from (i,j) to the bottom
-    int dp[][] = new int[n][n];
-
-    // Initialize
-    dp[0][0] = triangle.get(0).get(0);
-    for(int i = 1; i < n; ++i) {
-        dp[i][0] = dp[i-1][0] + triangle.get(i).get(0);
-        dp[i][i] = dp[i-1][i-1] + triangle.get(i).get(i);
-    }
-
-    // DP function
-    for(int i = 1; i < n; ++i) {
-        for(int j = 1; j < i; ++j) {
-            dp[i][j] = Math.min(dp[i-1][j-1], dp[i-1][j]) + triangle.get(i).get(j);
-        }
-    }
-
-    int result = Integer.MAX_VALUE;
-    for(int i = 0; i < n; ++i) {
-        result = Math.min(dp[n-1][i], result);
-    }
-
-    return result;
-}
-```
-
-**Solution 3:**
-
-将上面的算法优化到O(n)extra space. 实际上可以只开一个2 * n的矩阵，只保留计算当前这一层需要的前一层和此层，和n * n算法上并没有什么需别，而开1 * n的矩阵就需要考虑到谁先更新的问题。
-
-**Solution 4：**
-
-DP with no extra space with bottom up.
-
-不开新的矩阵，直接在输入上进行操作，bottom up，不需要初始化最底层
-
-
-
 **102. Binary Tree Level Order Traversal**
 
 **Example:**
@@ -1992,7 +1875,128 @@ private void backtracking(List<List<Integer>> combines, List<Integer> combineLis
 
 动态规划和递归(divide conquer)都是将原问题拆成多个字问题然后进行求解，他们之间最本质的区别是dp保留了子问题的解避免了重复计算。实际上，dp就相当于dfs + memorization。
 
+**注意：为了方便处理初始情况，一个常见的操作是建立一个n+1长度的dp数组，把初始值设置在dp[0]处。**
+
+**注意：DFS+Memoization基本等价DP，需要个数的时候用DP，需要输出的时候用DFS/backtracking**
+
 **Examples:**
+
+**120. Triangle**
+
+Given a triangle, find the minimum path sum from top to bottom. Each step you may move to adjacent numbers on the row below.
+
+**Example:**
+
+```
+[
+     [2],
+    [3,4],
+   [6,5,7],
+  [4,1,8,3]
+]
+```
+
+The minimum path sum from top to bottom is `11` (i.e., **2** + **3** + **5**+ **1** = 11).
+
+**Solution 1:**
+
+DP bottom up with O($n^2$) time complexity and exrta O($n^2$) space.
+
+自底向上的DP, 开一个NN的二维数组, 存的是从(i,j)出发走到最底层的最小路径，先初始化最后一层为其本身，两层for循环遍历前n-1层，每个节点的值depend on (i+1,j) 和 (i+1,j+1) 两个节点，取其最小值再加上本身即为从(i,j)出发到bottom的最短路径，直到求到(0,0)为止， return(0,0) (从(0,0)出发到bottom 的最小值)。
+
+```java
+public int minimumTotal(List<List<Integer>> triangle) {
+    int n = triangle.size();
+
+    // Record the minimum path from (i,j) to the bottom
+    int dp[][] = new int[n][n];
+
+    // Initialize the bottom
+    for(int i = 0; i < n; ++i) {
+        dp[n-1][i] = triangle.get(n-1).get(i); 
+    }
+
+    // DP function
+    for(int i = n - 2; i >= 0; --i) {
+        for(int j = 0; j <= i; ++j) {
+            dp[i][j] = Math.min(dp[i+1][j], dp[i+1][j+1]) + triangle.get(i).get(j);
+        }
+    }
+
+    return dp[0][0];
+}
+```
+
+初始化也可以放在两层赋值for循环中，加个if语句即可。
+
+```java
+public int minimumTotal(List<List<Integer>> triangle) {
+    int n = triangle.size();
+
+    // Record the minimum path from (i,j) to the bottom
+    int dp[][] = new int[n][n];
+
+    // DP function
+    for(int i = n - 1; i >= 0; --i) {
+        for(int j = 0; j <= i; ++j) {
+            // Initialize
+            if(i == n - 1) {
+                dp[i][j] = triangle.get(i).get(j);
+                continue;
+            }
+            dp[i][j] = Math.min(dp[i+1][j], dp[i+1][j+1]) + triangle.get(i).get(j);
+        }
+    }
+
+    return dp[0][0];
+}
+```
+
+**Solution 2:**
+
+DP bottom up with O($n^2$) time complexity and exrta O($n^2$) space.
+
+与Solution 1不同的是，dp(i,j) represents the minimum path from (0,0) to (i,j). 赋值时需要取两个前继节点的最小值取其本身，三角形左边右边只有一个前继节点，需要对三角形左边(i,0)右边(i,i)初始化为其唯一的前继节点+其本身。先初始化顶点，然后左边后边，初始化可以在外边也可以在两层for循环内加if语句完成。最后在最底层打擂台得到状态矩阵最底层的最小值。
+
+```java
+public int minimumTotal(List<List<Integer>> triangle) {
+    int n = triangle.size();
+
+    // Record the minimum path from (i,j) to the bottom
+    int dp[][] = new int[n][n];
+
+    // Initialize
+    dp[0][0] = triangle.get(0).get(0);
+    for(int i = 1; i < n; ++i) {
+        dp[i][0] = dp[i-1][0] + triangle.get(i).get(0);
+        dp[i][i] = dp[i-1][i-1] + triangle.get(i).get(i);
+    }
+
+    // DP function
+    for(int i = 1; i < n; ++i) {
+        for(int j = 1; j < i; ++j) {
+            dp[i][j] = Math.min(dp[i-1][j-1], dp[i-1][j]) + triangle.get(i).get(j);
+        }
+    }
+
+    int result = Integer.MAX_VALUE;
+    for(int i = 0; i < n; ++i) {
+        result = Math.min(dp[n-1][i], result);
+    }
+
+    return result;
+}
+```
+
+**Solution 3:**
+
+将上面的算法优化到O(n)extra space. 实际上可以只开一个2 * n的矩阵，只保留计算当前这一层需要的前一层和此层，和n * n算法上并没有什么需别，而开1 * n的矩阵就需要考虑到谁先更新的问题。
+
+**Solution 4：**
+
+DP with no extra space with bottom up.
+
+不开新的矩阵，直接在输入上进行操作，bottom up，不需要初始化最底层
 
 **64. Minimum Path Sum**
 
@@ -2265,6 +2269,86 @@ public int numberOfArithmeticSlices(int[] A) {
 }
 ```
 
+**DP之背包问题**
+
+有N个物品和容量为W的背包，要用这个背包装下物品的价值最大，这些物品有两个属性：体积 w 和价值 v。
+
+定义一个二维数组 dp 存储最大价值，其中 dp[i][j] 表示前 i 件物品体积不超过 j 的情况下能达到的最大价值。设第 i 件物品体积为 w，价值为 v，根据第 i 件物品是否添加到背包中，可以分两种情况讨论：
+
+- 第 i 件物品没添加到背包，总体积不超过 j 的前 i 件物品的最大价值就是总体积不超过 j 的前 i-1 件物品的最大价值，dp[i][j] = dp[i-1][j]。
+- 第 i 件物品添加到背包中，dp[i][j] = dp[i-1][j-w] + v。
+
+第 i 件物品可添加也可以不添加，取决于哪种情况下最大价值更大。
+
+综上，0-1 背包的状态转移方程为：dp[i][j] = max(dp[i - 1][j], dp[i-1][j-w] + v)。
+
+```
+int knapsack(vector<int> weights, vector<int> values, int N, int W) {
+    vector<vector<int>> dp (N + 1, vector<int>(W + 1, 0));
+    for (int i = 1; i <= N; ++i) {
+        int w = weights[i-1], v = values[i-1];
+        for (int j = 1; j <= W; ++j) {
+            if (j >= w) {
+                dp[i][j] = max(dp[i-1][j], dp[i-1][j-w] + v);
+            } else {
+                dp[i][j] = dp[i-1][j];
+            }
+        }
+    }
+    return dp[N][W];
+}
+```
+
+**空间优化**
+
+在程序实现时可以对 0-1 背包做优化。观察状态转移方程可以知道，前 i 件物品的状态仅由前 i-1 件物品的状态有关，因此可以将 dp 定义为一维数组，其中 dp[j] 既可以表示 dp[i-1][j] 也可以表示 dp[i][j]。此时，dp[i] = max(dp[j], dp[j-w] + v)。
+
+因为 dp[j-w] 表示 dp[i-1][j-w]，因此不能先求 dp[i][j-w]，以防止将 dp[i-1][j-w] 覆盖。也就是说要先计算 dp[i][j] 再计算 dp[i][j-w]，在程序实现时需要按倒序来循环求解。
+
+```c++
+int knapsack(vector<int> weights, vector<int> values, int N, int W) {
+    vector<int> dp (W + 1, 0);
+    for (int i = 1; i <= N; ++i) {
+        int w = weights[i-1], v = values[i-1];
+        for (int j = W; j >= w; --j) dp[j] = max(dp[j], dp[j-w] + v);
+    }
+    return dp[W];
+}
+```
+
+**变种**
+
+- 完全背包：物品数量为无限个
+
+- 多重背包：物品数量有限制
+
+- 多维费用背包：物品不仅有重量，还有体积，同时考虑这两种限制
+
+- 其它：物品之间相互约束或者依赖
+
+  **完全背包**
+
+  ```java
+  int knapsack(vector<int> weights, vector<int> values, int N, int W) {
+      vector<vector<int>> dp (N + 1, vector<int>(W + 1, 0));
+      for (int i = 1; i <= N; ++i) {
+          int w = weights[i-1], v = values[i-1];
+          for (int j = 1; j <= W; ++j) {
+              if (j >= w) {
+                  dp[i][j] = max(dp[i-1][j], dp[i][j-w] + v);  // i - 1 changed to i
+              } else {
+                  dp[i][j] = dp[i-1][j];
+              }
+          }
+      }
+      return dp[N][W];
+  }
+  ```
+
+  **完全背包 vs 0-1背包的空间优化**
+
+  对于压缩内存的写法，**0-1背包对物品的迭代放在外层，里层的重量或价值从后往前遍历；完全背包对物品的迭代放在里层，外层则正常从前往后遍历重量或价值**。（若完全背包的依赖方向在矩阵上是左和上，而这个依赖关系在调转行列后仍然成立，那么在这种情况下里层外层可以互换；为了保险，完全背包都把物品放在里层即可）
+
 ### Trie
 
 Trie又称字典树或者前缀树，用来判断字符串是否有某种前缀，或者字符串是否存在。背吧就。
@@ -2392,3 +2476,5 @@ sort(merge,quick selection,bucket etc.)
 topological sort(bfs)
 
 排列组合backtracking并没有很懂
+
+bfs+耗费不同， dijkastra

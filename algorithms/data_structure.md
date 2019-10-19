@@ -59,3 +59,34 @@ Heap 的性质是左右子结点都比root小(最小堆)，或者都比root大(�
 1. Merge two linked lists
 2. Reverse linked list
 3. Slow fast pointers to find the middle
+
+###树的操作
+
+一般会问到关于root，或者从root出发的。基本是用recursion，traversal，dfs，bfs。一般会问到关于root，或者从root出发的。
+
+如果说任意一个结点（比如一个结点不一定是root到任意子结点的最长路径），因为不能确定parent结点是谁，所以需要把树转化成图进行操作
+
+###Thread Safe
+
+ArrayList和Vector有什么区别？HashMap和HashTable有什么区别？StringBuilder和StringBuffer有什么区别？这些都是Java面试中常见的基础问题。面对这样的问题，回答是：ArrayList是非线程安全的，Vector是线程安全的；HashMap是非线程安全的，HashTable是线程安全的；StringBuilder是非线程安全的，StringBuffer是线程安全的。
+
+**1）synchronized**
+
+- Java提供这个关键字，为防止资源冲突提供的内置支持。当任务执行到被synchronized保护的代码片段的时候，它检查锁是否可用，然后获取锁，执行代码，释放锁。
+- 常用这个关键字可以修饰成员方法和代码块
+
+**2）读写锁**
+
+我们对数据的操作无非两种：“读”和“写”，试想一个这样的情景，当十个线程同时读取某个数据时，这个操作应不应该加同步。答案是没必要的。只有以下两种情况需要加同步：
+
+- 这十个线程对这个公共数据既有读又有写
+- 这十个线程对公共数据进行写操作
+- **以上两点归结起来就一点就是有对数据进行改变的操作就需要同步**
+
+java5提供了读写锁
+
+这种锁支持多线程读操作不互斥，多线程读写互斥，多线程写写互斥。
+
+https://wiki.jikexueyuan.com/project/java-concurrent/read-write-locks-in-java.html
+
+https://blog.csdn.net/u011877584/article/details/78339128
