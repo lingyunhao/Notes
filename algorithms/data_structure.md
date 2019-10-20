@@ -32,6 +32,10 @@ Queue<T> queue = new LinkedList<>();
 
 Stack<T> stack = new Stack<>();
 
+入stack: add, push
+
+出stack: pop
+
 **Deque**
 
 可以实现两头的O(1)增删，但是没办法在中间删除。一般用ArrayDeque或者LinkedList实现。
