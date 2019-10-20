@@ -155,9 +155,77 @@ Dikstra : PQ bfs 中的queue换成pq
 
  O(1)  online 求median，两个PQ，一个最大PQ，一个最小PQ
 
-##线程安全
+###线程安全
 
 写一个算法或者algorithm怎么使得 某一部分线程安全
 
 read write safe
+
+
+
+##ALgorithms
+
+###Greedy
+
+1.interval
+
+### Two pointers
+
+1. 对一个array的双指针，对两个1-darray的双指针 
+
+2. 异向双指针，完全平方和
+
+3. 快慢指针
+
+### Binary Search
+
+自己看
+
+### 排序
+
+1. merge sort O(nlgn)
+
+2. quick sort O(nlgn) / O($n^2$) - > quick selection -> 第k大的元素 average O(n)
+3. 桶排序 O(n) 知道最大的和最小的->hashmap去group.
+
+非online的order需要排序
+
+### Search BFS DFS
+
+backtracking、 数独、九皇后
+
+### DP
+
+###Divide Conquer
+
+master theory 
+
+给表达式加括号 241
+
+### 数学
+
+1. i式筛法  求1-n之间的所有素数 i从2开始依次删掉2的<n所有倍数（右界限 sqrt(N))
+2. 两个数最大公因数,最小公倍数： 
+
+```java
+//最大公因数
+int gcd(int a, int b) {
+    return b == 0 ? a : gcd(b, a% b);
+}
+
+// 最小公倍数
+int lcm(int a, int b) {
+    return a * b / gcd(a, b);
+}
+```
+
+3. 在O(n)的时间内找到中位数： quick selection
+
+### bit operation
+
+x ^ 0s = x      x & 0s = 0      x | 0s = x
+
+x ^ 1s = ~x     x & 1s = x      x | 1s = 1s
+
+x ^ x = 0       x & x = x       x | x = x
 

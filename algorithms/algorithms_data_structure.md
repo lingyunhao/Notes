@@ -560,7 +560,7 @@ T(n) = T(n/2) + O(1) = (T(n/4) + O(1)) + O(1) = T(8/n) + 3*O(1) = … = T(n/n) +
 
 **Binary Search 的三种境界**
 
-1. Given a sorted integer array - noms, and an integer - target, find any/first/last postion of the target
+1. Given a sorted integer array - nums, and an integer - target, find any/first/last postion of the target
 2. 给一个数组满足前半段和后半段在某一点不同，找第一个或者最后一个满足某种条件的位置 OOOOOXXXXXXXX， 这种情况判断结果只有两种，是O或者不是O，最后出了循环再去判断一下left，right指针，return相应值去避免corner case
 3. 可能无法找到某个条件使得前半段和后半段不同，但二分的本质是每次去掉无解的一半保留有解的一半
 
@@ -904,6 +904,57 @@ public int searchInsert(int[] nums, int target) {
 **Smallest Rectangle Enclosing Black Pixels**
 
 **33. Search In Rotated Sorted Array**
+
+Suppose an array sorted in ascending order is rotated at some pivot unknown to you beforehand.
+
+(i.e., `[0,1,2,4,5,6,7]` might become `[4,5,6,7,0,1,2]`).
+
+You are given a target value to search. If found in the array return its index, otherwise return `-1`.
+
+You may assume no duplicate exists in the array.
+
+Your algorithm's runtime complexity must be in the order of *O*(log *n*).
+
+**Example 1:**
+
+```
+Input: nums = [4,5,6,7,0,1,2], target = 0
+Output: 4
+```
+
+**Solution:**
+
+境界三，画图区分，主要是边界条件的判断。双重判断，还是丢掉一半，保留一半。
+
+```java
+public int search(int[] nums, int target) {
+    if(nums == null || nums.length == 0) return -1;
+    int start = 0;
+    int end = nums.length-1;
+
+    while(start+1 < end) {
+        int mid = start + (end - start)/2;
+        if(nums[mid] >= nums[start]) {
+            if(target >= nums[start] && target <= nums[mid]) {
+                end = mid;
+            } else {
+                start = mid;
+            }
+        } else {
+            if(target >= nums[mid] && target <= nums[end]) {
+                start = mid;
+            } else {
+                end = mid;
+            }
+        }
+    }
+    if(nums[start] == target) return start;
+    if(nums[end] == target) return end;
+    return -1;
+}
+```
+
+
 
 **Find Peak Element**
 
