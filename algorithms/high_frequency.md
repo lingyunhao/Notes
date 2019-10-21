@@ -841,3 +841,554 @@ return new int[0];
 }
 ```
 
+### 410. Split Array Largest Sum
+
+Given an array which consists of non-negative integers and an integer *m*, you can split the array into *m* non-empty continuous subarrays. Write an algorithm to minimize the largest sum among these *m* subarrays.
+
+**Examples:**
+
+```
+Input:
+nums = [7,2,5,10,8]
+m = 2
+
+Output:
+18
+
+Explanation:
+There are four ways to split nums into two subarrays.
+The best way is to split it into [7,2,5] and [10,8],
+where the largest sum among the two subarrays is only 18.
+```
+
+**Solution:**
+
+DP
+
+```java
+public int splitArray(int[] nums, int m) {
+    int n = nums.length;
+    int[][] f = new int[n + 1][m + 1];
+    int[] sub = new int[n + 1];
+    for (int i = 0; i <= n; i++) {
+        for (int j = 0; j <= m; j++) {
+            f[i][j] = Integer.MAX_VALUE;
+        }
+    }
+    for (int i = 0; i < n; i++) {
+        sub[i + 1] = sub[i] + nums[i];
+    }
+    f[0][0] = 0;
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            for (int k = 0; k < i; k++) {
+                f[i][j] = Math.min(f[i][j], Math.max(f[k][j - 1], sub[i] - sub[k]));
+            }
+        }
+    }
+    return f[n][m];        
+}
+```
+
+### 684. Redundant Connection
+
+In this problem, a tree is an **undirected** graph that is connected and has no cycles.
+
+The given input is a graph that started as a tree with N nodes (with distinct values 1, 2, ..., N), with one additional edge added. The added edge has two different vertices chosen from 1 to N, and was not an edge that already existed.
+
+The resulting graph is given as a 2D-array of `edges`. Each element of `edges` is a pair `[u, v]` with `u < v`, that represents an **undirected** edge connecting nodes `u` and `v`.
+
+Return an edge that can be removed so that the resulting graph is a tree of N nodes. If there are multiple answers, return the answer that occurs last in the given 2D-array. The answer edge `[u, v]` should be in the same format, with `u < v`.
+
+**Example 1:**
+
+```
+Input: [[1,2], [1,3], [2,3]]
+Output: [2,3]
+Explanation: The given undirected graph will be like this:
+  1
+ / \
+2 - 3
+```
+
+**Solution:**
+
+```java
+Set<Integer> seen = new HashSet();
+int MAX_EDGE_VAL = 1000;
+
+public int[] findRedundantConnection(int[][] edges) {
+    ArrayList<Integer>[] graph = new ArrayList[MAX_EDGE_VAL + 1];
+    for (int i = 0; i <= MAX_EDGE_VAL; i++) {
+        graph[i] = new ArrayList();
+    }
+
+    for (int[] edge: edges) {
+        seen.clear();
+        if (!graph[edge[0]].isEmpty() && !graph[edge[1]].isEmpty() &&
+                dfs(graph, edge[0], edge[1])) {
+            return edge;
+        }
+        graph[edge[0]].add(edge[1]);
+        graph[edge[1]].add(edge[0]);
+    }
+    throw new AssertionError();
+}
+public boolean dfs(ArrayList<Integer>[] graph, int source, int target) {
+    if (!seen.contains(source)) {
+        seen.add(source);
+        if (source == target) return true;
+        for (int nei: graph[source]) {
+            if (dfs(graph, nei, target)) return true;
+        }
+    }
+    return false;
+}
+```
+
+### 843. Guess the Word
+
+This problem is an **interactive problem** new to the LeetCode platform.
+
+We are given a word list of unique words, each word is 6 letters long, and one word in this list is chosen as **secret**.
+
+You may call `master.guess(word)` to guess a word.  The guessed word should have type `string` and must be from the original list with 6 lowercase letters.
+
+This function returns an `integer` type, representing the number of exact matches (value and position) of your guess to the **secret word**.  Also, if your guess is not in the given wordlist, it will return `-1` instead.
+
+For each test case, you have 10 guesses to guess the word. At the end of any number of calls, if you have made 10 or less calls to `master.guess` and at least one of these guesses was the **secret**, you pass the testcase.
+
+Besides the example test case below, there will be 5 additional test cases, each with 100 words in the word list.  The letters of each word in those testcases were chosen independently at random from `'a'` to `'z'`, such that every word in the given word lists is unique.
+
+```
+Example 1:
+Input: secret = "acckzz", wordlist = ["acckzz","ccbazz","eiowzz","abcczz"]
+
+Explanation:
+
+master.guess("aaaaaa") returns -1, because "aaaaaa" is not in wordlist.
+master.guess("acckzz") returns 6, because "acckzz" is secret and has all 6 matches.
+master.guess("ccbazz") returns 3, because "ccbazz" has 3 matches.
+master.guess("eiowzz") returns 2, because "eiowzz" has 2 matches.
+master.guess("abcczz") returns 4, because "abcczz" has 4 matches.
+
+We made 5 calls to master.guess and one of them was the secret, so we pass the test case.
+```
+
+**Solution:**
+
+```java
+int[][] H;
+public void findSecretWord(String[] wordlist, Master master) {
+    int N = wordlist.length;
+    H = new int[N][N];
+    for (int i = 0; i < N; ++i)
+        for (int j = i; j < N; ++j) {
+            int match = 0;
+            for (int k = 0; k < 6; ++k)
+                if (wordlist[i].charAt(k) == wordlist[j].charAt(k))
+                    match++;
+            H[i][j] = H[j][i] = match;
+        }
+
+    List<Integer> possible = new ArrayList();
+    List<Integer> path = new ArrayList();
+    for (int i = 0; i < N; ++i) possible.add(i);
+
+    while (!possible.isEmpty()) {
+        int guess = solve(possible, path);
+        int matches = master.guess(wordlist[guess]);
+        if (matches == wordlist[0].length()) return;
+        List<Integer> possible2 = new ArrayList();
+        for (Integer j: possible) if (H[guess][j] == matches) possible2.add(j);
+        possible = possible2;
+        path.add(guess);
+    }
+
+}
+
+public int solve(List<Integer> possible, List<Integer> path) {
+    if (possible.size() <= 2) return possible.get(0);
+    List<Integer> ansgrp = possible;
+    int ansguess = -1;
+
+    for (int guess = 0; guess < H.length; ++guess) {
+        if (!path.contains(guess)) {
+            ArrayList<Integer>[] groups = new ArrayList[7];
+            for (int i = 0; i < 7; ++i) groups[i] = new ArrayList<Integer>();
+            for (Integer j: possible) if (j != guess) {
+                groups[H[guess][j]].add(j);
+            }
+
+            ArrayList<Integer> maxgroup = groups[0];
+            for (int i = 0; i < 7; ++i)
+                if (groups[i].size() > maxgroup.size())
+                    maxgroup = groups[i];
+
+            if (maxgroup.size() < ansgrp.size()) {
+                ansgrp = maxgroup;
+                ansguess = guess;
+            }
+        }
+    }
+
+    return ansguess;
+}
+```
+
+```java
+public int countDiff (String a, String b) {
+    int count = 0;
+    for (int i = 0; i < 6; i ++) {
+        if (a.charAt(i) == b.charAt(i)) count ++;
+    }
+    return count;
+}
+public void findSecretWord(String[] wordlist, Master master) {       
+    LinkedList<Integer> left = new LinkedList<>();
+    for (int i = 0; i < wordlist.length; i ++) left.offer(i);
+    while(true) {
+        if (left.isEmpty()) break;
+        Collections.shuffle(left);
+        int current = left.poll();
+        int diff = master.guess(wordlist[current]);
+        int size = left.size();
+        for (int j = 0; j < size; j ++) {
+            int next = left.poll();
+            if (countDiff(wordlist[current], wordlist[next]) == diff) left.offer(next);
+        }
+    }        
+}
+```
+
+### 146. LRU Cache
+
+Design and implement a data structure for [Least Recently Used (LRU) cache](https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU). It should support the following operations: `get` and `put`.
+
+`get(key)` - Get the value (will always be positive) of the key if the key exists in the cache, otherwise return -1.
+`put(key, value)` - Set or insert the value if the key is not already present. When the cache reached its capacity, it should invalidate the least recently used item before inserting a new item.
+
+The cache is initialized with a **positive** capacity.
+
+**Follow up:**
+Could you do both operations in **O(1)** time complexity?
+
+**Example:**
+
+```
+LRUCache cache = new LRUCache( 2 /* capacity */ );
+
+cache.put(1, 1);
+cache.put(2, 2);
+cache.get(1);       // returns 1
+cache.put(3, 3);    // evicts key 2
+cache.get(2);       // returns -1 (not found)
+cache.put(4, 4);    // evicts key 1
+cache.get(1);       // returns -1 (not found)
+cache.get(3);       // returns 3
+cache.get(4);       // returns 4
+```
+
+#### Approach 1: Ordered dictionary
+
+**Intuition**
+
+We're asked to implement [the structure](https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU) which provides the following operations in \mathcal{O}(1)O(1) time :
+
+- Get the key / Check if the key exists
+- Put the key
+- Delete the first added key
+
+The first two operations in \mathcal{O}(1)O(1) time are provided by the standard hashmap, and the last one - by linked list.
+
+> There is a structure called *ordered dictionary*, it combines behind both hashmap and linked list. In Python this structure is called [*OrderedDict*](https://docs.python.org/3/library/collections.html#collections.OrderedDict) and in Java [*LinkedHashMap*](https://docs.oracle.com/javase/8/docs/api/java/util/LinkedHashMap.html).
+
+```java
+class LRUCache extends LinkedHashMap<Integer, Integer>{
+    private int capacity;
+    
+    public LRUCache(int capacity) {
+        super(capacity, 0.75F, true);
+        this.capacity = capacity;
+    }
+
+    public int get(int key) {
+        return super.getOrDefault(key, -1);
+    }
+
+    public void put(int key, int value) {
+        super.put(key, value);
+    }
+
+    @Override
+    protected boolean removeEldestEntry(Map.Entry<Integer, Integer> eldest) {
+        return size() > capacity; 
+    }
+}
+```
+
+#### Approach 2: Hashmap + DoubleLinkedList
+
+**Intuition**
+
+This Java solution is an extended version of the [the article published on the Discuss forum](https://leetcode.com/problems/lru-cache/discuss/45911/Java-Hashtable-%2B-Double-linked-list-(with-a-touch-of-pseudo-nodes)).
+
+The problem can be solved with a hashmap that keeps track of the keys and its values in the double linked list. That results in \mathcal{O}(1)O(1) time for `put` and `get` operations and allows to remove the first added node in \mathcal{O}(1)O(1) time as well.
+
+![compute](https://leetcode.com/problems/lru-cache/Figures/146/structure.png)
+
+One advantage of *double* linked list is that the node can remove itself without other reference. In addition, it takes constant time to add and remove nodes from the head or tail.
+
+One particularity about the double linked list implemented here is that there are *pseudo head* and *pseudo tail* to mark the boundary, so that we don't need to check the `null` node during the update.
+
+![compute](https://leetcode.com/problems/lru-cache/Figures/146/new_node.png)
+
+**Implementation**
+
+```java
+public class LRUCache {
+
+  class DLinkedNode {
+    int key;
+    int value;
+    DLinkedNode prev;
+    DLinkedNode next;
+  }
+
+  private void addNode(DLinkedNode node) {
+    /**
+     * Always add the new node right after head.
+     */
+    node.prev = head;
+    node.next = head.next;
+
+    head.next.prev = node;
+    head.next = node;
+  }
+
+  private void removeNode(DLinkedNode node){
+    /**
+     * Remove an existing node from the linked list.
+     */
+    DLinkedNode prev = node.prev;
+    DLinkedNode next = node.next;
+
+    prev.next = next;
+    next.prev = prev;
+  }
+
+  private void moveToHead(DLinkedNode node){
+    /**
+     * Move certain node in between to the head.
+     */
+    removeNode(node);
+    addNode(node);
+  }
+
+  private DLinkedNode popTail() {
+    /**
+     * Pop the current tail.
+     */
+    DLinkedNode res = tail.prev;
+    removeNode(res);
+    return res;
+  }
+
+  private Map<Integer, DLinkedNode> cache = new HashMap<>();
+  private int size;
+  private int capacity;
+  private DLinkedNode head, tail;
+
+  public LRUCache(int capacity) {
+    this.size = 0;
+    this.capacity = capacity;
+
+    head = new DLinkedNode();
+    // head.prev = null;
+
+    tail = new DLinkedNode();
+    // tail.next = null;
+
+    head.next = tail;
+    tail.prev = head;
+  }
+
+  public int get(int key) {
+    DLinkedNode node = cache.get(key);
+    if (node == null) return -1;
+
+    // move the accessed node to the head;
+    moveToHead(node);
+
+    return node.value;
+  }
+
+  public void put(int key, int value) {
+    DLinkedNode node = cache.get(key);
+
+    if(node == null) {
+      DLinkedNode newNode = new DLinkedNode();
+      newNode.key = key;
+      newNode.value = value;
+
+      cache.put(key, newNode);
+      addNode(newNode);
+
+      ++size;
+
+      if(size > capacity) {
+        // pop the tail
+        DLinkedNode tail = popTail();
+        cache.remove(tail.key);
+        --size;
+      }
+    } else {
+      // update the value.
+      node.value = value;
+      moveToHead(node);
+    }
+  }
+}
+```
+
+### 460. LFU Cache
+
+Design and implement a data structure for [Least Frequently Used (LFU)](https://en.wikipedia.org/wiki/Least_frequently_used) cache. It should support the following operations: `get` and `put`.
+
+`get(key)` - Get the value (will always be positive) of the key if the key exists in the cache, otherwise return -1.
+`put(key, value)` - Set or insert the value if the key is not already present. When the cache reaches its capacity, it should invalidate the least frequently used item before inserting a new item. For the purpose of this problem, when there is a tie (i.e., two or more keys that have the same frequency), the least **recently** used key would be evicted.
+
+Note that the number of times an item is used is the number of calls to the `get` and `put` functions for that item since it was inserted. This number is set to zero when the item is removed.
+
+**Solution:**
+
+```java
+class LFUCache {
+
+    HashMap<Integer, DoubleLinkedList> freqMap = new HashMap<>(); // HashMap<freq, ddl>
+    HashMap<Integer, Node> map = new HashMap<>(); // HashMap<Key, Node>
+    int minFreq;
+    int count, capacity;
+    public LFUCache(int capacity) {
+        this.capacity = capacity;
+        count = 0;
+        minFreq = 1;
+        freqMap.put(1, new DoubleLinkedList());
+    }
+    
+    public int get(int key) {
+        if(!map.containsKey(key))
+            return -1;
+        //1. Get the node
+        Node node = map.get(key);
+        //2. remove from original frequency
+        DoubleLinkedList curList = freqMap.get(node.freq);
+        curList.removeNode(node);
+        //3. increase frequency + add to new frequency
+        node.freq ++;
+        if(!freqMap.containsKey(node.freq))
+            freqMap.put(node.freq, new DoubleLinkedList());
+        DoubleLinkedList newList = freqMap.get(node.freq);
+        newList.addToHead(node);
+        
+        if(freqMap.get(minFreq).isEmpty())             // Update minFreq !!!
+            minFreq ++;
+        
+        return node.val;
+    }
+    
+    public void put(int key, int value) {
+        if(capacity == 0) return;
+        if(map.containsKey(key)) {
+            //1. Get the node
+            Node node = map.get(key);
+            //2. Change its value
+            node.val = value;
+            //3. remove from original frequency
+            DoubleLinkedList curList = freqMap.get(node.freq);
+            curList.removeNode(node);
+            //4. increase frequency + add to new frequency
+            node.freq ++;
+            if(!freqMap.containsKey(node.freq))
+                freqMap.put(node.freq, new DoubleLinkedList());
+            DoubleLinkedList newList = freqMap.get(node.freq);
+            newList.addToHead(node);
+            
+            if(freqMap.get(minFreq).isEmpty())        // Update minFreq !!!
+                minFreq ++;
+            
+            return;
+        }
+        
+        
+        //1. new node with frequency 1
+        Node node = new Node(key, value, 1);
+        map.put(key, node);
+        //2. if count > capacity, evict the last --> update the last
+        count ++;
+        if(count > capacity) {
+            DoubleLinkedList remove = freqMap.get(minFreq);   // Remove minFreq !!!
+            Node last = remove.popTail();
+            map.remove(last.key);
+            count --;
+        }
+        //3. add the node to the list
+        if(!freqMap.containsKey(node.freq))
+            freqMap.put(node.freq, new DoubleLinkedList());
+        DoubleLinkedList newList = freqMap.get(node.freq);
+        newList.addToHead(node);
+        
+        minFreq = 1;                                 // Update minFreq !!!
+    }
+    
+    class Node {
+        int key;
+        int val;
+        int freq;
+        Node prev;
+        Node next;
+        public Node(int k, int v, int f) {
+            key = k;
+            val = v;
+            freq = f;
+        }
+    }
+    class DoubleLinkedList {
+        Node head, tail;
+        public DoubleLinkedList() {
+            head = new Node(-1,-1,-1);
+            tail = new Node(-1,-1,-1);
+            head.next = tail;
+            tail.prev = head;
+        }
+        public void addToHead(Node node) {
+            Node headNext = head.next;
+            head.next = node;
+            node.prev = head;
+            node.next = headNext;
+            headNext.prev = node;
+        }
+        public void removeNode(Node node) {
+            Node prevNode = node.prev;
+            Node nextNode = node.next;
+            prevNode.next = nextNode;
+            nextNode.prev = prevNode;
+        }
+        public Node popTail() {
+            Node node = tail.prev;
+            if(node == head) return null;
+            Node prevNode = node.prev;
+            prevNode.next = tail;
+            tail.prev = prevNode;
+            node.next = null;
+            node.prev = null;
+            return node;
+        }
+        public boolean isEmpty() {
+            return head.next == tail;
+        }
+    }
+    
+}
+```
+
