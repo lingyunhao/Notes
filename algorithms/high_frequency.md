@@ -247,3 +247,441 @@ class Solution {
 }
 ```
 
+### 658. Find K Closest Elements
+
+Given a sorted array, two integers `k` and `x`, find the `k` closest elements to `x` in the array. The result should also be sorted in ascending order. If there is a tie, the smaller elements are always preferred.
+
+**Example 1:**
+
+```
+Input: [1,2,3,4,5], k=4, x=3
+Output: [1,2,3,4]
+```
+
+**Solution:**
+
+Binary search + two pointers  O(logn + k)
+
+```java
+public List<Integer> findClosestElements(int[] arr, int k, int x) {
+    List<Integer> res = new ArrayList<>();
+    if (arr == null || arr.length == 0) return res;
+    int left = findLastEqualOrSmaller(arr, x);
+    int right = left + 1;
+    for (int i = 0; i < k; i++) {
+        if (right >= arr.length || (left >= 0 && (Math.abs(arr[left] - x) <= Math.abs(arr[right] - x)))) {
+            left--;
+        } else {
+            right++;
+        }
+    }
+    for (int i = left + 1; i < right; i++) {
+        res.add(arr[i]);
+    }
+    return res;
+}
+public int findLastEqualOrSmaller(int[] array, int x) {
+    int start = 0;
+    int end = array.length - 1;
+    int mid;
+    while (start + 1 < end) {
+        mid = start + (end - start) / 2;
+        if (array[mid] == x) {
+            start = mid;
+        } else if (array[mid] < x) {
+            start = mid;
+        } else {
+            end = mid;
+        }
+    }
+    if (array[end] <= x) {
+        return end;
+    } else {
+        return start;
+    }
+}
+```
+
+**给定一个数组，和一个target，要求返回这个数组中能不能有subset的sum是target，followup问的是返回有多少这样的subset，以及如果不仅仅是和，还可以减，或者乘除怎么办，还有如果是要求返回subset本身怎么办
+E.g Given [3,5,6,7,3,2,6,1] t=9
+Return [5,3,1], [7,2] etc.**
+
+### 78. Subsets (no duplicate)
+
+```java
+public List<List<Integer>> subsets(int[] nums) {
+    List<List<Integer>> subsets = new ArrayList<>();
+    List<Integer> tem = new ArrayList<>();
+    for(int size=0; size<=nums.length; size++) {
+        backtracking(subsets, tem, 0, size, nums);
+    }
+    return subsets;
+}
+
+private void backtracking(List<List<Integer>> subsets, List<Integer> tem, int start, int size, int[] nums) {
+    if(tem.size() == size) {
+        subsets.add(new ArrayList<>(tem));
+        return;
+    }
+
+    for(int i=start; i<nums.length; i++) {
+        tem.add(nums[i]);
+        backtracking(subsets, tem, i+1, size, nums);
+        tem.remove(tem.size()-1);
+    }
+}
+```
+
+### 90. Subsets II (duplicate elements)
+
+```java
+public List<List<Integer>> subsetsWithDup(int[] nums) {
+    List<List<Integer>> subsets = new ArrayList<>();
+    List<Integer> tem = new ArrayList<>();
+    Arrays.sort(nums);
+    boolean[] visited = new boolean[nums.length];
+    for(int size = 0; size<=nums.length; size++) {
+        backtracking(subsets, tem, visited, 0, size, nums);
+    }
+    return subsets;
+}
+
+private void backtracking(List<List<Integer>> subsets, List<Integer> tem, boolean[] visited, int start, int size, int[] nums) {
+    if(tem.size() == size) {
+        subsets.add(new ArrayList<>(tem));
+        return;
+    }
+
+    for(int i=start; i<nums.length; i++) {
+        if(i!=0 && nums[i] == nums[i-1] && !visited[i-1]) {
+            continue;
+        }
+        tem.add(nums[i]);
+        visited[i] = true;
+        backtracking(subsets, tem, visited, i+1, size, nums);
+        visited[i] = false;
+        tem.remove(tem.size()-1);
+    }
+}
+```
+
+### 40. Combination Sum II
+
+Given a collection of candidate numbers (`candidates`) and a target number (`target`), find all unique combinations in `candidates` where the candidate numbers sums to `target`.
+
+Each number in `candidates` may only be used **once** in the combination.
+
+**Note:**
+
+- All numbers (including `target`) will be positive integers.
+- The solution set must not contain duplicate combinations.
+
+**Example 1:**
+
+```
+Input: candidates = [10,1,2,7,6,1,5], target = 8,
+A solution set is:
+[
+  [1, 7],
+  [1, 2, 5],
+  [2, 6],
+  [1, 1, 6]
+]
+```
+
+**Solution:**
+
+```java
+public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+    List<List<Integer>> combines = new ArrayList<>();
+    Arrays.sort(candidates);
+    boolean[] visited = new boolean[candidates.length];
+    backtracking(new ArrayList<>(), combines, 0, candidates, target, visited);
+    return combines;
+}
+
+private void backtracking(List<Integer> combineList, List<List<Integer>> combines, int start, int[] candidates, int target, boolean[] visited) {
+
+    if(target == 0) {
+        combines.add(new ArrayList<>(combineList));
+        return;
+    }
+    for(int i=start; i<candidates.length; i++) {
+        if(i!=0 && candidates[i] == candidates[i-1] && !visited[i-1]) continue;
+        if(candidates[i] <= target) {
+            visited[i] = true;
+            combineList.add(candidates[i]);
+            backtracking(combineList, combines, i+1,candidates, target-candidates[i], visited);
+            combineList.remove(combineList.size()-1);
+            visited[i] = false;
+        }
+    }
+}
+```
+
+### 708. Insert into a Cyclic Sorted List
+
+Given a node from a cyclic linked list which is sorted in ascending order, write a function to insert a value into the list such that it remains a cyclic sorted list. The given node can be a reference to *any* single node in the list, and may not be necessarily the smallest value in the cyclic list.
+
+If there are multiple suitable places for insertion, you may choose any place to insert the new value. After the insertion, the cyclic list should remain sorted.
+
+If the list is empty (i.e., given node is `null`), you should create a new single cyclic list and return the reference to that single node. Otherwise, you should return the original given node.
+
+**Soution：**
+
+分情况讨论所有可能的情况，用一个cur和next指针去逼近该插入的位置，然后break出循环，插到cur和next中间。
+
+```java
+public Node insert(Node head, int insertVal) {
+    if (head == null) {
+        Node cur = new Node();
+        cur.val = insertVal;
+        cur.next = cur;
+        return cur;
+    }
+    Node cur = head;
+    Node next = head.next;
+    while (next != head) {
+        // 2->2->2->3->3->3 insert2,3
+        // 1->3->3->4 insert 2,3
+        // 1->3->4->1(head) insert 1
+        if (cur.val <= next.val && insertVal >= cur.val && insertVal <= next.val) break;
+        // 3->4->1->3(head) insert 5
+        if (cur.val > next.val && insertVal >= cur.val) break;
+        // 3->4->1->3->(head) insert 0,1
+        if (cur.val > next.val && insertVal <= next.val) break;
+        // 1->3->4->1(head) insert 5(while)
+        cur = next;
+        next = cur.next;
+    }
+    Node node = new Node(insertVal, next);
+    cur.next = node;
+    return head;
+}
+```
+
+### 951. Flip Equivalent Binary Trees
+
+For a binary tree T, we can define a flip operation as follows: choose any node, and swap the left and right child subtrees.
+
+A binary tree X is *flip equivalent* to a binary tree Y if and only if we can make X equal to Y after some number of flip operations.
+
+Write a function that determines whether two binary trees are *flip equivalent*.  The trees are given by root nodes `root1` and `root2`.
+
+**Example 1:**
+
+```
+Input: root1 = [1,2,3,4,5,6,null,null,null,7,8], root2 = [1,3,2,null,6,4,5,null,null,null,null,8,7]
+Output: true
+Explanation: We flipped at nodes with values 1, 3, and 5.
+```
+
+ **Solution:**
+
+递推：recursion。（也可以理解为是个dfs，dfs(recursion写法）本质上就是在用recursion去搜索）。
+
+主要要把recursion单独当作一种方法，不要和dfs混淆，只是dfs经常用recursion来写，因为快且方便。
+
+**Recursion 的要素**
+
+- 递归的定义（递归函数求的是什么，完成了什么功能，类似dp[i]表示什么）
+- 递归的拆解 （这次递归和之前的递归有什么关系，在本次递归调用递归传参，return等等，类似dp fucntion）
+- 递归的出口 （什么时候可以return）
+
+**写recursion的时候，assume对于当前的node是正确的，那么对于所有的node一定正确。**
+
+**tree等需要recursion结构 判断identical类问题四步：**
+
+1. 两个root皆为null return true （出口）
+
+2. 两个root其中一个为null return false （出口）
+
+3. 两个root的值不相等 return false （出口）
+
+4. 根据题意，判断左右子树调用问题传参（递归的拆解）
+
+   本题的recursion就是判断当前节点正确，且左右子树正确
+
+```java
+public boolean flipEquiv(TreeNode root1, TreeNode root2) {
+    if (root1 == null && root2 == null) return true;
+    if (root1 == null || root2 == null) return false;
+    if (root1.val != root2.val) return false;
+    return (flipEquiv(root1.left, root2.left) && flipEquiv(root1.right, root2.right)) || (flipEquiv(root1.left, root2.right) && flipEquiv(root1.right, root2.left));
+}
+```
+
+### 54. Spiral Matrix
+
+Given a matrix of *m* x *n* elements (*m* rows, *n* columns), return all elements of the matrix in spiral order.
+
+**Example 1:**
+
+```
+Input:
+[
+ [ 1, 2, 3 ],
+ [ 4, 5, 6 ],
+ [ 7, 8, 9 ]
+]
+Output: [1,2,3,6,9,8,7,4,5]
+```
+
+**Solution:**
+
+```java
+public List<Integer> spiralOrder(int[][] matrix) {
+    List ans = new ArrayList();
+    if (matrix.length == 0) return ans;
+    int R = matrix.length, C = matrix[0].length;
+    boolean[][] seen = new boolean[R][C];
+    int[] dr = {0, 1, 0, -1};
+    int[] dc = {1, 0, -1, 0};
+    int r = 0, c = 0, di = 0;
+    for (int i = 0; i < R * C; i++) {
+        ans.add(matrix[r][c]);
+        seen[r][c] = true;
+        int cr = r + dr[di];
+        int cc = c + dc[di];
+        if (0 <= cr && cr < R && 0 <= cc && cc < C && !seen[cr][cc]){
+            r = cr;
+            c = cc;
+        } else {
+            di = (di + 1) % 4;
+            r += dr[di];
+            c += dc[di];
+        }
+    }
+    return ans;
+}
+```
+
+### 417. Pacific Atlantic Water Flow
+
+Given an `m x n` matrix of non-negative integers representing the height of each unit cell in a continent, the "Pacific ocean" touches the left and top edges of the matrix and the "Atlantic ocean" touches the right and bottom edges.
+
+Water can only flow in four directions (up, down, left, or right) from a cell to another one with height equal or lower.
+
+Find the list of grid coordinates where water can flow to both the Pacific and Atlantic ocean.
+
+**Solution:**
+
+```java
+int[][] directions = new int[][]{{1,0}, {-1,0}, {0,1}, {0,-1}};
+public List<List<Integer>> pacificAtlantic(int[][] matrix) {
+    if (matrix == null) return null;
+    if (matrix.length == 0) return new ArrayList();
+    List<List<Integer>> res = new ArrayList<>();
+    int m = matrix.length, n = matrix[0].length;
+    boolean[][] reach_p = new boolean[m][n];
+    boolean[][] reach_a = new boolean[m][n];
+    // 与第0列相连的（相连的定义有海拔限制）可以到达pacific
+    // 与最后一列相连的，可以到达atlantic
+    for (int i = 0; i < m; ++i) {
+        dfs(matrix, reach_p, i, 0, m, n);
+        dfs(matrix, reach_a, i, n-1, m, n);
+    }
+    // 与第0行相连的（相连的定义有海拔限制）可以到达pacific
+    // 与最后一行相连的，可以到达atlantic
+    for (int i = 0; i < n; ++i) {
+        dfs(matrix, reach_p, 0, i, m, n);
+        dfs(matrix, reach_a, m-1, i, m, n);
+    }
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (reach_p[i][j] && reach_a[i][j]) 
+                res.add(new ArrayList(Arrays.asList(i, j)));
+        }
+    }
+    return res;
+}
+
+// 将联通区域设置为ture（此时的联通定义中多了个条件就是海拔高度限制
+private void dfs(int[][] matrix, boolean[][] can_reach, int r, int c, int m, int n) {
+    // 出口
+    if (can_reach[r][c]) return;
+    can_reach[r][c] = true;
+    for (int[] d : directions) {
+        int nextR = r + d[0], nextC = c + d[1];
+        // 出口
+        if (nextR < 0 || nextR >= m || nextC < 0 || nextC >= n || matrix[r][c] > matrix[nextR][nextC]) continue;
+        dfs(matrix, can_reach, nextR, nextC, m, n);
+    }
+}
+```
+
+### 329. Longest Increasing Path in a Matrix
+
+Given an integer matrix, find the length of the longest increasing path.
+
+From each cell, you can either move to four directions: left, right, up or down. You may NOT move diagonally or move outside of the boundary (i.e. wrap-around is not allowed).
+
+**Example 1:**
+
+```
+Input: nums = 
+[
+  [9,9,4],
+  [6,6,8],
+  [2,1,1]
+] 
+Output: 4 
+Explanation: The longest increasing path is [1, 2, 6, 9].
+```
+
+**Solution:**
+
+Topological sort
+
+```java
+// Topological Sort Based Solution
+// An Alternative Solution
+public class Solution {
+    private static final int[][] dir = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    private int m, n;
+    public int longestIncreasingPath(int[][] grid) {
+        int m = grid.length;
+        if (m == 0) return 0;
+        int n = grid[0].length;
+        // padding the matrix with zero as boundaries
+        // assuming all positive integer, otherwise use INT_MIN as boundaries
+        int[][] matrix = new int[m + 2][n + 2];
+        for (int i = 0; i < m; ++i)
+            System.arraycopy(grid[i], 0, matrix[i + 1], 1, n);
+
+        // calculate outdegrees
+        int[][] outdegree = new int[m + 2][n + 2];
+        for (int i = 1; i <= m; ++i)
+            for (int j = 1; j <= n; ++j)
+                for (int[] d: dir)
+                    if (matrix[i][j] < matrix[i + d[0]][j + d[1]])
+                        outdegree[i][j]++;
+
+        // find leaves who have zero out degree as the initial level
+        n += 2;
+        m += 2;
+        List<int[]> leaves = new ArrayList<>();
+        for (int i = 1; i < m - 1; ++i)
+            for (int j = 1; j < n - 1; ++j)
+                if (outdegree[i][j] == 0) leaves.add(new int[]{i, j});
+
+        // remove leaves level by level in topological order
+        int height = 0;
+        while (!leaves.isEmpty()) {
+            height++;
+            List<int[]> newLeaves = new ArrayList<>();
+            for (int[] node : leaves) {
+                for (int[] d:dir) {
+                    int x = node[0] + d[0], y = node[1] + d[1];
+                    if (matrix[node[0]][node[1]] > matrix[x][y])
+                        if (--outdegree[x][y] == 0)
+                            newLeaves.add(new int[]{x, y});
+                }
+            }
+            leaves = newLeaves;
+        }
+        return height;
+    }
+}
+```
+

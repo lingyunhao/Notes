@@ -139,6 +139,108 @@ public int search(int[] nums, int target) {
 }
 ```
 
+### 39. Combination Sum
+
+Given a **set** of candidate numbers (`candidates`) **(without duplicates)** and a target number (`target`), find all unique combinations in `candidates` where the candidate numbers sums to `target`.
+
+The **same** repeated number may be chosen from `candidates` unlimited number of times.
+
+**Note:**
+
+- All numbers (including `target`) will be positive integers.
+- The solution set must not contain duplicate combinations.
+
+**Example 1:**
+
+```
+Input: candidates = [2,3,6,7], target = 7,
+A solution set is:
+[
+  [7],
+  [2,2,3]
+]
+```
+
+**Solution:**
+
+```java
+public List<List<Integer>> combinationSum(int[] candidates, int target) {
+    List<List<Integer>> combines = new ArrayList<>();
+    backtracking(new ArrayList<>(), combines, 0, candidates, target);
+    return combines;
+}
+
+private void backtracking(List<Integer> combineList, List<List<Integer>> combines, int start, int[] candidates, int target) {
+    if(target == 0) {
+        combines.add(new ArrayList<>(combineList));
+        return;
+    }
+    for(int i=start; i<candidates.length; i++) {
+        if(candidates[i] <= target) {
+            combineList.add(candidates[i]);
+            backtracking(combineList, combines, i,candidates, target-candidates[i]);
+            combineList.remove(combineList.size()-1);
+        }
+    }
+}
+```
+
+
+
+### 40. Combination Sum II
+
+Given a collection of candidate numbers (`candidates`) and a target number (`target`), find all unique combinations in `candidates` where the candidate numbers sums to `target`.
+
+Each number in `candidates` may only be used **once** in the combination.
+
+**Note:**
+
+- All numbers (including `target`) will be positive integers.
+- The solution set must not contain duplicate combinations.
+
+**Example 1:**
+
+```
+Input: candidates = [10,1,2,7,6,1,5], target = 8,
+A solution set is:
+[
+  [1, 7],
+  [1, 2, 5],
+  [2, 6],
+  [1, 1, 6]
+]
+```
+
+**Solution:**
+
+```java
+public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+    List<List<Integer>> combines = new ArrayList<>();
+    Arrays.sort(candidates);
+    boolean[] visited = new boolean[candidates.length];
+    backtracking(new ArrayList<>(), combines, 0, candidates, target, visited);
+    return combines;
+}
+
+private void backtracking(List<Integer> combineList, List<List<Integer>> combines, int start, int[] candidates, int target, boolean[] visited) {
+
+    if(target == 0) {
+        combines.add(new ArrayList<>(combineList));
+        return;
+    }
+    for(int i=start; i<candidates.length; i++) {
+        if(i!=0 && candidates[i] == candidates[i-1] && !visited[i-1]) continue;
+        if(candidates[i] <= target) {
+            visited[i] = true;
+            combineList.add(candidates[i]);
+            backtracking(combineList, combines, i+1,candidates, target-candidates[i], visited);
+            combineList.remove(combineList.size()-1);
+            visited[i] = false;
+        }
+    }
+}
+```
+
 
 
 ###46. Permutations
@@ -2893,7 +2995,7 @@ public boolean isNStraightHand(int[] hand, int W) {
     TreeMap<Integer, Integer> count = new TreeMap();
     for (int card : hand) {
         if (!count.containsKey(card)) count.put(card,1);
-             // treemap replace
+        // treemap replace
         else count.replace(card, count.get(card) + 1);
     }
 

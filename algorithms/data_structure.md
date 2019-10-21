@@ -70,6 +70,38 @@ Heap 的性质是左右子结点都比root小(最小堆)，或者都比root大(�
 
 如果说任意一个结点（比如一个结点不一定是root到任意子结点的最长路径），因为不能确定parent结点是谁，所以需要把树转化成图进行操作
 
+### Map Iterator
+
+```java
+// 不改变map时
+// using for-each loop for iteration over Map.entrySet() 
+for (Map.Entry<String,String> entry : gfg.entrySet())  
+  System.out.println("Key = " + entry.getKey() + 
+                     ", Value = " + entry.getValue());
+
+// using keySet() for iteration over keys 
+for (String name : gfg.keySet())  
+  System.out.println("key: " + name); 
+
+
+// using values() for iteration over keys 
+for (String url : gfg.values())  
+  System.out.println("value: " + url); 
+
+// 需要改变map的话用iterator
+// using iterators 
+Iterator<Map.Entry<String, String>> itr = gfg.entrySet().iterator(); 
+
+while(itr.hasNext()) 
+{ 
+  Map.Entry<String, String> entry = itr.next(); 
+  System.out.println("Key = " + entry.getKey() +  
+                     ", Value = " + entry.getValue()); 
+} 
+```
+
+
+
 ###Thread Safe
 
 ArrayList和Vector有什么区别？HashMap和HashTable有什么区别？StringBuilder和StringBuffer有什么区别？这些都是Java面试中常见的基础问题。面对这样的问题，回答是：ArrayList是非线程安全的，Vector是线程安全的；HashMap是非线程安全的，HashTable是线程安全的；StringBuilder是非线程安全的，StringBuffer是线程安全的。

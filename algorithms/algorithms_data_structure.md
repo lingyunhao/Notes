@@ -2704,7 +2704,35 @@ while (fast.next != null && fast.next.next != null) {
 }
 ```
 
+###Dijkstra 无负边单源最短路
 
+求start到所有点（或给定点）的最短距离，时间复杂度是O((N+E)logE)。原理和写法十分类似Prim's Algorithm，不同点是，不用visited去重，而是再次比较距离，保留更短的那个。
+
+```c++
+void dijkstra(int start, int N, vector<vector<int>>& connections) {
+    vector<vector<pair<int, int>>> graph(N, vector<pair<int, int>>());
+    // pair<最短距离，节点编号>
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq; 
+    for (const auto& conn : connections) {
+        graph[conn[0]].push_back(make_pair(conn[2], conn[1]));
+        // graph[conn[1]].push_back(make_pair(conn[2], conn[0]));  // 如果是无向图，加上反向边
+    }
+    vector<int> d(N, INT_MAX);  // 最短距离
+    d[start] = 0;
+    pq.push(make_pair(0, start));
+    while (!pq.empty()) {
+        auto [old_cost, from] = pq.top(); pq.pop();
+        if (d[from] < old_cost) continue;
+        for (const auto & v: graph[from]) {
+            auto [cost, to] = v;
+            if (d[to] > d[from] + cost) {
+                d[to] = d[from] + cost;
+                pq.push(make_pair(d[to], to));
+            }
+        }
+    }
+}
+```
 
 ### 待学习知识点
 
