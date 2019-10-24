@@ -56,7 +56,7 @@ P(i, j) = ( P(i+1, j-1) \text{ and } S_i == S_j )*P*(*i*,*j*)=(*P*(*i*+1,*j*−1
 
 The base cases are:
 
-P(i, i) = true*P*(*i*,*i*)=*t**r**u**e*
+P(i, i) = true*P*(*i*,*i*)=**true**
 
 P(i, i+1) = ( S_i == S_{i+1} )*P*(*i*,*i*+1)=(*S**i*==*S**i*+1)
 
@@ -71,7 +71,7 @@ public String longestPalindrome(String s) {
     int row = 0, col = 0;
     for (int i = n - 1; i >= 0; --i) {
         for (int j = i; j < n; ++j) {
-            // 初始化
+            // 初始化 innilize one and two letters palindrome
             if (j == i || (chars[i] == chars[j] && j-i <= 1)) {
                 dp[i][j] = true;
             } else {
@@ -110,6 +110,8 @@ Output: 4
 **Solution:**
 
 境界三，画图区分，主要是边界条件的判断。双重判断，还是丢掉一半，保留一半。
+
+先判断是在ascding part还是desceding part。
 
 ```java
 public int search(int[] nums, int target) {
@@ -162,6 +164,8 @@ A solution set is:
 ```
 
 **Solution:**
+
+可以重复使用。不用sort, 不用在dfs中判断 nums[i] == nums[i-1], dfs 时，i in stead of i+1
 
 ```java
 public List<List<Integer>> combinationSum(int[] candidates, int target) {
@@ -217,25 +221,24 @@ A solution set is:
 public List<List<Integer>> combinationSum2(int[] candidates, int target) {
     List<List<Integer>> combines = new ArrayList<>();
     Arrays.sort(candidates);
-    boolean[] visited = new boolean[candidates.length];
     backtracking(new ArrayList<>(), combines, 0, candidates, target, visited);
     return combines;
 }
 
-private void backtracking(List<Integer> combineList, List<List<Integer>> combines, int start, int[] candidates, int target, boolean[] visited) {
+private void backtracking(List<Integer> combineList, List<List<Integer>> combines, int start, int[] candidates, int target) {
 
     if(target == 0) {
         combines.add(new ArrayList<>(combineList));
         return;
     }
     for(int i=start; i<candidates.length; i++) {
-        if(i!=0 && candidates[i] == candidates[i-1] && !visited[i-1]) continue;
+        if(i!=start && candidates[i] == candidates[i-1]) continue;
         if(candidates[i] <= target) {
-            visited[i] = true;
+   
             combineList.add(candidates[i]);
-            backtracking(combineList, combines, i+1,candidates, target-candidates[i], visited);
+            backtracking(combineList, combines, i+1, candidates, target-candidates[i]);
             combineList.remove(combineList.size()-1);
-            visited[i] = false;
+           
         }
     }
 }
@@ -271,27 +274,24 @@ Output:
 ```java
 public List<List<Integer>> permute(int[] nums) {
     List<List<Integer>> permutes = new ArrayList<>();
-    List<Integer> permuteList = new ArrayList<>();
-    boolean[] visited = new boolean[nums.length];
-    backtracking(permutes, permuteList, visited, nums);
+    backtracking(permutes, 0, nums);
     return permutes;
 }
 
-private void backtracking(List<List<Integer>> permutes, List<Integer> permuteList, boolean[] visited, int[] nums) {
-    if(permuteList.size() == visited.length) {
-        permutes.add(new ArrayList<>(permuteList));
+private void backtracking(List<List<Integer>> permutes, int start, int[] nums) {
+    if (start == nums.length - 1) {
+        permutes.add(new ArrayList<>(nums));
         return;
     }
-    for(int i=0; i<visited.length; i++) {
-        if(visited[i]) continue;
-        visited[i] = true;
-        permuteList.add(nums[i]);
-        backtracking(permutes, permuteList, visited, nums);
-        permuteList.remove(permuteList.size()-1);
-        visited[i] = false;
+    for(int i = start; i < nums.length; i++) {
+        swap(nums[i], nums[start]);
+        backtracking(permutes, start+1, nums);
+        swap(nums[start], nums[i]);
     }
 }
 ```
+
+
 
 ###47. Permutations II
 
@@ -318,37 +318,26 @@ Output:
 先sort然后多判断了一下
 
 ```java
-public List<List<Integer>> permuteUnique(int[] nums) {
+public List<List<Integer>> permute(int[] nums) {
     List<List<Integer>> permutes = new ArrayList<>();
-    List<Integer> permuteList = new ArrayList<>();
-    Arrays.sort(nums);
-    boolean[] visited = new boolean[nums.length];
-    backtracking(permutes, permuteList, visited, nums);
+    backtracking(permutes, 0, nums);
     return permutes;
 }
 
-private void backtracking(List<List<Integer>> permutes, List<Integer> permuteList, boolean[] visited, int[] nums) {
-    if(permuteList.size() == nums.length) {
-        permutes.add(new ArrayList<>(permuteList));
+private void backtracking(List<List<Integer>> permutes, int start, int[] nums) {
+    if (start == nums.length - 1) {
+        permutes.add(new ArrayList<>(nums));
         return;
     }
-
-    for(int i=0; i<visited.length; i++) {
-        //排除重复
-        if(i!=0 && nums[i] == nums[i-1] && !visited[i-1]) {
-            continue;
-        }
-        if(visited[i]) continue;
-        visited[i] = true;
-        permuteList.add(nums[i]);
-        backtracking(permutes, permuteList, visited, nums);
-        permuteList.remove(permuteList.size()-1);
-        visited[i] = false;
+    Arrays.sort(nums, start, nums.length - 1);
+    for(int i = start; i < nums.length; i++) {
+        if (i != start && nums[i] == nums[i-1]) continue;
+        swap(nums[i], nums[start]);
+        backtracking(permutes, start+1, nums);
+        swap(nums[start], nums[i]);
     }
-} 
+}
 ```
-
-
 
 ### 55. Jump Game
 
@@ -490,7 +479,7 @@ public boolean exist(char[][] board, String word) {
     boolean[][] visited = new boolean[m][n];
     for(int i=0; i<m; i++) {
         for(int j=0; j<n; j++) {
-            if (backtracking(0, i,j,visited, board, word)) {
+            if (backtracking(0, i, j, visited, board, word)) {
                 return true;
             }
         }

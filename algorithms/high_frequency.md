@@ -27,8 +27,8 @@ public ListNode reverse(ListNode head)
 {
     ListNode cur=head, prev=null, next=null;
     while(cur!=null){
-        next= cur.next;
-        cur.next= prev;
+        next = cur.next;
+        cur.next = prev;
         prev=cur;
         cur=next;
     }
@@ -57,7 +57,7 @@ public ListNode add(ListNode l1, ListNode l2)
         carry = sum/10;
         sum = sum%10;
         prev.next = new ListNode(sum);
-        prev=prev.next;
+        prev = prev.next;
     }
     // 最高位有进位别忘了！！！！
     if(carry !=0)
@@ -85,6 +85,7 @@ public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
     }
     ListNode resultNode = null;
     int carry = 0;
+    // 别忘了最高位的carry
     while(!stack1.isEmpty() || !stack2.isEmpty() || carry>0) {
         if(stack1.isEmpty()) {
             stack1.push(0);
@@ -129,7 +130,7 @@ queries = [ ["a", "c"], ["b", "a"], ["a", "e"], ["a", "a"], ["x", "x"] ].
 
 **Solution:**
 
-题目描述有图的关系，是一种搜索题。dfs + graph.
+题目描述有图的关系，是一种搜索题。dfs + graph. 。 
 
 ```java
 public double[] calcEquation(List<List<String>> equations, double[] values, List<List<String>> queries) {
@@ -212,7 +213,9 @@ cnt表示最后一层的个数，别忘了循环只进行了h-1次，最后一�
 
 Math.pow(2, h-1)是前h-1层的结点个数之和。
 
-求高度是O(lgn)的复杂度，在一个h-1的for循环中，又求高度，所以是O(lgn * lgn)的复杂度， 比O(n)小很多。 可以用搜索这样每个节点遍历一遍，时间复杂度为O(n)。
+求高度是O(lgn)的复杂度，在一个h-1的for循环中，又求高度，所以是O(lgn * lgn)的复杂度， 比O(n)小很多。 可以用搜索这样如solution2每个节点遍历一遍，时间复杂度为O(n)。
+
+a to the power of b
 
 ```java
 public int countNodes(TreeNode root) {
@@ -221,7 +224,7 @@ public int countNodes(TreeNode root) {
     int cnt = 0;
     for (int i = h - 1; i > 0; --i) {
         if (countHeight(root.right) == i) {
-            cnt += (int)Math.pow(2, i-1);
+            cnt += (int)Math.pow(2, i-1); // two to the power of i-1
             root = root.right;
         } else {
             root = root.left;
@@ -269,6 +272,7 @@ public List<Integer> findClosestElements(int[] arr, int k, int x) {
     int left = findLastEqualOrSmaller(arr, x);
     int right = left + 1;
     for (int i = 0; i < k; i++) {
+        // 相同的差要取小的那个 所以后边是小于等于
         if (right >= arr.length || (left >= 0 && (Math.abs(arr[left] - x) <= Math.abs(arr[right] - x)))) {
             left--;
         } else {
@@ -318,6 +322,7 @@ public List<List<Integer>> subsets(int[] nums) {
     return subsets;
 }
 
+// backtracking: add all of the subsets with size(input) into results
 private void backtracking(List<List<Integer>> subsets, List<Integer> tem, int start, int size, int[] nums) {
     if(tem.size() == size) {
         subsets.add(new ArrayList<>(tem));
@@ -337,30 +342,24 @@ private void backtracking(List<List<Integer>> subsets, List<Integer> tem, int st
 ```java
 public List<List<Integer>> subsetsWithDup(int[] nums) {
     List<List<Integer>> subsets = new ArrayList<>();
-    List<Integer> tem = new ArrayList<>();
+    List<Integer> temp = new ArrayList<>();
     Arrays.sort(nums);
-    boolean[] visited = new boolean[nums.length];
-    for(int size = 0; size<=nums.length; size++) {
-        backtracking(subsets, tem, visited, 0, size, nums);
+    for (int size = 0; size <= nums.length; size++) {
+        backtracking(subsets, temp, 0, size, nums);
     }
     return subsets;
 }
 
-private void backtracking(List<List<Integer>> subsets, List<Integer> tem, boolean[] visited, int start, int size, int[] nums) {
-    if(tem.size() == size) {
-        subsets.add(new ArrayList<>(tem));
+private void backtracking(List<List<Integer>> subsets, List<Integer> temp, int start, int size, int[] nums) {
+    if (temp.size() == size) {
+        subsets.add(new ArrayList<>(temp));
         return;
     }
-
-    for(int i=start; i<nums.length; i++) {
-        if(i!=0 && nums[i] == nums[i-1] && !visited[i-1]) {
-            continue;
-        }
-        tem.add(nums[i]);
-        visited[i] = true;
-        backtracking(subsets, tem, visited, i+1, size, nums);
-        visited[i] = false;
-        tem.remove(tem.size()-1);
+    for (int i = start; i < nums.length; i++) {
+        if (i != start && nums[i] == nums[i-1]) continue;
+        temp.add(nums[i]);
+        backtracking(subsets, temp, i+1, size, nums);
+        temp.remove(temp.size()-1);
     }
 }
 ```
@@ -395,25 +394,21 @@ A solution set is:
 public List<List<Integer>> combinationSum2(int[] candidates, int target) {
     List<List<Integer>> combines = new ArrayList<>();
     Arrays.sort(candidates);
-    boolean[] visited = new boolean[candidates.length];
-    backtracking(new ArrayList<>(), combines, 0, candidates, target, visited);
+    backtracking(new ArrayList<>(), combines, 0, candidates, target);
     return combines;
 }
-
-private void backtracking(List<Integer> combineList, List<List<Integer>> combines, int start, int[] candidates, int target, boolean[] visited) {
-
-    if(target == 0) {
+    
+private void backtracking(List<Integer> combineList, List<List<Integer>> combines, int start, int[] candidates, int target) {
+    if (target == 0) {
         combines.add(new ArrayList<>(combineList));
         return;
     }
-    for(int i=start; i<candidates.length; i++) {
-        if(i!=0 && candidates[i] == candidates[i-1] && !visited[i-1]) continue;
-        if(candidates[i] <= target) {
-            visited[i] = true;
+    for (int i = start; i<candidates.length; i++) {
+        if (i != start && candidates[i] == candidates[i-1]) continue;
+        if (candidates[i] <= target) {
             combineList.add(candidates[i]);
-            backtracking(combineList, combines, i+1,candidates, target-candidates[i], visited);
-            combineList.remove(combineList.size()-1);
-            visited[i] = false;
+            backtracking(combineList, combines, i + 1, candidates, target-candidates[i]);
+            combineList.remove(combineList.size() - 1);
         }
     }
 }
@@ -538,6 +533,7 @@ public List<Integer> spiralOrder(int[][] matrix) {
     int[] dr = {0, 1, 0, -1};
     int[] dc = {1, 0, -1, 0};
     int r = 0, c = 0, di = 0;
+    // for 循环的长度 = result 的长度，num of elements m * n
     for (int i = 0; i < R * C; i++) {
         ans.add(matrix[r][c]);
         seen[r][c] = true;
@@ -721,7 +717,7 @@ public boolean canFinish(int numCourses, int[][] prerequisites) {
     // Topological Sort
     // need a hashmap to save the indegree to each node(each course)
     Map<Integer, Integer> node_to_indegree = new HashMap<>();
-    // 先给每一个node都在map里建一下入度
+    // 先给每一个node都在map里 initialize the indegree as 0
     for ( int i = 0; i < numCourses; i++){
         node_to_indegree.put(i, 0);
     }
@@ -744,7 +740,7 @@ public boolean canFinish(int numCourses, int[][] prerequisites) {
         Integer curCourse = q.poll();
         result.add(curCourse);
         // check all the next course whose prerequisites is curCourse and deduct their indegree by 1, offer them into the queue when the indegree == 0
-        for ( int i = 0; i < length; i++){
+        for (int i = 0; i < length; i++){
             if(prerequisites[i][1] == curCourse){
                 // node_to_indegree.get(prerequisites[i][0]--);
                 node_to_indegree.put(prerequisites[i][0], node_to_indegree.getOrDefault(prerequisites[i][0], 0) - 1);
@@ -752,10 +748,10 @@ public boolean canFinish(int numCourses, int[][] prerequisites) {
                     q.offer(prerequisites[i][0]);
                 }
             }
-        }
+        }	
     }
 
-    if ( result.size() == numCourses){
+    if (result.size() == numCourses){
         return true;
     }else{
         return false;
@@ -1392,3 +1388,182 @@ class LFUCache {
 }
 ```
 
+### 1096. Brace Expansion II
+
+Under a grammar given below, strings can represent a set of lowercase words.  Let's use `R(expr)` to denote the **set** of words the expression represents.
+
+Grammar can best be understood through simple examples:
+
+- Single letters represent a singleton set containing that word.
+  - `R("a") = {"a"}`
+  - `R("w") = {"w"}`
+- When we take a comma delimited list of 2 or more expressions, we take the union of possibilities.
+  - `R("{a,b,c}") = {"a","b","c"}`
+  - `R("{{a,b},{b,c}}") = {"a","b","c"}` (notice the final set only contains each word at most once)
+- When we concatenate two expressions, we take the set of possible concatenations between two words where the first word comes from the first expression and the second word comes from the second expression.
+  - `R("{a,b}{c,d}") = {"ac","ad","bc","bd"}`
+  - `R("a{b,c}{d,e}f{g,h}") = {"abdfg", "abdfh", "abefg", "abefh", "acdfg", "acdfh", "acefg", "acefh"}`
+
+Formally, the 3 rules for our grammar:
+
+- For every lowercase letter `x`, we have `R(x) = {x}`
+- For expressions `e_1, e_2, ... , e_k` with `k >= 2`, we have `R({e_1,e_2,...}) = R(e_1) ∪ R(e_2) ∪ ...`
+- For expressions `e_1` and `e_2`, we have `R(e_1 + e_2) = {a + b for (a, b) in R(e_1) × R(e_2)}`, where + denotes concatenation, and × denotes the cartesian product.
+
+Given an `expression` representing a set of words under the given grammar, return the sorted list of words that the expression represents.
+
+**Example 1:**
+
+```
+Input: "{a,b}{c,{d,e}}"
+Output: ["ac","ad","ae","bc","bd","be"]
+```
+
+**Example 2:**
+
+```
+Input: "{{a,z},a{b,c},{ab,z}}"
+Output: ["a","ab","ac","z"]
+Explanation: Each distinct word is written only once in the final answer.
+```
+
+**Solution:**
+
+```java
+class Solution {
+    public List<String> braceExpansionII(String expression) {
+        Set<String> set = solve(expression);
+        List<String> result = new ArrayList<>(set);
+        Collections.sort(result);
+        return result;
+    }
+    
+    private Set<String> solve(String str) {
+        int level = 0;
+        int start = 0;
+        List<Set<String>> groups = new ArrayList<>();
+        groups.add(new HashSet<>());
+        for (int i = 0; i < str.length(); i++) {
+            if (str.charAt(i) == '{') {
+                if (level == 0) start = i + 1;
+                level++;
+            } else if (str.charAt(i) == '}') {
+                level--;
+                if (level == 0) {
+                    Set<String> sub = solve(str.substring(start, i));
+                    groups.set(groups.size() - 1, merge(groups.get(groups.size() - 1), sub));
+                }
+            } else if (str.charAt(i) == ',' && level == 0) {
+                groups.add(new HashSet<>());
+            } else if (level == 0) {
+                Set<String> tmp = new HashSet<>();
+                StringBuilder builder = new StringBuilder();
+                while (i < str.length() && Character.isLetter(str.charAt(i))) {
+                    builder.append(str.charAt(i++));
+                }
+                i--;
+                tmp.add(builder.toString());
+                groups.set(groups.size() - 1, merge(groups.get(groups.size() - 1), tmp));
+            }
+        }
+        
+        Set<String> result = new HashSet<>();
+        for (Set<String> group : groups) {
+            result.addAll(group);
+        }
+        return result;
+    }
+    
+    private Set<String> merge(Set<String> set1, Set<String> set2) {
+        Set<String> result = new HashSet<>();
+        if (set1.size() == 0) return set2;
+        if (set2.size() == 0) return set1;
+        for (String str1 : set1) {
+            for (String str2 : set2) {
+                result.add(str1 + str2);
+            }
+        }
+        return result;
+    }
+}
+```
+
+### 1066. Campus Bikes II
+
+
+On a campus represented as a 2D grid, there are `N` workers and `M` bikes, with `N <= M`. Each worker and bike is a 2D coordinate on this grid.
+
+We assign one unique bike to each worker so that the sum of the Manhattan distances between each worker and their assigned bike is minimized.
+
+The Manhattan distance between two points `p1` and `p2` is `Manhattan(p1, p2) = |p1.x - p2.x| + |p1.y - p2.y|`.
+
+Return the minimum possible sum of Manhattan distances between each worker and their assigned bike.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2019/03/06/1261_example_1_v2.png)
+
+```
+Input: workers = [[0,0],[2,1]], bikes = [[1,2],[3,3]]
+Output: 6
+Explanation: 
+We assign bike 0 to worker 0, bike 1 to worker 1. The Manhattan distance of both assignments is 3, so t
+```
+
+**Example 2:**
+
+![img](https://assets.leetcode.com/uploads/2019/03/06/1261_example_2_v2.png)
+
+```
+Input: workers = [[0,0],[1,1],[2,0]], bikes = [[1,0],[2,2],[2,1]]
+Output: 4
+Explanation: 
+We first assign bike 0 to worker 0, then assign bike 1 to worker 1 or worker 2, bike 2 to worker 2 or worker 1. Both assignments lead to sum of the Manhattan distances as 4.
+```
+
+ **Solution:**
+
+```java
+class Solution {
+    
+    HashMap<String, Integer> dp = new HashMap<String,Integer>();
+    
+    public int manHattanDistance(int[][] A, int[][] B, int i, int j){
+        int dis = Math.abs(A[i][0] - B[j][0]) + Math.abs(A[i][1] - B[j][1]);
+        return dis;
+    }
+    public int helper(int[][] workers, int[][] bikes, int count, boolean[] used, int m, int n){
+        if(count >= m)
+            return 0;
+        
+        String curr = Arrays.toString(used);
+        
+        if(dp.containsKey(curr)){
+            return dp.get(curr);
+        }
+        
+        int val = Integer.MAX_VALUE;
+        for(int j=0;j<n;j++){
+            if(!used[j]){
+                used[j] = true;
+                val = Math.min(val,helper(workers,bikes,count+1,used,m,n) + manHattanDistance(workers,bikes,count,j));
+                used[j] = false;
+            }
+        }
+        
+        dp.put(curr,val);
+        return val;
+    }
+    public int assignBikes(int[][] workers, int[][] bikes) {
+        int m = workers.length;
+        int n = bikes.length;
+        boolean[] used = new boolean[n];
+        String curr = Arrays.toString(used);
+        return helper(workers,bikes,0,used,m,n);
+        
+    }
+
+  
+```
