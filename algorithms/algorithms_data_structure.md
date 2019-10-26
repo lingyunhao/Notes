@@ -2736,12 +2736,6 @@ void dijkstra(int start, int N, vector<vector<int>>& connections) {
 
 ### 待学习知识点
 
-dfs non-recursion写法（stack)
-
-sort(merge,quick selection,bucket etc.)
-
-topological sort(bfs)
-
-排列组合backtracking并没有很懂
+排序
 
 bfs+耗费不同， dijkastra
