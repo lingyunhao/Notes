@@ -36,6 +36,12 @@ Stack<T> stack = new Stack<>();
 
 出stack: pop
 
+**Stack and Queue互相转化**
+
+两个stack实现queue，或者两个queue实现stack，要实现pop，pushO(1)操作。
+
+到过去再到回来
+
 **Deque**
 
 可以实现两头的O(1)增删，但是没办法在中间删除。一般用ArrayDeque或者LinkedList实现。
@@ -146,6 +152,8 @@ ArrayList和Vector有什么区别？HashMap和HashTable有什么区别？StringB
 java5提供了读写锁
 
 这种锁支持多线程读操作不互斥，多线程读写互斥，多线程写写互斥。
+
+References:
 
 https://wiki.jikexueyuan.com/project/java-concurrent/read-write-locks-in-java.html
 
