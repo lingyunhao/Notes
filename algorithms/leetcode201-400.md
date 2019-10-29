@@ -20,8 +20,6 @@ public ListNode reverseList(ListNode head) {
 }
 ```
 
-
-
 ### 234. Palindrome Linked List
 
 Could you do it in O(n) time and O(1) space?

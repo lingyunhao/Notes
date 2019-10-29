@@ -2736,6 +2736,6 @@ void dijkstra(int start, int N, vector<vector<int>>& connections) {
 
 ### 待学习知识点
 
-排序
+排序(quick sort, quick selection, bucket sort,merge sort)
 
 bfs+耗费不同， dijkastra
