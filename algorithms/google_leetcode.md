@@ -189,8 +189,6 @@ private void backtracking(List<Integer> combineList, List<List<Integer>> combine
 }
 ```
 
-
-
 ### 40. Combination Sum II
 
 Given a collection of candidate numbers (`candidates`) and a target number (`target`), find all unique combinations in `candidates` where the candidate numbers sums to `target`.
@@ -290,8 +288,6 @@ private void backtracking(List<List<Integer>> permutes, int start, int[] nums) {
     }
 }
 ```
-
-
 
 ###47. Permutations II
 
@@ -508,8 +504,6 @@ private boolean backtracking(int curLen, int r, int c, boolean[][] visited, fina
 }
 ```
 
-
-
 ### 85. Maximal Rectangle
 
 Given a 2D binary matrix filled with 0's and 1's, find the largest rectangle containing only 1's and return its area.
@@ -688,7 +682,195 @@ public boolean wordBreak(String s, List<String> wordDict) {
 }
 ```
 
+### 146. LRU Cache
 
+Design and implement a data structure for [Least Recently Used (LRU) cache](https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU). It should support the following operations: `get` and `put`.
+
+`get(key)` - Get the value (will always be positive) of the key if the key exists in the cache, otherwise return -1.
+`put(key, value)` - Set or insert the value if the key is not already present. When the cache reached its capacity, it should invalidate the least recently used item before inserting a new item.
+
+The cache is initialized with a **positive** capacity.
+
+**Follow up:**
+Could you do both operations in **O(1)** time complexity?
+
+**Example:**
+
+```
+LRUCache cache = new LRUCache( 2 /* capacity */ );
+
+cache.put(1, 1);
+cache.put(2, 2);
+cache.get(1);       // returns 1
+cache.put(3, 3);    // evicts key 2
+cache.get(2);       // returns -1 (not found)
+cache.put(4, 4);    // evicts key 1
+cache.get(1);       // returns -1 (not found)
+cache.get(3);       // returns 3
+cache.get(4);       // returns 4
+```
+
+#### Approach 1: Ordered dictionary
+
+**Intuition**
+
+We're asked to implement [the structure](https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU) which provides the following operations in \mathcal{O}(1)O(1) time :
+
+- Get the key / Check if the key exists
+- Put the key
+- Delete the first added key
+
+The first two operations in \mathcal{O}(1)O(1) time are provided by the standard hashmap, and the last one - by linked list.
+
+> There is a structure called *ordered dictionary*, it combines behind both hashmap and linked list. In Python this structure is called [*OrderedDict*](https://docs.python.org/3/library/collections.html#collections.OrderedDict) and in Java [*LinkedHashMap*](https://docs.oracle.com/javase/8/docs/api/java/util/LinkedHashMap.html).
+
+```java
+class LRUCache extends LinkedHashMap<Integer, Integer>{
+    private int capacity;
+    
+    public LRUCache(int capacity) {
+        super(capacity, 0.75F, true);
+        this.capacity = capacity;
+    }
+
+    public int get(int key) {
+        return super.getOrDefault(key, -1);
+    }
+
+    public void put(int key, int value) {
+        super.put(key, value);
+    }
+
+    @Override
+    protected boolean removeEldestEntry(Map.Entry<Integer, Integer> eldest) {
+        return size() > capacity; 
+    }
+}
+```
+
+#### Approach 2: Hashmap + DoubleLinkedList
+
+**Intuition**
+
+This Java solution is an extended version of the [the article published on the Discuss forum](https://leetcode.com/problems/lru-cache/discuss/45911/Java-Hashtable-%2B-Double-linked-list-(with-a-touch-of-pseudo-nodes)).
+
+The problem can be solved with a hashmap that keeps track of the keys and its values in the double linked list. That results in \mathcal{O}(1)O(1) time for `put` and `get` operations and allows to remove the first added node in \mathcal{O}(1)O(1) time as well.
+
+![compute](https://leetcode.com/problems/lru-cache/Figures/146/structure.png)
+
+One advantage of *double* linked list is that the node can remove itself without other reference. In addition, it takes constant time to add and remove nodes from the head or tail.
+
+One particularity about the double linked list implemented here is that there are *pseudo head* and *pseudo tail* to mark the boundary, so that we don't need to check the `null` node during the update.
+
+![compute](https://leetcode.com/problems/lru-cache/Figures/146/new_node.png)
+
+**Implementation**
+
+```java
+public class LRUCache {
+
+  class DLinkedNode {
+    int key;
+    int value;
+    DLinkedNode prev;
+    DLinkedNode next;
+  }
+
+  private void addNode(DLinkedNode node) {
+    /**
+     * Always add the new node right after head.
+     */
+    node.prev = head;
+    node.next = head.next;
+
+    head.next.prev = node;
+    head.next = node;
+  }
+
+  private void removeNode(DLinkedNode node){
+    /**
+     * Remove an existing node from the linked list.
+     */
+    DLinkedNode prev = node.prev;
+    DLinkedNode next = node.next;
+
+    prev.next = next;
+    next.prev = prev;
+  }
+
+  private void moveToHead(DLinkedNode node){
+    /**
+     * Move certain node in between to the head.
+     */
+    removeNode(node);
+    addNode(node);
+  }
+
+  private DLinkedNode popTail() {
+    /**
+     * Pop the current tail.
+     */
+    DLinkedNode res = tail.prev;
+    removeNode(res);
+    return res;
+  }
+
+  private Map<Integer, DLinkedNode> cache = new HashMap<>();
+  private int size;
+  private int capacity;
+  private DLinkedNode head, tail;
+
+  public LRUCache(int capacity) {
+    this.size = 0;
+    this.capacity = capacity;
+
+    head = new DLinkedNode();
+    // head.prev = null;
+
+    tail = new DLinkedNode();
+    // tail.next = null;
+
+    head.next = tail;
+    tail.prev = head;
+  }
+
+  public int get(int key) {
+    DLinkedNode node = cache.get(key);
+    if (node == null) return -1;
+
+    // move the accessed node to the head;
+    moveToHead(node);
+
+    return node.value;
+  }
+
+  public void put(int key, int value) {
+    DLinkedNode node = cache.get(key);
+
+    if(node == null) {
+      DLinkedNode newNode = new DLinkedNode();
+      newNode.key = key;
+      newNode.value = value;
+
+      cache.put(key, newNode);
+      addNode(newNode);
+
+      ++size;
+
+      if(size > capacity) {
+        // pop the tail
+        DLinkedNode tail = popTail();
+        cache.remove(tail.key);
+        --size;
+      }
+    } else {
+      // update the value.
+      node.value = value;
+      moveToHead(node);
+    }
+  }
+}
+```
 
 ### 171. Excel Sheet Column Number
 
@@ -1625,8 +1807,6 @@ public int integerBreak(int n) {
 }
 ```
 
-
-
 ### 346. Moving Average from Data Stream
 
 Given a stream of integers and a window size, calculate the moving average of all integers in the sliding window.
@@ -1830,7 +2010,7 @@ int add(ListNode node) {
 }
 ```
 
-###**417. Pacific Atlantic Water Flow**
+###417. Pacific Atlantic Water Flow
 
 Given an `m x n` matrix of non-negative integers representing the height of each unit cell in a continent, the "Pacific ocean" touches the left and top edges of the matrix and the "Atlantic ocean" touches the right and bottom edges.
 
@@ -1947,8 +2127,6 @@ public String licenseKeyFormatting(String S, int K) {
 }
 ```
 
-###449. Serialize and Deserialize BST
-
 ### 551. Student Attendance Record I
 
 You are given a string representing an attendance record for a student. The record only contains the following three characters:
@@ -1999,7 +2177,7 @@ public boolean checkRecord(String s) {
 }
 ```
 
-###**583. Delete Operation for Two Strings**
+###583. Delete Operation for Two Strings
 
 Given two words *word1* and *word2*, find the minimum number of steps required to make *word1* and *word2* the same, where in each step you can delete one character in either string.
 
@@ -2028,7 +2206,7 @@ public int minDistance(String word1, String word2) {
 }
 ```
 
-### *659. Split Array into Consecutive Subsequences
+### 659. Split Array into Consecutive Subsequences
 
 Given an array `nums` sorted in ascending order, return `true` if and only if you can split it into 1 or more subsequences such that each subsequence consists of consecutive integers and has length at least 3.
 
@@ -2107,9 +2285,65 @@ class Counter extends HashMap<Integer, Integer> {
 }
 ```
 
+### 684. Redundant Connection
+
+In this problem, a tree is an **undirected** graph that is connected and has no cycles.
+
+The given input is a graph that started as a tree with N nodes (with distinct values 1, 2, ..., N), with one additional edge added. The added edge has two different vertices chosen from 1 to N, and was not an edge that already existed.
+
+The resulting graph is given as a 2D-array of `edges`. Each element of `edges` is a pair `[u, v]` with `u < v`, that represents an **undirected** edge connecting nodes `u` and `v`.
+
+Return an edge that can be removed so that the resulting graph is a tree of N nodes. If there are multiple answers, return the answer that occurs last in the given 2D-array. The answer edge `[u, v]` should be in the same format, with `u < v`.
+
+**Example 1:**
+
+```
+Input: [[1,2], [1,3], [2,3]]
+Output: [2,3]
+Explanation: The given undirected graph will be like this:
+  1
+ / \
+2 - 3
+```
+
+**Solution:**
+
+```java
+Set<Integer> seen = new HashSet();
+int MAX_EDGE_VAL = 1000;
+
+public int[] findRedundantConnection(int[][] edges) {
+    ArrayList<Integer>[] graph = new ArrayList[MAX_EDGE_VAL + 1];
+    for (int i = 0; i <= MAX_EDGE_VAL; i++) {
+        graph[i] = new ArrayList();
+    }
+
+    for (int[] edge: edges) {
+        seen.clear();
+        if (!graph[edge[0]].isEmpty() && !graph[edge[1]].isEmpty() &&
+                dfs(graph, edge[0], edge[1])) {
+            return edge;
+        }
+        graph[edge[0]].add(edge[1]);
+        graph[edge[1]].add(edge[0]);
+    }
+    throw new AssertionError();
+}
+public boolean dfs(ArrayList<Integer>[] graph, int source, int target) {
+    if (!seen.contains(source)) {
+        seen.add(source);
+        if (source == target) return true;
+        for (int nei: graph[source]) {
+            if (dfs(graph, nei, target)) return true;
+        }
+    }
+    return false;
+}
+```
+
 ### 686. Repeated String Match
 
-Given two strings A and B, find the minimum number of times A has to be repeated such that B is a substring of it. If no such solution, return -1.
+Given two strings A and B, find the minimum number of times A has to be repeated such that B is a substring of it. If no such solution, r4eturn -1.
 
 For example, with A = "abcd" and B = "cdabcdab".
 
@@ -2168,118 +2402,6 @@ public int search(ArrayReader reader, int target) {
 
     // there is no target element
     return -1;
-}
-```
-
-### 763. Partition Labels
-
-**Example 1:**
-
-```
-Input: S = "ababcbacadefegdehijhklij"
-Output: [9,7,8]
-Explanation:
-The partition is "ababcbaca", "defegde", "hijhklij".
-This is a partition so that each letter appears in at most one part.
-A partition like "ababcbacadefegde", "hijhklij" is incorrect, because it splits S into less parts.
-```
-
-**Solution：**
-
-贪心？设定一个start，然后动态
-
-```java
-public List<Integer> partitionLabels(String S) {
-    int[] lastIndexofChar = new int[26];
-    for(int i=0; i<S.length(); i++) {
-        lastIndexofChar[S.charAt(i) - 'a'] = i;
-    }
-    int firstIndex = 0;
-    List<Integer> ret = new ArrayList<>();
-    while(firstIndex < S.length()){
-        int lastIndex = firstIndex;
-        // 重复更新lastindex知道partition完毕
-        for(int i=firstIndex; i<S.length() && i<=lastIndex; i++) {
-            int index = lastIndexofChar[S.charAt(i) - 'a'];
-            if(index > lastIndex){
-                lastIndex = index;
-            }
-        }
-        ret.add(lastIndex - firstIndex + 1);
-        firstIndex = lastIndex + 1;
-    }
-    return ret;
-}
-```
-
-### 767. Reorganize String
-
-Given a string `S`, check if the letters can be rearranged so that two characters that are adjacent to each other are not the same.
-
-If possible, output any possible result.  If not possible, return the empty string.
-
-**Example 1:**
-
-```
-Input: S = "aab"
-Output: "aba"
-```
-
-**Example 2:**
-
-```
-Input: S = "aaab"
-Output: ""
-```
-
-**Solution:**
-
-统计所有字母的count, count > (n+1) / 2 则不可能。
-
-用PriorityQueue来存letter 和 count的pair，按照count排序。
-
-每次poll两个字母下来(当前count最多和第二多的字母)，把这两个append上去，（保证了相邻两个不会相同），不能只poll一个。
-
-Time Complexity : O(NlogA) A为字母表的长度，即为26，每次poll，pq都要从剩下的中找到最大的，是logA的复杂度。
-
-注意定义PriorityQueue的排序。
-
-```java
-class Pair {
-    int count;
-    char letter;
-    public Pair(int ct, char ch) {
-        count = ct;
-        letter = ch;
-    }
-}
-class Solution {
-    public String reorganizeString(String S) {
-        int n = S.length();
-        int[] count = new int[26];
-        for (char c : S.toCharArray()) count[c - 'a']++;
-        PriorityQueue<Pair> pq = new PriorityQueue<Pair>((a,b) -> a.count == b.count ? a.letter - b.letter : b.count - a.count);
-        
-        for (int i = 0; i < 26; ++i) {
-            if (count[i] > 0) {
-                if (count[i] > (n+1)/2) return "";
-                pq.add(new Pair(count[i], (char)(i + 'a')));
-            }
-        }
-        
-        StringBuilder res = new StringBuilder();
-        while (pq.size() >= 2) {
-            Pair c1 = pq.poll();
-            Pair c2 = pq.poll();
-            res.append(c1.letter);
-            res.append(c2.letter);
-            if (--c1.count > 0) pq.add(c1);
-            if (--c2.count > 0) pq.add(c2);
-        }
-        
-        if (pq.size() > 0) res.append(pq.poll().letter);
-        return res.toString();
-    }
 }
 ```
 
@@ -2513,6 +2635,152 @@ public int networkDelayTime(int[][] times, int N, int K) {
 }
 ```
 
+### 763. Partition Labels
+
+**Example 1:**
+
+```
+Input: S = "ababcbacadefegdehijhklij"
+Output: [9,7,8]
+Explanation:
+The partition is "ababcbaca", "defegde", "hijhklij".
+This is a partition so that each letter appears in at most one part.
+A partition like "ababcbacadefegde", "hijhklij" is incorrect, because it splits S into less parts.
+```
+
+**Solution：**
+
+贪心？设定一个start，然后动态
+
+```java
+public List<Integer> partitionLabels(String S) {
+    int[] lastIndexofChar = new int[26];
+    for(int i=0; i<S.length(); i++) {
+        lastIndexofChar[S.charAt(i) - 'a'] = i;
+    }
+    int firstIndex = 0;
+    List<Integer> ret = new ArrayList<>();
+    while(firstIndex < S.length()){
+        int lastIndex = firstIndex;
+        // 重复更新lastindex知道partition完毕
+        for(int i=firstIndex; i<S.length() && i<=lastIndex; i++) {
+            int index = lastIndexofChar[S.charAt(i) - 'a'];
+            if(index > lastIndex){
+                lastIndex = index;
+            }
+        }
+        ret.add(lastIndex - firstIndex + 1);
+        firstIndex = lastIndex + 1;
+    }
+    return ret;
+}
+```
+
+### 767. Reorganize String
+
+Given a string `S`, check if the letters can be rearranged so that two characters that are adjacent to each other are not the same.
+
+If possible, output any possible result.  If not possible, return the empty string.
+
+**Example 1:**
+
+```
+Input: S = "aab"
+Output: "aba"
+```
+
+**Example 2:**
+
+```
+Input: S = "aaab"
+Output: ""
+```
+
+**Solution:**
+
+统计所有字母的count, count > (n+1) / 2 则不可能。
+
+用PriorityQueue来存letter 和 count的pair，按照count排序。
+
+每次poll两个字母下来(当前count最多和第二多的字母)，把这两个append上去，（保证了相邻两个不会相同），不能只poll一个。
+
+Time Complexity : O(NlogA) A为字母表的长度，即为26，每次poll，pq都要从剩下的中找到最大的，是logA的复杂度。
+
+注意定义PriorityQueue的排序。
+
+```java
+class Pair {
+    int count;
+    char letter;
+    public Pair(int ct, char ch) {
+        count = ct;
+        letter = ch;
+    }
+}
+class Solution {
+    public String reorganizeString(String S) {
+        int n = S.length();
+        int[] count = new int[26];
+        for (char c : S.toCharArray()) count[c - 'a']++;
+        PriorityQueue<Pair> pq = new PriorityQueue<Pair>((a,b) -> a.count == b.count ? a.letter - b.letter : b.count - a.count);
+        
+        for (int i = 0; i < 26; ++i) {
+            if (count[i] > 0) {
+                if (count[i] > (n+1)/2) return "";
+                pq.add(new Pair(count[i], (char)(i + 'a')));
+            }
+        }
+        
+        StringBuilder res = new StringBuilder();
+        while (pq.size() >= 2) {
+            Pair c1 = pq.poll();
+            Pair c2 = pq.poll();
+            res.append(c1.letter);
+            res.append(c2.letter);
+            if (--c1.count > 0) pq.add(c1);
+            if (--c2.count > 0) pq.add(c2);
+        }
+        
+        if (pq.size() > 0) res.append(pq.poll().letter);
+        return res.toString();
+    }
+}
+```
+
+### 788. Rotated Digits
+
+X is a good number if after rotating each digit individually by 180 degrees, we get a valid number that is different from X.  Each digit must be rotated - we cannot choose to leave it alone.
+
+A number is valid if each digit remains a digit after rotation. 0, 1, and 8 rotate to themselves; 2 and 5 rotate to each other; 6 and 9 rotate to each other, and the rest of the numbers do not rotate to any other number and become invalid.
+
+Now given a positive number `N`, how many numbers X from `1` to `N` are good?
+
+**Solution:**
+
+validTable 的思想。
+
+```java
+public int rotatedDigits(int N) {
+    int cnt = 0;
+    // 0,1,8 -> 0, 2,5,6,9 ->1, 3,4,7 -> -1
+    int[] validTable = {0,0,1,-1,-1,1,1,-1,0,1};
+    for (int i = 1; i <= N; ++i) {
+        if (validNumber(validTable, i)) ++cnt;
+    }
+    return cnt;
+}
+private boolean validNumber(int[] validTable, int n) {
+    boolean isDifferent = false;
+    while (n > 0) {
+        int mode = n % 10;
+        if (validTable[mode] == -1) return false;
+        if (validTable[mode] == 1) isDifferent = true;
+        n /= 10;
+    }
+    return isDifferent;
+}
+```
+
 ### 792. Number of Matching Subsequences
 
 Given string `S` and a dictionary of words `words`, find the number of `words[i]` that is a subsequence of `S`.
@@ -2574,152 +2842,6 @@ class Node {
         word = w;
         index = i;
     }
-}
-```
-
-### 809. Expressive Words
-
-Sometimes people repeat letters to represent extra feeling, such as "hello" -> "heeellooo", "hi" -> "hiiii".  In these strings like "heeellooo", we have *groups* of adjacent letters that are all the same:  "h", "eee", "ll", "ooo".
-
-For some given string `S`, a query word is *stretchy* if it can be made to be equal to `S` by any number of applications of the following *extension* operation: choose a group consisting of characters `c`, and add some number of characters `c` to the group so that the size of the group is 3 or more.
-
-For example, starting with "hello", we could do an extension on the group "o" to get "hellooo", but we cannot get "helloo" since the group "oo" has size less than 3.  Also, we could do another extension like "ll" -> "lllll" to get "helllllooo".  If `S = "helllllooo"`, then the query word "hello" would be stretchy because of these two extension operations: `query = "hello" -> "hellooo" -> "helllllooo" = S`.
-
-Given a list of query words, return the number of words that are stretchy. 
-
-```
-Example:
-Input: 
-S = "heeellooo"
-words = ["hello", "hi", "helo"]
-Output: 1
-Explanation: 
-We can extend "e" and "o" in the word "hello" to get "heeellooo".
-We can't extend "helo" to get "heeellooo" because the group "ll" is not size 3 or more.
-```
-
- **Solution1:**
-
-把S按照character依次group存key和count。注意valid的判断条件，一些variables需要重置等等，空间比solution2少，但是solution2更容易理解。
-
-```java
-public int expressiveWords(String S, String[] words) {
-    List<Integer> counts = new ArrayList<>();
-    List<Character> chars = new ArrayList<>();
-    int prev = -1;
-    for (int i = 0; i < S.length(); i++) {
-        if (i == S.length() - 1 || S.charAt(i) != S.charAt(i+1)) {
-            chars.add(S.charAt(i));
-            counts.add(i - prev);
-            prev = i;
-        }
-    }
-    int index = 0;
-    int cnt = 0;
-    int previous = -1;
-    boolean valid = false;
-    for (String word : words) {
-        for (int i = 0; i < word.length(); i++) {
-            if (i == word.length() - 1 || word.charAt(i) != word.charAt(i+1)) {
-                if (index >= chars.size()) break;
-                if (word.charAt(i) != chars.get(index)) break;
-                int count = i - previous;
-                if (count > counts.get(index)) break;
-                if (count != counts.get(index) && counts.get(index) < 3) break;
-                if (i == word.length() - 1 && index == chars.size() - 1) valid = true;
-                index++;
-                previous = i;
-            }
-        }       
-        if (valid) {
-            cnt++;
-        }
-        valid = false;
-        previous = -1;
-        index = 0;
-    }
-    return cnt;
-}
-```
-
-**Solution2:**
-
-```java
-class Solution {
-    public int expressiveWords(String S, String[] words) {
-        RLE R = new RLE(S);
-        int ans = 0;
-
-        search: for (String word: words) {
-            RLE R2 = new RLE(word);
-            if (!R.key.equals(R2.key)) continue;
-            for (int i = 0; i < R.counts.size(); ++i) {
-                int c1 = R.counts.get(i);
-                int c2 = R2.counts.get(i);
-                if (c1 < 3 && c1 != c2 || c1 < c2)
-                    continue search;
-            }
-            ans++;
-        }
-        return ans;
-    }
-}
-
-class RLE {
-    String key;
-    List<Integer> counts;
-
-    public RLE(String S) {
-        StringBuilder sb = new StringBuilder();
-        counts = new ArrayList();
-
-        char[] ca = S.toCharArray();
-        int N = ca.length;
-        int prev = -1;
-        for (int i = 0; i < N; ++i) {
-            if (i == N-1 || ca[i] != ca[i+1]) {
-                sb.append(ca[i]);
-                counts.add(i - prev);
-                prev = i;
-            }
-        }
-
-        key = sb.toString();
-    }
-}
-```
-
-### 788. Rotated Digits
-
-X is a good number if after rotating each digit individually by 180 degrees, we get a valid number that is different from X.  Each digit must be rotated - we cannot choose to leave it alone.
-
-A number is valid if each digit remains a digit after rotation. 0, 1, and 8 rotate to themselves; 2 and 5 rotate to each other; 6 and 9 rotate to each other, and the rest of the numbers do not rotate to any other number and become invalid.
-
-Now given a positive number `N`, how many numbers X from `1` to `N` are good?
-
-**Solution:**
-
-validTable 的思想。
-
-```java
-public int rotatedDigits(int N) {
-    int cnt = 0;
-    // 0,1,8 -> 0, 2,5,6,9 ->1, 3,4,7 -> -1
-    int[] validTable = {0,0,1,-1,-1,1,1,-1,0,1};
-    for (int i = 1; i <= N; ++i) {
-        if (validNumber(validTable, i)) ++cnt;
-    }
-    return cnt;
-}
-private boolean validNumber(int[] validTable, int n) {
-    boolean isDifferent = false;
-    while (n > 0) {
-        int mode = n % 10;
-        if (validTable[mode] == -1) return false;
-        if (validTable[mode] == 1) isDifferent = true;
-        n /= 10;
-    }
-    return isDifferent;
 }
 ```
 
@@ -2851,6 +2973,118 @@ public boolean dfs(int i, int[] color, int[][] graph) {
 }
 ```
 
+### 809. Expressive Words
+
+Sometimes people repeat letters to represent extra feeling, such as "hello" -> "heeellooo", "hi" -> "hiiii".  In these strings like "heeellooo", we have *groups* of adjacent letters that are all the same:  "h", "eee", "ll", "ooo".
+
+For some given string `S`, a query word is *stretchy* if it can be made to be equal to `S` by any number of applications of the following *extension* operation: choose a group consisting of characters `c`, and add some number of characters `c` to the group so that the size of the group is 3 or more.
+
+For example, starting with "hello", we could do an extension on the group "o" to get "hellooo", but we cannot get "helloo" since the group "oo" has size less than 3.  Also, we could do another extension like "ll" -> "lllll" to get "helllllooo".  If `S = "helllllooo"`, then the query word "hello" would be stretchy because of these two extension operations: `query = "hello" -> "hellooo" -> "helllllooo" = S`.
+
+Given a list of query words, return the number of words that are stretchy. 
+
+```
+Example:
+Input: 
+S = "heeellooo"
+words = ["hello", "hi", "helo"]
+Output: 1
+Explanation: 
+We can extend "e" and "o" in the word "hello" to get "heeellooo".
+We can't extend "helo" to get "heeellooo" because the group "ll" is not size 3 or more.
+```
+
+ **Solution1:**
+
+把S按照character依次group存key和count。注意valid的判断条件，一些variables需要重置等等，空间比solution2少，但是solution2更容易理解。
+
+```java
+public int expressiveWords(String S, String[] words) {
+    List<Integer> counts = new ArrayList<>();
+    List<Character> chars = new ArrayList<>();
+    int prev = -1;
+    for (int i = 0; i < S.length(); i++) {
+        if (i == S.length() - 1 || S.charAt(i) != S.charAt(i+1)) {
+            chars.add(S.charAt(i));
+            counts.add(i - prev);
+            prev = i;
+        }
+    }
+    int index = 0;
+    int cnt = 0;
+    int previous = -1;
+    boolean valid = false;
+    for (String word : words) {
+        for (int i = 0; i < word.length(); i++) {
+            if (i == word.length() - 1 || word.charAt(i) != word.charAt(i+1)) {
+                if (index >= chars.size()) break;
+                if (word.charAt(i) != chars.get(index)) break;
+                int count = i - previous;
+                if (count > counts.get(index)) break;
+                if (count != counts.get(index) && counts.get(index) < 3) break;
+                if (i == word.length() - 1 && index == chars.size() - 1) valid = true;
+                index++;
+                previous = i;
+            }
+        }       
+        if (valid) {
+            cnt++;
+        }
+        valid = false;
+        previous = -1;
+        index = 0;
+    }
+    return cnt;
+}
+```
+
+**Solution2:**
+
+```java
+class Solution {
+    public int expressiveWords(String S, String[] words) {
+        RLE R = new RLE(S);
+        int ans = 0;
+
+        search: for (String word: words) {
+            RLE R2 = new RLE(word);
+            if (!R.key.equals(R2.key)) continue;
+            for (int i = 0; i < R.counts.size(); ++i) {
+                int c1 = R.counts.get(i);
+                int c2 = R2.counts.get(i);
+                if (c1 < 3 && c1 != c2 || c1 < c2)
+                    continue search;
+            }
+            ans++;
+        }
+        return ans;
+    }
+}
+
+class RLE {
+    String key;
+    List<Integer> counts;
+
+    public RLE(String S) {
+        StringBuilder sb = new StringBuilder();
+        counts = new ArrayList();
+
+        char[] ca = S.toCharArray();
+        int N = ca.length;
+        int prev = -1;
+        for (int i = 0; i < N; ++i) {
+            if (i == N-1 || ca[i] != ca[i+1]) {
+                sb.append(ca[i]);
+                counts.add(i - prev);
+                prev = i;
+            }
+        }
+
+        key = sb.toString();
+    }
+}
+```
+
 ### 833. Find And Replace in String
 
 To some string `S`, we will perform some replacement operations that replace groups of letters with new ones (not necessarily the same size).
@@ -2912,6 +3146,121 @@ public String findReplaceString(String S, int[] indexes, String[] sources, Strin
         }
     }
     return sb.toString();
+}
+```
+
+### 843. Guess the Word
+
+This problem is an **interactive problem** new to the LeetCode platform.
+
+We are given a word list of unique words, each word is 6 letters long, and one word in this list is chosen as **secret**.
+
+You may call `master.guess(word)` to guess a word.  The guessed word should have type `string` and must be from the original list with 6 lowercase letters.
+
+This function returns an `integer` type, representing the number of exact matches (value and position) of your guess to the **secret word**.  Also, if your guess is not in the given wordlist, it will return `-1` instead.
+
+For each test case, you have 10 guesses to guess the word. At the end of any number of calls, if you have made 10 or less calls to `master.guess` and at least one of these guesses was the **secret**, you pass the testcase.
+
+Besides the example test case below, there will be 5 additional test cases, each with 100 words in the word list.  The letters of each word in those testcases were chosen independently at random from `'a'` to `'z'`, such that every word in the given word lists is unique.
+
+```
+Example 1:
+Input: secret = "acckzz", wordlist = ["acckzz","ccbazz","eiowzz","abcczz"]
+
+Explanation:
+
+master.guess("aaaaaa") returns -1, because "aaaaaa" is not in wordlist.
+master.guess("acckzz") returns 6, because "acckzz" is secret and has all 6 matches.
+master.guess("ccbazz") returns 3, because "ccbazz" has 3 matches.
+master.guess("eiowzz") returns 2, because "eiowzz" has 2 matches.
+master.guess("abcczz") returns 4, because "abcczz" has 4 matches.
+
+We made 5 calls to master.guess and one of them was the secret, so we pass the test case.
+```
+
+**Solution:**
+
+```java
+int[][] H;
+public void findSecretWord(String[] wordlist, Master master) {
+    int N = wordlist.length;
+    H = new int[N][N];
+    for (int i = 0; i < N; ++i)
+        for (int j = i; j < N; ++j) {
+            int match = 0;
+            for (int k = 0; k < 6; ++k)
+                if (wordlist[i].charAt(k) == wordlist[j].charAt(k))
+                    match++;
+            H[i][j] = H[j][i] = match;
+        }
+
+    List<Integer> possible = new ArrayList();
+    List<Integer> path = new ArrayList();
+    for (int i = 0; i < N; ++i) possible.add(i);
+
+    while (!possible.isEmpty()) {
+        int guess = solve(possible, path);
+        int matches = master.guess(wordlist[guess]);
+        if (matches == wordlist[0].length()) return;
+        List<Integer> possible2 = new ArrayList();
+        for (Integer j: possible) if (H[guess][j] == matches) possible2.add(j);
+        possible = possible2;
+        path.add(guess);
+    }
+
+}
+
+public int solve(List<Integer> possible, List<Integer> path) {
+    if (possible.size() <= 2) return possible.get(0);
+    List<Integer> ansgrp = possible;
+    int ansguess = -1;
+
+    for (int guess = 0; guess < H.length; ++guess) {
+        if (!path.contains(guess)) {
+            ArrayList<Integer>[] groups = new ArrayList[7];
+            for (int i = 0; i < 7; ++i) groups[i] = new ArrayList<Integer>();
+            for (Integer j: possible) if (j != guess) {
+                groups[H[guess][j]].add(j);
+            }
+
+            ArrayList<Integer> maxgroup = groups[0];
+            for (int i = 0; i < 7; ++i)
+                if (groups[i].size() > maxgroup.size())
+                    maxgroup = groups[i];
+
+            if (maxgroup.size() < ansgrp.size()) {
+                ansgrp = maxgroup;
+                ansguess = guess;
+            }
+        }
+    }
+
+    return ansguess;
+}
+```
+
+```java
+public int countDiff (String a, String b) {
+    int count = 0;
+    for (int i = 0; i < 6; i ++) {
+        if (a.charAt(i) == b.charAt(i)) count ++;
+    }
+    return count;
+}
+public void findSecretWord(String[] wordlist, Master master) {       
+    LinkedList<Integer> left = new LinkedList<>();
+    for (int i = 0; i < wordlist.length; i ++) left.offer(i);
+    while(true) {
+        if (left.isEmpty()) break;
+        Collections.shuffle(left);
+        int current = left.poll();
+        int diff = master.guess(wordlist[current]);
+        int size = left.size();
+        for (int j = 0; j < size; j ++) {
+            int next = left.poll();
+            if (countDiff(wordlist[current], wordlist[next]) == diff) left.offer(next);
+        }
+    }        
 }
 ```
 
@@ -3987,6 +4336,147 @@ class Solution {
         return -1;
     }
 }
+```
+
+### 1096. Brace Expansion II
+
+Under a grammar given below, strings can represent a set of lowercase words.  Let's use `R(expr)` to denote the **set** of words the expression represents.
+
+Grammar can best be understood through simple examples:
+
+- Single letters represent a singleton set containing that word.
+  - `R("a") = {"a"}`
+  - `R("w") = {"w"}`
+- When we take a comma delimited list of 2 or more expressions, we take the union of possibilities.
+  - `R("{a,b,c}") = {"a","b","c"}`
+  - `R("{{a,b},{b,c}}") = {"a","b","c"}` (notice the final set only contains each word at most once)
+- When we concatenate two expressions, we take the set of possible concatenations between two words where the first word comes from the first expression and the second word comes from the second expression.
+  - `R("{a,b}{c,d}") = {"ac","ad","bc","bd"}`
+  - `R("a{b,c}{d,e}f{g,h}") = {"abdfg", "abdfh", "abefg", "abefh", "acdfg", "acdfh", "acefg", "acefh"}`
+
+Formally, the 3 rules for our grammar:
+
+- For every lowercase letter `x`, we have `R(x) = {x}`
+- For expressions `e_1, e_2, ... , e_k` with `k >= 2`, we have `R({e_1,e_2,...}) = R(e_1) ∪ R(e_2) ∪ ...`
+- For expressions `e_1` and `e_2`, we have `R(e_1 + e_2) = {a + b for (a, b) in R(e_1) × R(e_2)}`, where + denotes concatenation, and × denotes the cartesian product.
+
+Given an `expression` representing a set of words under the given grammar, return the sorted list of words that the expression represents.
+
+**Example 1:**
+
+```
+Input: "{a,b}{c,{d,e}}"
+Output: ["ac","ad","ae","bc","bd","be"]
+```
+
+**Example 2:**
+
+```
+Input: "{{a,z},a{b,c},{ab,z}}"
+Output: ["a","ab","ac","z"]
+Explanation: Each distinct word is written only once in the final answer.
+```
+
+**Solution:**
+
+```java
+class Solution {
+    public List<String> braceExpansionII(String expression) {
+        Set<String> set = solve(expression);
+        List<String> result = new ArrayList<>(set);
+        Collections.sort(result);
+        return result;
+    }
+    
+    private Set<String> solve(String str) {
+        int level = 0;
+        int start = 0;
+        List<Set<String>> groups = new ArrayList<>();
+        groups.add(new HashSet<>());
+        for (int i = 0; i < str.length(); i++) {
+            if (str.charAt(i) == '{') {
+                if (level == 0) start = i + 1;
+                level++;
+            } else if (str.charAt(i) == '}') {
+                level--;
+                if (level == 0) {
+                    Set<String> sub = solve(str.substring(start, i));
+                    groups.set(groups.size() - 1, merge(groups.get(groups.size() - 1), sub));
+                }
+            } else if (str.charAt(i) == ',' && level == 0) {
+                groups.add(new HashSet<>());
+            } else if (level == 0) {
+                Set<String> tmp = new HashSet<>();
+                StringBuilder builder = new StringBuilder();
+                while (i < str.length() && Character.isLetter(str.charAt(i))) {
+                    builder.append(str.charAt(i++));
+                }
+                i--;
+                tmp.add(builder.toString());
+                groups.set(groups.size() - 1, merge(groups.get(groups.size() - 1), tmp));
+            }
+        }
+        
+        Set<String> result = new HashSet<>();
+        for (Set<String> group : groups) {
+            result.addAll(group);
+        }
+        return result;
+    }
+    
+    private Set<String> merge(Set<String> set1, Set<String> set2) {
+        Set<String> result = new HashSet<>();
+        if (set1.size() == 0) return set2;
+        if (set2.size() == 0) return set1;
+        for (String str1 : set1) {
+            for (String str2 : set2) {
+                result.add(str1 + str2);
+            }
+        }
+        return result;
+    }
+}
+```
+
+```java
+class Solution {
+    
+    HashMap<String, Integer> dp = new HashMap<String,Integer>();
+    
+    public int manHattanDistance(int[][] A, int[][] B, int i, int j){
+        int dis = Math.abs(A[i][0] - B[j][0]) + Math.abs(A[i][1] - B[j][1]);
+        return dis;
+    }
+    public int helper(int[][] workers, int[][] bikes, int count, boolean[] used, int m, int n){
+        if(count >= m)
+            return 0;
+        
+        String curr = Arrays.toString(used);
+        
+        if(dp.containsKey(curr)){
+            return dp.get(curr);
+        }
+        
+        int val = Integer.MAX_VALUE;
+        for(int j=0;j<n;j++){
+            if(!used[j]){
+                used[j] = true;
+                val = Math.min(val,helper(workers,bikes,count+1,used,m,n) + manHattanDistance(workers,bikes,count,j));
+                used[j] = false;
+            }
+        }
+        
+        dp.put(curr,val);
+        return val;
+    }
+    public int assignBikes(int[][] workers, int[][] bikes) {
+        int m = workers.length;
+        int n = bikes.length;
+        boolean[] used = new boolean[n];
+        String curr = Arrays.toString(used);
+        return helper(workers,bikes,0,used,m,n);
+        
+    }
 ```
 
 ### 1110. Delete Nodes And Return Forest

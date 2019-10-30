@@ -729,8 +729,6 @@ private int last_position(int[] nums, int target) {
 }
 ```
 
-
-
 **278. First Bad Version**
 
 **Solution:**
@@ -1275,7 +1273,240 @@ Graph is a tree if and only if 1. There are n-1 edges. 2. n nodes are connected
     }
 ```
 
+### Topological Sort
 
+### 329. Longest Increasing Path in a Matrix
+
+Given an integer matrix, find the length of the longest increasing path.
+
+From each cell, you can either move to four directions: left, right, up or down. You may NOT move diagonally or move outside of the boundary (i.e. wrap-around is not allowed).
+
+**Example 1:**
+
+```
+Input: nums = 
+[
+  [9,9,4],
+  [6,6,8],
+  [2,1,1]
+] 
+Output: 4 
+Explanation: The longest increasing path is [1, 2, 6, 9].
+```
+
+**Solution:**
+
+Topological sort
+
+```java
+// Topological Sort Based Solution
+// An Alternative Solution
+public class Solution {
+    private static final int[][] dir = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    private int m, n;
+    public int longestIncreasingPath(int[][] grid) {
+        int m = grid.length;
+        if (m == 0) return 0;
+        int n = grid[0].length;
+        // padding the matrix with zero as boundaries
+        // assuming all positive integer, otherwise use INT_MIN as boundaries
+        int[][] matrix = new int[m + 2][n + 2];
+        for (int i = 0; i < m; ++i)
+            System.arraycopy(grid[i], 0, matrix[i + 1], 1, n);
+
+        // calculate outdegrees
+        int[][] outdegree = new int[m + 2][n + 2];
+        for (int i = 1; i <= m; ++i)
+            for (int j = 1; j <= n; ++j)
+                for (int[] d: dir)
+                    if (matrix[i][j] < matrix[i + d[0]][j + d[1]])
+                        outdegree[i][j]++;
+
+        // find leaves who have zero out degree as the initial level
+        n += 2;
+        m += 2;
+        List<int[]> leaves = new ArrayList<>();
+        for (int i = 1; i < m - 1; ++i)
+            for (int j = 1; j < n - 1; ++j)
+                if (outdegree[i][j] == 0) leaves.add(new int[]{i, j});
+
+        // remove leaves level by level in topological order
+        int height = 0;
+        while (!leaves.isEmpty()) {
+            height++;
+            List<int[]> newLeaves = new ArrayList<>();
+            for (int[] node : leaves) {
+                for (int[] d:dir) {
+                    int x = node[0] + d[0], y = node[1] + d[1];
+                    if (matrix[node[0]][node[1]] > matrix[x][y])
+                        if (--outdegree[x][y] == 0)
+                            newLeaves.add(new int[]{x, y});
+                }
+            }
+            leaves = newLeaves;
+        }
+        return height;
+    }
+}
+```
+
+### 207. Course Schedule
+
+There are a total of *n* courses you have to take, labeled from `0` to `n-1`.
+
+Some courses may have prerequisites, for example to take course 0 you have to first take course 1, which is expressed as a pair: `[0,1]`
+
+Given the total number of courses and a list of prerequisite **pairs**, is it possible for you to finish all courses?
+
+**Example 1:**
+
+```
+Input: 2, [[1,0]] 
+Output: true
+Explanation: There are a total of 2 courses to take. 
+             To take course 1 you should have finished course 0. So it is possible.
+```
+
+**Example 2:**
+
+```
+Input: 2, [[1,0],[0,1]]
+Output: false
+Explanation: There are a total of 2 courses to take. 
+             To take course 1 you should have finished course 0, and to take course 0 you should
+             also have finished course 1. So it is impossible.
+```
+
+**Solution:**
+
+topological sort
+
+```java
+public boolean canFinish(int numCourses, int[][] prerequisites) {
+    // Topological Sort
+    // need a hashmap to save the indegree to each node(each course)
+    Map<Integer, Integer> node_to_indegree = new HashMap<>();
+    // 先给每一个node都在map里 initialize the indegree as 0
+    for ( int i = 0; i < numCourses; i++){
+        node_to_indegree.put(i, 0);
+    }
+
+    int length = prerequisites.length;
+    for ( int i = 0; i < length; i++){
+        node_to_indegree.put(prerequisites[i][0], node_to_indegree.getOrDefault(prerequisites[i][0], 0) + 1);
+    }
+
+    Deque<Integer> q = new LinkedList<>();
+    // offer the coursed whose indegree is 0 into queue
+    for(Integer key : node_to_indegree.keySet()){
+        if(node_to_indegree.get(key) == 0){
+            q.offer(key);
+        }
+    }
+
+    List<Integer> result = new ArrayList<>();
+    while(!q.isEmpty()){
+        Integer curCourse = q.poll();
+        result.add(curCourse);
+        // check all the next course whose prerequisites is curCourse and deduct their indegree by 1, offer them into the queue when the indegree == 0
+        for (int i = 0; i < length; i++){
+            if(prerequisites[i][1] == curCourse){
+                // node_to_indegree.get(prerequisites[i][0]--);
+                node_to_indegree.put(prerequisites[i][0], node_to_indegree.getOrDefault(prerequisites[i][0], 0) - 1);
+                if(node_to_indegree.get(prerequisites[i][0]) == 0){
+                    q.offer(prerequisites[i][0]);
+                }
+            }
+        }	
+    }
+
+    if (result.size() == numCourses){
+        return true;
+    }else{
+        return false;
+    }
+}
+```
+
+### 210. Course Schedule II
+
+There are a total of *n* courses you have to take, labeled from `0` to `n-1`.
+
+Some courses may have prerequisites, for example to take course 0 you have to first take course 1, which is expressed as a pair: `[0,1]`
+
+Given the total number of courses and a list of prerequisite **pairs**, return the ordering of courses you should take to finish all courses.
+
+There may be multiple correct orders, you just need to return one of them. If it is impossible to finish all courses, return an empty array.
+
+**Example 1:**
+
+```
+Input: 4, [[1,0],[2,0],[3,1],[3,2]]
+Output: [0,1,2,3] or [0,2,1,3]
+Explanation: There are a total of 4 courses to take. To take course 3 you should have finished both     
+             courses 1 and 2. Both courses 1 and 2 should be taken after you finished course 0. 
+             So one correct course order is [0,1,2,3]. Another correct ordering is [0,2,1,3] .
+```
+
+**Solution:**
+
+```java
+public int[] findOrder(int numCourses, int[][] prerequisites) {
+
+boolean isPossible = true;
+Map<Integer, List<Integer>> adjList = new HashMap<Integer, List<Integer>>();
+int[] indegree = new int[numCourses];
+int[] topologicalOrder = new int[numCourses];
+
+// Create the adjacency list representation of the graph
+for (int i = 0; i < prerequisites.length; i++) {
+  int dest = prerequisites[i][0];
+  int src = prerequisites[i][1];
+  List<Integer> lst = adjList.getOrDefault(src, new ArrayList<Integer>());
+  lst.add(dest);
+  adjList.put(src, lst);
+
+  // Record in-degree of each vertex
+  indegree[dest] += 1;
+}
+
+// Add all vertices with 0 in-degree to the queue
+Queue<Integer> q = new LinkedList<Integer>();
+for (int i = 0; i < numCourses; i++) {
+  if (indegree[i] == 0) {
+    q.add(i);
+  }
+}
+
+int i = 0;
+// Process until the Q becomes empty
+while (!q.isEmpty()) {
+  int node = q.remove();
+  topologicalOrder[i++] = node;
+
+  // Reduce the in-degree of each neighbor by 1
+  if (adjList.containsKey(node)) {
+    for (Integer neighbor : adjList.get(node)) {
+      indegree[neighbor]--;
+
+      // If in-degree of a neighbor becomes 0, add it to the Q
+      if (indegree[neighbor] == 0) {
+        q.add(neighbor);
+      }
+    }
+  }
+}
+
+// Check to see if topological sort is possible or not.
+if (i == numCourses) {
+  return topologicalOrder;
+}
+
+return new int[0];
+}
+```
+
+### 
 
 ### Depth First Search
 
@@ -1639,6 +1870,110 @@ private void dfs(int[][] matrix, boolean[][] can_reach, int r, int c, int m, int
 - 但是在递归返回时，需要将元素标记为未访问，因为只需要保证在一个递归链中不同时访问一个元素，可以访问已经访问过但是不在当前递归链中的元素。
 
 Backtracking 修改一般有两种情况，一种是**修改最后一位输出**，比如排列组合；一种是**修改访问标记**，比如矩阵里搜字符串。
+
+**78. Subsets (no duplicate)**
+
+```java
+public List<List<Integer>> subsets(int[] nums) {
+    List<List<Integer>> subsets = new ArrayList<>();
+    List<Integer> tem = new ArrayList<>();
+    for(int size=0; size<=nums.length; size++) {
+        backtracking(subsets, tem, 0, size, nums);
+    }
+    return subsets;
+}
+
+// backtracking: add all of the subsets with size(input) into results
+private void backtracking(List<List<Integer>> subsets, List<Integer> tem, int start, int size, int[] nums) {
+    if(tem.size() == size) {
+        subsets.add(new ArrayList<>(tem));
+        return;
+    }
+
+    for(int i=start; i<nums.length; i++) {
+        tem.add(nums[i]);
+        backtracking(subsets, tem, i+1, size, nums);
+        tem.remove(tem.size()-1);
+    }
+}
+```
+
+**90. Subsets II (duplicate elements)**
+
+```java
+public List<List<Integer>> subsetsWithDup(int[] nums) {
+    List<List<Integer>> subsets = new ArrayList<>();
+    List<Integer> temp = new ArrayList<>();
+    Arrays.sort(nums);
+    for (int size = 0; size <= nums.length; size++) {
+        backtracking(subsets, temp, 0, size, nums);
+    }
+    return subsets;
+}
+
+private void backtracking(List<List<Integer>> subsets, List<Integer> temp, int start, int size, int[] nums) {
+    if (temp.size() == size) {
+        subsets.add(new ArrayList<>(temp));
+        return;
+    }
+    for (int i = start; i < nums.length; i++) {
+        if (i != start && nums[i] == nums[i-1]) continue;
+        temp.add(nums[i]);
+        backtracking(subsets, temp, i+1, size, nums);
+        temp.remove(temp.size()-1);
+    }
+}
+```
+
+**40. Combination Sum II**
+
+Given a collection of candidate numbers (`candidates`) and a target number (`target`), find all unique combinations in `candidates` where the candidate numbers sums to `target`.
+
+Each number in `candidates` may only be used **once** in the combination.
+
+**Note:**
+
+- All numbers (including `target`) will be positive integers.
+- The solution set must not contain duplicate combinations.
+
+**Example 1:**
+
+```
+Input: candidates = [10,1,2,7,6,1,5], target = 8,
+A solution set is:
+[
+  [1, 7],
+  [1, 2, 5],
+  [2, 6],
+  [1, 1, 6]
+]
+```
+
+**Solution:**
+
+```java
+public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+    List<List<Integer>> combines = new ArrayList<>();
+    Arrays.sort(candidates);
+    backtracking(new ArrayList<>(), combines, 0, candidates, target);
+    return combines;
+}
+    
+private void backtracking(List<Integer> combineList, List<List<Integer>> combines, int start, int[] candidates, int target) {
+    if (target == 0) {
+        combines.add(new ArrayList<>(combineList));
+        return;
+    }
+    for (int i = start; i<candidates.length; i++) {
+        if (i != start && candidates[i] == candidates[i-1]) continue;
+        if (candidates[i] <= target) {
+            combineList.add(candidates[i]);
+            backtracking(combineList, combines, i + 1, candidates, target-candidates[i]);
+            combineList.remove(combineList.size() - 1);
+        }
+    }
+}
+```
 
 **79. Word Search**
 
