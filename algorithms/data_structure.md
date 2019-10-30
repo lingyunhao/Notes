@@ -36,12 +36,6 @@ Stack<T> stack = new Stack<>();
 
 出stack: pop
 
-**Stack and Queue互相转化**
-
-两个stack实现queue，或者两个queue实现stack，要实现pop，pushO(1)操作。
-
-到过去再到回来
-
 **Deque**
 
 可以实现两头的O(1)增删，但是没办法在中间删除。一般用ArrayDeque或者LinkedList实现。
@@ -62,13 +56,162 @@ TreeMap,TreeSet 是由Balanced BST(Binary Search Tree)(red black tree)实现的�
 
 Heap 的性质是左右子结点都比root小(最小堆)，或者都比root大(最大堆)。可以在O(1)时间在找到最小值或者最大值，如果要增添数进去，或者pop顶点(min,max)出去，都是O(logn)。需要swim或者sink。PriorityQueue是由heap实现能够找到最小值的一种结构，也可以override compare使得其实现找到最大值。
 
+### Satck and Queue
+
+**Stack and Queue互相转化**
+
+两个stack实现queue，或者两个queue实现stack，要实现pop，pushO(1)操作。
+
+到过去再到回来
+
+**Min stack**
+
+two  stack （优化 新的元素小于等于min stack peek 则push到min stack中,  大于不push进去）
+
+**括号类问题**
+
+一般用stack O(n)
+
+**运算类问题**
+
+stack O(n)
+
+**单调栈**
+
+性质：维持栈内的值单调递减或者单调递增
+
+维持一个顺序又维持O(n) ->monoto stack
+
+example: 找下个比他大的第一个位置- 单调递减
+
+input: 2 3 2 1 4
+
+output: 1 4 4 4 -1(index)
+
+用一个单调栈，栈里边存index，遍历一遍input，遇到比栈顶的元素(index)相对应的位置元素小的，加入栈，否则，把stack中元素pop出来，pop到栈中元素比当前元素大于等于为止，在result的相应位置上写上新的元素的index。整个过程一直在维护单调递减栈。
+
+单调递减栈 peek是最小的那个。
+
+### Priority Queue vs Heap
+
+**实现方法**
+
+swim sink
+
+arraylist 来实现 (根据index找到parent和child)
+
+merge K sorted list -> 动态的知道n个元素的最小值（怎么写）-> 用pq来找n个元素的最小值
+
+看数据结构怎么implement
+
+static type，dynamic type
+
+**和Treeset treemap区别 维持了关系O(lgn)**
+
+### HashSet and HashMap
+
+**TreeSet TreeMap HashSet HashMap**
+
+java 实现eqaul和hashcode
+
+**Two Sum** HashMap
+
+**连续性**
+
+判断一个无序数组中最长的连续串多长，Hashset可以随机get一个数，往小往大get
+
+### String
+
+Subtring Subarray Subsequence
+
+**String+判断重复**
+
+anagram
+
+**Palindrom, 递增**
+
+DP，Stack
+
+string中最长最短：dp 或者用sort维持order
+
+**647 Palindrom subString**
+
+对于i，和i+1前后extending
+
+**Calcutor**
+
+recursion + stack
+
+KMP O(m+n) 字符串搜字符串
+
+### List(Array) and Matrix
+
+矩阵寻找
+
+从左向右sort好的 从上到下sort好 找一个数从右上角开始找
+
+找第K大的数  Binary Search
+
+可以通过0-n-1index关系利用array操作
+
+Split 从左往右走当前最大值等于index的话 cnt+1 0-n-769
+
+wiggle sort 数组： 判断满不满足关系不满足就sort一下就好
+
+**积分图和前缀和**
+
+把结果作为value或者key存，index作为另一个
+
+560 hashmap（前缀和，前缀和出现的次数）
+
+### Tree
+
+求树的高度（one line code recursion） 数是否平衡
+
+最长路径 更新的global值且热突然不同的值
+
+判断两个树是否相同，判断自己是不是对称（把前一个改一改）
+
+**BST**
+
+1. trim a bst，保留[a，b]， recursion 
+2. 利用整体的关系 把所有的比自己本身大的val相加
+3. 树上的two sum 转化为arraylist （没有别的方法）
+
+leetcode 99
+
+### Trie 26叉树
+
+### 线段树 online
+
+### Graph
+
+表示方法1. 2d array 连续空间 很不好申请，提前知道有几个节点
+
+2. hashmap of hashset
+
+ 1.dfs bfs
+
+2. 染色法 
+3. topological sort(判断条件入读为1
+
+Dikstra : PQ bfs 中的queue换成pq
+
+### LRU 146 背
+
+ O(1)  online 求median，两个PQ，一个最大PQ，一个最小PQ
+
 ### Linked List
 
 基本就三个考点：
 
 1. Merge two linked lists
-2. Reverse linked list
+2. Reverse linked list : 206 while or recur
 3. Slow fast pointers to find the middle
+
+merge two linked list
+
+sort list  快慢指针找中点 merge sort
 
 ###树的操作
 
