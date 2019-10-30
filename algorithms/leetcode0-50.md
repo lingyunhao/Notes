@@ -195,7 +195,36 @@ public int romanToInt(String s) {
 }
 ```
 
+### 14. Longest Common Prefix
 
+Write a function to find the longest common prefix string amongst an array of strings.
+
+If there is no common prefix, return an empty string `""`.
+
+**Example 1:**
+
+```
+Input: ["flower","flow","flight"] Output: "fl"
+没有则返回 ""
+```
+
+**Solution:**
+
+horizontal scanning: 拿第一个字符串作为标准，在剩下的字符串中进行遍历，遇到不满足条件则停止，每个字符最多被遍历一次。所以时间复杂度 O(s), s为所有character的个数
+
+```java
+public String longestCommonPrefix(String[] strs) {
+    if (strs == null || strs.length == 0) return "";
+    for (int i = 0; i < strs[0].length() ; i++){
+        char c = strs[0].charAt(i);
+        for (int j = 1; j < strs.length; j++) {
+            if (i == strs[j].length() || strs[j].charAt(i) != c)
+                return strs[0].substring(0, i);             
+        }
+    }
+    return strs[0];
+}
+```
 
 ### 26. Remove Duplicates from Sorted Array
 
