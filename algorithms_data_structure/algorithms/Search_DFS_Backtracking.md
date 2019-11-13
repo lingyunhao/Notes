@@ -1,4 +1,4 @@
-##Depth First Search
+###Depth First Search
 
 BFS是一层一层遍历，每一层得到所有的新节点，用队列存当前层的节点，处理本层节点的同时加入下一层新节点。而DFS是得到新节点立马对新节点进行遍历，直到没有新节点了再返回上一层，然后继续对该层进行遍历，如此重复，直到所有节点遍历完毕。
 
@@ -65,7 +65,7 @@ DFS可以用来求最大面积，求方案总数等等（同dp）。
 
 union and find
 
-##Example problems in leetcode
+###Example problems in leetcode
 
 **695. Max Area of Island**
 
@@ -348,7 +348,7 @@ private void dfs(int[][] matrix, boolean[][] can_reach, int r, int c, int m, int
 }
 ```
 
-##BackTracking
+###BackTracking
 
 回溯法（Backtracking）属于 DFS。
 
