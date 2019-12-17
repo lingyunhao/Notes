@@ -48,6 +48,6 @@ Local repo：个人机器上使用
 3. 忽略文件： `.gitignore filename`
 4. 提交更新：`git commit -m "info about this commit"` (commit 之前要先`git status`看下是否所有需要commit的文件都保存到了暂存区域)
 5. 跳过使用暂存区域更新的方式：`git commit -a -m "info about this commit"`  `git commit`加上 `-a`就会把所有已经跟踪过的文件暂存起来一并提交，从而跳过`git add`步骤。
-6. 移除文件：`git rm filename` 先从暂存区域移除，然后提交
+6. 移除文件：`git rm filename` 先从暂存区域移除，然后提交（首先要在本地 rm移除掉已经被git track的文件，后面详细说明）
 7. 对文件重命名: `git mv README.md README` 相当于`mv README.md README`、`git rm README.md` 、`git add README` 这三条命令的集合。
 
