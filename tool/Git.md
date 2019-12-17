@@ -35,4 +35,17 @@ Local repo：个人机器上使用
 ### 创建数据库
 
 1. 创建全新的repo，在现有目录中初始化仓库: 进入项目目录运行 `git init`命令，该命令将创建一个名为`.git`的子目录。
-2. 从一个服务器克隆一个现有的repo: test
+2. 从一个服务器克隆一个现有的repo: `git clone [url]` 自定义本地repo的名字 `git clone [url] directoryname`
+
+### 修改文件并更新到本地repo
+
+1. 检测当前文件状态: `git status`
+2. 把处于modified状态的文件添加到缓存区：
+   * 特定文件：`git add filename`
+   * 所有文件：`git add *`
+   * 所有.txt文件：`git add *.txt`
+
+3. 忽略文件： `.gitignore filename`
+4. 提交更新：`git commit -m "info about this commit"` (commit 之前要先`git status`看下是否所有需要commit的文件都保存到了暂存区域)
+5. 跳过使用暂存区域更新的方式：`git commit -a -m "info about this commit"`  `git commit`加上 `-a`就会把所有已经跟踪过的文件暂存起来一并提交，从而跳过`git add`步骤。
+6. 
