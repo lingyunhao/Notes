@@ -46,8 +46,26 @@ Local repo：个人机器上使用
    * 所有.txt文件：`git add *.txt`
 
 3. 忽略文件： `.gitignore filename`
+
 4. 提交更新：`git commit -m "info about this commit"` (commit 之前要先`git status`看下是否所有需要commit的文件都保存到了暂存区域)
+
 5. 跳过使用暂存区域更新的方式：`git commit -a -m "info about this commit"`  `git commit`加上 `-a`就会把所有已经跟踪过的文件暂存起来一并提交，从而跳过`git add`步骤。
-6. 移除文件：`git rm filename` 先从暂存区域移除，然后提交（首先要在本地 rm移除掉已经被git track的文件，后面详细说明）
+
+6. **移除文件**：`git rm filename` 先从暂存区域移除，然后提交（首先要在本地 rm移除掉已经被git track的文件，<font color=red>情况比较复杂，后面详细说明</font>）
+
 7. 对文件重命名: `git mv README.md README` 相当于`mv README.md README`、`git rm README.md` 、`git add README` 这三条命令的集合。
 
+   <font color=red>对于已经add到暂存区域的文件，可以直接使用上面的命令行改名，没有add到暂存区域的文件直接`mv README.md README`就好了</font>
+
+**Git 删除文件**
+
+删除文件有两种情况，一种是已经被Git track的文件，也就是缓存区中已经存在的文件，第二种是未被Git追踪的也就是暂存区中没有的文件。
+
+1. 暂存区域中已经存在的文件(Git tracked):
+
+   如果新增添了文件，或者修改了文件，然后执行了`git add`，这时想删除这个文件，要执行以下操作：
+
+   *  `rm test.txt` （<font color=red>这时候，如果看`git status`会发现，need commited 里边还是有new file或者modified：test.txt，然后未被staged有`deleted: test.txt`</font>)
+   * `git rm test.txt` 这时发现new file或者modified的状态已经不在了，deleted也不在了
+
+   我们知道，工作区修改和添加文件之后，使用`git add` 命令会把这些操作天见到暂存区域中，然而`git add`
