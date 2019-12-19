@@ -34,7 +34,9 @@ Local repo：个人机器上使用
 
 ### 创建数据库
 
-1. 创建全新的repo，在现有目录中初始化仓库: 进入项目目录运行 `git init`命令，该命令将创建一个名为`.git`的子目录。
+有如下两种方法：
+
+1. 创建全新的repo，在现有目录中初始化仓库: 进入项目目录运行 `git init`命令，该命令将创建一个名为`.git`的子目录。`git init`: 当前目录->repo
 2. 从一个服务器克隆一个现有的repo: `git clone [url]` 自定义本地repo的名字 `git clone [url] directoryname`
 
 ### 修改文件并更新到本地repo
@@ -88,5 +90,9 @@ Local repo：个人机器上使用
 
   例如，我们要把本地的一个仓库和Github上创建的一个仓库关联可以`git remote add origin https://github.com/lingyunhao/Notes.git`
 
-* 要将改动提交到remote repo:  `git push origin master`(<font color=red>可以把master换成想要提交的任何分支</font>)
+  然后再push到一个branch上，强行push可能会覆盖原来的内容。
+
+  可以新建一个branch，然后push到此branch上。
+
+* 要将改动提交到remote repo的master分支:  `git push origin master`(<font color=red>可以把master换成想要提交的任何分支</font>)
 
