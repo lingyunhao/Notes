@@ -59,7 +59,15 @@ Local repo：个人机器上使用
 
    <font color=red>对于已经add到暂存区域的文件，可以直接使用上面的命令行改名，没有add到暂存区域的文件直接`mv README.md README`就好了</font>
 
-**Git 删除文件**
+**好的Git提交消息**
+
+标题行：描述和解释这次提交，尽量清晰的用一句话概括，方便Git日志查看工具显示和其他人的阅读。
+
+主体部分可以是很少的几行，来加入更多的细节来解释提交，给出相关背景或者解释这个提交能够修复和解决什么问题。
+
+主题部分可以有几段，注意换行和句子不要太长。这样在使用'git log'时候比较美观。
+
+### Git 删除文件
 
 删除文件有两种情况，一种是已经被Git track的文件，也就是缓存区中已经存在的文件，第二种是未被Git追踪的也就是暂存区中没有的文件。
 
@@ -76,15 +84,7 @@ Local repo：个人机器上使用
 
    直接使用`rm test.txt` 就行了。
 
-**好的Git提交消息**
-
-标题行：描述和解释这次提交，尽量清晰的用一句话概括，方便Git日志查看工具显示和其他人的阅读。
-
-主体部分可以是很少的几行，来加入更多的细节来解释提交，给出相关背景或者解释这个提交能够修复和解决什么问题。
-
-主题部分可以有几段，注意换行和句子不要太长。这样在使用'git log'时候比较美观。
-
-**推送改动到远程仓库**
+### 推送改动到远程仓库
 
 * 如果没有clone现有仓库，并且想要将现有的仓库连接到某个远程服务器, 可以使用`git remote add origin <server>`
 
@@ -95,4 +95,44 @@ Local repo：个人机器上使用
   可以新建一个branch，然后push到此branch上。
 
 * 要将改动提交到remote repo的master分支:  `git push origin master`(<font color=red>可以把master换成想要提交的任何分支</font>)
+
+### 远程仓库的移除与重命名
+
+* 移除：git remote rm repo
+* 重命名：git remote rename oldrepo newrepo
+
+### 查看提交历史
+
+`git log`用于查看提交历史。可以添加一些参数。
+
+只看某人的提交记录：`git log --author=lingyun`
+
+### 撤销操作
+
+* 若提交信息写错，漏交文件等需要取消提交，可以运行带有`--amend`选项的提交命令尝试重新提交:`git commit --amend`
+
+* 取消暂存的文件： `git reset filename`
+
+* 撤销对文件的修改: `git checkout -- filename`
+
+* 假如想丢弃在本地的所有改动与提交，可以到服务器上获取最新的版本历史，本将本地主分支指向它：
+
+  `git fetch origin`
+
+  `git reset --hard origin/master`
+
+### 分支
+
+分支是用来将特性开发绝缘开来的。在创建仓库的时候，master是默认的分支。在其他分支上进行开发，完成后再将它们合并到主分支上。通常会在开发新的功能，修复bug时创建分支。
+
+* 创建一个新的分支： `git branch test`
+
+* 切换当前分支到test分支：`git checkout test`
+
+  切换分支时，Git会重置工作目录，自动添加、删除、修改文件以确保此时的工作目录和这个分支最后一次提交时一模一样。
+
+* 直接创建分支并切换过去: `git checkout -b test`
+* 合并分支(可能会有冲突)：`git merge test`
+* 删除local的分支：`git branch -d test`
+* 将分支推送到远端仓库(他人可见)：`git push origin`
 
