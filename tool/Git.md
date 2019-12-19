@@ -68,4 +68,25 @@ Local repo：个人机器上使用
    *  `rm test.txt` （<font color=red>这时候，如果看`git status`会发现，need commited 里边还是有new file或者modified：test.txt，然后未被staged有`deleted: test.txt`</font>)
    * `git rm test.txt` 这时发现new file或者modified的状态已经不在了，deleted也不在了
 
-   我们知道，工作区修改和添加文件之后，使用`git add` 命令会把这些操作天见到暂存区域中，然而`git add`
+   我们知道，工作区修改和添加文件之后，使用`git add` 命令会把这些操作天见到暂存区域中，然而`git add`,然而`git add`添加的并不包含删除操作，所以有了相对应的`git rm`
+
+2. 暂存区域中没有存在的文件（未执行`git add`)
+
+   直接使用`rm test.txt` 就行了。
+
+**好的Git提交消息**
+
+标题行：描述和解释这次提交，尽量清晰的用一句话概括，方便Git日志查看工具显示和其他人的阅读。
+
+主体部分可以是很少的几行，来加入更多的细节来解释提交，给出相关背景或者解释这个提交能够修复和解决什么问题。
+
+主题部分可以有几段，注意换行和句子不要太长。这样在使用'git log'时候比较美观。
+
+**推送改动到远程仓库**
+
+* 如果没有clone现有仓库，并且想要将现有的仓库连接到某个远程服务器, 可以使用`git remote add origin <server>`
+
+  例如，我们要把本地的一个仓库和Github上创建的一个仓库关联可以`git remote add origin https://github.com/lingyunhao/Notes.git`
+
+* 要将改动提交到remote repo:  `git push origin master`(<font color=red>可以把master换成想要提交的任何分支</font>)
+
