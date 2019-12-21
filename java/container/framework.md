@@ -1,4 +1,24 @@
-## Java 集合框架知识总结
+## Java 集合框架底层数据结构总结
+
+### Collection
+
+1. List
+   * ArrayList: Object 数组
+   * Vector: Object 数组
+   * LinkedList：双向链表
+
+2. Set
+   * HashSet：无序，无重复，基于HashMap实现，底层使用HashMap保存元素
+   * LinkedHashSet: 继承HashSet,内部通过LinkedHashMap实现
+   * TreeSet：有序，无重复，红黑树（自平衡排序二叉树）
+
+3. Map
+   * HashMap
+   * LinkedHashMap：实现了访问顺序
+   * HashTable
+   * TreeMap：红黑树
+
+## Java 集合框架常见问题
 
 ### List 的遍历方式选择
 
@@ -52,4 +72,3 @@ ArrayList 不同步，不需要保证线程安全时使用ArrayList。
 **这个算法应该如何设计呢？**
 
 我们首先可能会想到采用%取余的操作来实现。但是，重点来了：**“取余(%)操作中如果除数是2的幂次则等价于与其除数减一的与(&)操作（也就是说 hash%length==hash&(length-1)的前提是 length 是2的 n 次方；）。”** 并且 **采用二进制位操作 &，相对于%能够提高运算效率，这就解释了 HashMap 的长度为什么是2的幂次方。**
-
