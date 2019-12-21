@@ -72,3 +72,27 @@ ArrayList 不同步，不需要保证线程安全时使用ArrayList。
 **这个算法应该如何设计呢？**
 
 我们首先可能会想到采用%取余的操作来实现。但是，重点来了：**“取余(%)操作中如果除数是2的幂次则等价于与其除数减一的与(&)操作（也就是说 hash%length==hash&(length-1)的前提是 length 是2的 n 次方；）。”** 并且 **采用二进制位操作 &，相对于%能够提高运算效率，这就解释了 HashMap 的长度为什么是2的幂次方。**
+
+### ConcurrentHashMap VS HashTable
+
+ConcurrentHashMap 和 HashTable 的底层数据结构类似，区别主要是实现线程安全的方式不同。
+
+* **底层数据结构**：JDK1.7 的ConcurrentHashMap底层采用分段的数组+链表实现，JDK1.8 采用数组+链表/红黑二叉树。HashTable 的底层结构是数组+链表。
+
+* **实现线程安全**：
+
+  * **在JDK1.7的时候，ConcurrentHashMap（分段锁）** 对整个桶数组进行了分割分段(Segment)，每一把锁只锁容器其中一部分数据，多线程访问容器里不同数据段的数据，就不会存在锁竞争，提高并发访问率。一个 ConcurrentHashMap 里包含一个 Segment 数组。Segment 的结构和HashMap类似，是一种数组和链表结构，一个 Segment 包含一个 HashEntry 数组，每个 HashEntry 是一个链表结构的元素，每个 Segment 守护着一个HashEntry数组里的元素，当对 HashEntry 数组的数据进行修改时，必须首先获得对应的 Segment的锁。
+
+     **到了 JDK1.8 的时候已经摒弃了Segment的概念，而是直接用 Node 数组+链表+红黑树的数据结构来实现，并发控制使用 synchronized 和 CAS 来操作。（JDK1.6以后 对 synchronized锁做了很多优化）** 整个看起来就像是优化过且线程安全的 HashMap，虽然在JDK1.8中还能看到 Segment 的数据结构，但是已经简化了属性，只是为了兼容旧版本。Java 8在链表长度超过一定阈值（8）时将链表（寻址时间复杂度为O(N)）转换为红黑树（寻址时间复杂度为O(log(N))）
+
+    synchronized只锁定当前链表或红黑二叉树的首节点，这样只要hash不冲突，就不会产生并发，效率又提升N倍。
+
+  * **Hashtable(同一把锁)** :使用 synchronized 来保证线程安全，效率非常低下。当一个线程访问同步方法时，其他线程也访问同步方法，可能会进入阻塞或轮询状态，如使用 put 添加元素，另一个线程不能使用 put 添加元素，也不能使用 get，竞争会越来越激烈效率越低。
+
+### Comparable VS Comparator
+
+- comparable接口出自 java.lang 包，通过`compareTo(Object obj)`方法排序
+- comparator接口出自 java.util 包，通过`compare(Object obj1, Object obj2)`方法排序
+
+当我们需要对一个集合使用自定义排序时， 我们要重写`compareTo()` `compare()`方法。或者当我们需要对一个集合实现两种排序方式时，比如一个Student中的Score和Name分别采用一种排序方法来排序，我们可以重写`compareTo()`方法和使用自制的Comparator方法或者以两个Comparator来实现歌名排序和歌星名排序，第二种代表我们只能使用两个参数版的 `Collections.sort()`。
+
