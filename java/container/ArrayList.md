@@ -1,6 +1,4 @@
-## ArrayList 源码分析
-
-### ArrayList
+## ArrayList 简介
 
 ArrayList 相当于动态数组，容量能动态增长，通过`ensureCapacity`来增加ArrayList的容量。继承于AbstractList，实现了 **List, RandomAccess, Cloneable, Java.io.Serializable** 这些接口。
 
@@ -10,7 +8,7 @@ ArrayList 实现 **java.io.Serializable 接口**，这意味着ArrayList**支持
 
 和 Vector 不同，**ArrayList 中的操作不是线程安全的**！所以，建议在单线程中才使用 ArrayList，而在多线程中可以选择 Vector 或者 CopyOnWriteArrayList。
 
-### ArrayList 核心源码
+## ArrayList 核心源码
 
 ```java
 package java.util;
